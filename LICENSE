@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 xinxin
+Copyright (c) 2026 668xin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+This project is a MoonBit port of the Python `num2words` library
+(https://github.com/savoirfairelinux/num2words), which is distributed under
+the MIT License. The algorithmic approach, language coverage and many of the
+spelling rules are derived from that upstream project; the implementation
+itself is written from scratch in MoonBit.

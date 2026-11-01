@@ -345,6 +345,38 @@ test "path consistency: string and int agree in every language" {
   }
 }
 
+// --- supported magnitude ----------------------------------------------------
+// Scale-word tables are finite, so each language has a ceiling. Values past
+// it must be reported, never crash by indexing off the end of the table.
+
+fn zeros(n : Int) -> String {
+  let mut s = ""
+  for i = 0; i < n; i = i + 1 {
+    s = s + "0"
+  }
+  s
+}
+
+test "magnitude within the scale table" {
+  assert_eq(num2words_str("1" + zeros(33), "en", "cardinal"), "one decillion")
+  assert_eq(num2words_str("1" + zeros(30), "fr", "cardinal"), "un sextillion")
+  assert_eq(num2words_str("1" + zeros(21), "it", "cardinal"), "un triliardo")
+  assert_eq(num2words_str("1" + zeros(21), "pt", "cardinal"), "um sextilhão")
+  assert_eq(lang_en().max_power(), 11)
+}
+
+test "magnitude beyond the scale table is reported, not crashed" {
+  let too_big = "1" + zeros(36)
+  assert_eq(num2words_str(too_big, "en", "cardinal"), "")
+  assert_eq(
+    num2words_str_checked(too_big, "en", "cardinal"),
+    Err("magnitude out of supported range: " + too_big),
+  )
+  // Italian and Portuguese tables stop at 10^21
+  assert_eq(num2words_str("1" + zeros(24), "it", "cardinal"), "")
+  assert_eq(num2words_str("1" + zeros(24), "pt", "cardinal"), "")
+}
+
 test "path consistency: string and float agree" {
   assert_eq(
     num2words_str("1234.56", "en", "cardinal"),

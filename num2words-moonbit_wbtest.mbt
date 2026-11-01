@@ -144,3 +144,103 @@ test "decimal string input" {
   assert_eq(num2words_str("1000000", "de", "cardinal"), "eine Million")
   assert_eq(num2words_str("-42", "en", "cardinal"), "minus forty-two")
 }
+
+// --- M1: validation and boundaries ------------------------------------------
+
+test "input validation accepts well-formed numbers" {
+  assert_eq(is_valid_number("0"), true)
+  assert_eq(is_valid_number("1234"), true)
+  assert_eq(is_valid_number("007"), true)
+  assert_eq(is_valid_number("-42"), true)
+  assert_eq(is_valid_number("1234.56"), true)
+  assert_eq(is_valid_number("-0.5"), true)
+  assert_eq(is_valid_number("1000000000000000000000"), true)
+}
+
+test "input validation rejects malformed numbers" {
+  assert_eq(is_valid_number(""), false)
+  assert_eq(is_valid_number("-"), false)
+  assert_eq(is_valid_number("."), false)
+  assert_eq(is_valid_number(".5"), false)
+  assert_eq(is_valid_number("5."), false)
+  assert_eq(is_valid_number("1.2.3"), false)
+  assert_eq(is_valid_number("12a"), false)
+  assert_eq(is_valid_number("abc"), false)
+  assert_eq(is_valid_number("--5"), false)
+  assert_eq(is_valid_number("1,234"), false)
+}
+
+test "malformed input returns empty string instead of aborting" {
+  assert_eq(num2words_str("abc", "en", "cardinal"), "")
+  assert_eq(num2words_str("1.2.3", "en", "cardinal"), "")
+  assert_eq(num2words_str("", "en", "cardinal"), "")
+  assert_eq(num2words_str("-", "en", "cardinal"), "")
+}
+
+test "checked API reports success and failure" {
+  assert_eq(
+    num2words_str_checked("abc", "en", "cardinal"),
+    Err("invalid number: abc"),
+  )
+  assert_eq(
+    num2words_str_checked("1234", "en", "cardinal"),
+    Ok("one thousand, two hundred and thirty-four"),
+  )
+}
+
+test "boundaries" {
+  assert_eq(num2words_str("0", "en", "cardinal"), "zero")
+  assert_eq(num2words_str("-0", "en", "cardinal"), "zero")
+  assert_eq(num2words_str("007", "en", "cardinal"), "seven")
+  assert_eq(num2words_str("1.50", "en", "cardinal"), "one point five zero")
+  assert_eq(num2words_str("0.0", "en", "cardinal"), "zero point zero")
+  assert_eq(
+    num2words_str("1000000000000000000000", "en", "cardinal"),
+    "one sextillion",
+  )
+  assert_eq(num2words_int(0, "en", "ordinal"), "zeroth")
+  assert_eq(num2words_int(0, "en", "ordinal_num"), "0th")
+  assert_eq(num2words_int(0, "en", "year"), "zero")
+  assert_eq(num2words_int(0, "en", "currency"), "zero dollars")
+  assert_eq(num2words_int(-1, "en", "ordinal"), "minus first")
+}
+
+// --- M1: path consistency ---------------------------------------------------
+// The Int / BigInt / String entry points must agree on the same value; this is
+// the invariant that guards against divergence between the parsing paths.
+
+test "path consistency: string and int agree" {
+  let samples = [0, 1, 9, 10, 21, 42, 100, 101, 999, 1000, 1234, 1000000, 1234567]
+  for i = 0; i < samples.length(); i = i + 1 {
+    let n = samples[i]
+    assert_eq(
+      num2words_str(n.to_string(), "en", "cardinal"),
+      num2words_int(n, "en", "cardinal"),
+    )
+  }
+}
+
+test "path consistency: string and int agree in every language" {
+  let langs = ["en", "fr", "es", "de"]
+  let samples = [0, 21, 100, 1234, 1000000]
+  for li = 0; li < langs.length(); li = li + 1 {
+    for si = 0; si < samples.length(); si = si + 1 {
+      let n = samples[si]
+      assert_eq(
+        num2words_str(n.to_string(), langs[li], "cardinal"),
+        num2words_int(n, langs[li], "cardinal"),
+      )
+    }
+  }
+}
+
+test "path consistency: string and float agree" {
+  assert_eq(
+    num2words_str("1234.56", "en", "cardinal"),
+    num2words_float(1234.56, "en", "cardinal"),
+  )
+  assert_eq(
+    num2words_str("0.5", "en", "cardinal"),
+    num2words_float(0.5, "en", "cardinal"),
+  )
+}

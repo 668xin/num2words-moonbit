@@ -104,6 +104,11 @@ fn currency_for(l : Lang, value : BigInt) -> String {
 /// Spell a big integer.
 pub fn num2words(value : BigInt, lang : String, to : String) -> String {
   let l = get_lang(lang)
+  if !l.supports(value) {
+    // Beyond the language's scale-word table: report as unsupported rather
+    // than indexing past the end of the table.
+    return ""
+  }
   match to {
     "cardinal" => l.cardinal(value)
     "ordinal" => ordinal_for(l, value)
@@ -166,17 +171,22 @@ pub fn num2words_str(value : String, lang : String, to : String) -> String {
   }
 }
 
-/// Same as `num2words_str`, but rejects malformed input explicitly:
-/// `Ok(words)` on success, `Err(message)` when `value` is not a valid
-/// decimal/integer string.
+/// Same as `num2words_str`, but rejects bad input explicitly:
+/// `Ok(words)` on success, `Err(message)` when `value` is either malformed
+/// (`Err("invalid number: ...")`) or larger than the language's scale-word
+/// table (`Err("magnitude out of supported range: ...")`).
 pub fn num2words_str_checked(
   value : String,
   lang : String,
   to : String
 ) -> Result[String, String] {
   if !is_valid_number(value) {
-    Err("invalid number: " + value)
-  } else {
-    Ok(num2words_str(value, lang, to))
+    return Err("invalid number: " + value)
   }
+  let l = get_lang(lang)
+  let int_part = value.split(".").map(fn (w) { w.to_owned() }).collect()[0]
+  if !l.supports(BigInt::from_string(int_part)) {
+    return Err("magnitude out of supported range: " + value)
+  }
+  Ok(num2words_str(value, lang, to))
 }

@@ -143,6 +143,9 @@ fn Lang::cardinal_en(self : Lang, n : BigInt) -> String {
   if n == BigInt::from_int(0) {
     return self.zero
   }
+  if !self.supports(n) {
+    return ""
+  }
   let neg = n < BigInt::from_int(0)
   let n = if neg { -n } else { n }
   let groups = group3(n)
@@ -313,6 +316,25 @@ pub fn currency_en(dollars : BigInt, cents : BigInt) -> String {
 // =====================================================================
 // Dispatch
 // =====================================================================
+
+/// True when the magnitude of `n` fits inside the language's scale-word
+/// table. Scale tables are finite, so every language has a maximum supported
+/// power; values beyond it are reported as unsupported instead of indexing
+/// past the table (which would abort).
+pub fn Lang::supports(self : Lang, n : BigInt) -> Bool {
+  let x = if n < BigInt::from_int(0) { -n } else { n }
+  if x == BigInt::from_int(0) {
+    return true
+  }
+  let groups = group3(x)
+  let (_, top_power) = groups[0]
+  top_power < self.thousands.length()
+}
+
+/// Highest power of 1000 the language can spell (e.g. English: 11 -> 10^33).
+pub fn Lang::max_power(self : Lang) -> Int {
+  self.thousands.length() - 1
+}
 
 pub fn Lang::cardinal(self : Lang, n : BigInt) -> String {
   match self.variant {

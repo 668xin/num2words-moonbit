@@ -91,6 +91,9 @@ fn Lang::cardinal_es(self : Lang, n : BigInt) -> String {
   if n == BigInt::from_int(0) {
     return self.zero
   }
+  if !self.supports(n) {
+    return ""
+  }
   let neg = n < BigInt::from_int(0)
   let n = if neg { -n } else { n }
   let groups = group3(n)

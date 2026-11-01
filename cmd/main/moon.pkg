@@ -1,0 +1,6 @@
+import {
+  "668xin/num2words-moonbit" @lib,
+  "moonbitlang/core/env" @env,
+}
+
+pkgtype(kind: "executable")

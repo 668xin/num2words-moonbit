@@ -136,10 +136,39 @@ $ moon run cmd/main -- 1.2.3
 error: invalid number: 1.2.3
 ```
 
+### Supported magnitude
+
+Scale-word tables are finite, so each language has a ceiling. Values past it
+are **reported, never crashed**:
+
+| Language | Largest spellable | Example |
+| --- | --- | --- |
+| `en` | 10³³ (10^33) | `10^33` → *one decillion* |
+| `fr` | 10³⁰ | `10^30` → *un sextillion* |
+| `es`, `de` | 10²⁴ | — |
+| `it`, `pt` | 10²¹ | `10^21` → *un triliardo* / *um sextilhão* |
+
+```mbt
+@n2w.num2words_str_checked("1" + <36 zeros>, "en", "cardinal")
+// Err("magnitude out of supported range: 1000...")
+@n2w.num2words_str("1" + <36 zeros>, "en", "cardinal")   // ""
+```
+
+```bash
+$ moon run cmd/main -- 1000000000000000000000000000000000000
+error: magnitude out of supported range: 1000000000000000000000000000000000000
+```
+
+`Lang::max_power()` returns the highest power of 1000 a language supports.
+
 ### Known limitations
 
 - **6 languages** (`en`, `fr`, `es`, `de`, `it`, `pt`). More are planned; see
   the per-language extension layout above.
+- **Magnitudes are bounded** by each language's scale-word table — see
+  *Supported magnitude* above. "Arbitrarily large" is **not** claimed.
+- **Not yet published to mooncakes.io**, so `moon add 668xin/num2words-moonbit`
+  does not resolve yet; use the public repository as a git dependency.
 - **Portuguese is the Brazilian variant** (`dezesseis`, short scale
   *bilhão* = 10⁹). European Portuguese forms (`dezasseis`, *mil milhões*)
   are not provided.

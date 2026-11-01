@@ -27,4 +27,4 @@ import "668xin/num2words-moonbit" @n2w
 
 ## License
 
-MIT. Derived from Python `num2words` (Savoirfairelinux, MIT).
+LGPL-2.1. Derived from Python `num2words` (Savoirfairelinux, LGPL-2.1).

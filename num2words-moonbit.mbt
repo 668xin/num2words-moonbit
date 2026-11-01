@@ -1,6 +1,6 @@
 // num2words-moonbit.mbt — public API and dispatch.
 //
-// Port of the Python `num2words` library (MIT). See README / base.mbt header
+// Port of the Python `num2words` library (LGPL-2.1). See README / base.mbt header
 // for attribution. Acknowledged upstream: https://github.com/savoirfairelinux/num2words
 //
 // API: `num2words(value, lang, to)` where `value` is a BigInt (or use the

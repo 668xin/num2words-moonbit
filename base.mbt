@@ -1,7 +1,7 @@
 // base.mbt — core engine for num2words-moonbit
 //
 // An independent reimplementation in MoonBit of the ideas behind the Python
-// `num2words` library (https://github.com/savoirfairelinux/num2words, MIT).
+// `num2words` library (https://github.com/savoirfairelinux/num2words, LGPL-2.1).
 // It spells integers / years / ordinals / currency amounts in multiple
 // languages. The upstream project is acknowledged in README.md.
 //

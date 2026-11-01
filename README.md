@@ -1,7 +1,7 @@
 # num2words-moonbit
 
 [![CI](https://github.com/668xin/num2words-moonbit/actions/workflows/ci.yml/badge.svg)](https://github.com/668xin/num2words-moonbit/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: LGPL-2.1](https://img.shields.io/badge/License-LGPL--2.1-blue.svg)](LICENSE)
 
 **Convert numbers into words — in pure [MoonBit](https://www.moonbitlang.com/).**
 
@@ -146,10 +146,10 @@ moon run cmd/main -- 1234 --lang en
 
 This is a **port** of the Python
 [`num2words`](https://github.com/savoirfairelinux/num2words) library
-(Savoirfairelinux, **MIT License**). The language coverage, spelling rules and
+(Savoirfairelinux, **LGPL-2.1**). The language coverage, spelling rules and
 overall design are derived from that project; the implementation is written
 from scratch in MoonBit. We thank the upstream authors for their work.
 
 ## License
 
-[MIT](LICENSE) © 2026 668xin
+[LGPL-2.1](LICENSE) © 2026 668xin

@@ -89,10 +89,64 @@ import "668xin/num2words-moonbit" @n2w
 | `num2words` | `(value : BigInt, lang : String, to : String) -> String` | core entry point |
 | `num2words_int` | `(value : Int, lang : String, to : String) -> String` | convenience |
 | `num2words_float` | `(value : Double, lang : String, to : String) -> String` | decimal literal |
-| `num2words_str` | `(value : String, lang : String, to : String) -> String` | integer/bigint/decimal string |
+| `num2words_str` | `(value : String, lang : String, to : String) -> String` | integer/bigint/decimal string; `""` on malformed input |
+| `num2words_str_checked` | `(value : String, lang : String, to : String) -> Result[String, String]` | `Ok(words)` / `Err(message)` |
+| `is_valid_number` | `(value : String) -> Bool` | validates before conversion |
 
 `lang` and `to` are positional (no defaults): use `""`/`"en"`/`"cardinal"`
 explicitly.
+
+---
+
+## Input handling, boundaries and limitations
+
+### Accepted input
+
+The string entry points accept exactly:
+
+```
+-?digits            e.g. "1234", "-42", "007"
+-?digits.digits     e.g. "1234.56", "-0.5"
+```
+
+Everything else is **rejected**: `""`, `"-"`, `"."`, `".5"`, `"5."`,
+`"1.2.3"`, `"12a"`, `"abc"`, `"--5"`, `"1,234"`.
+
+### Behaviour on invalid input
+
+`BigInt::from_string` aborts on malformed input, so the library validates
+first:
+
+| API | Invalid input behaviour |
+| --- | --- |
+| `num2words_str` | returns `""` — never aborts |
+| `num2words_str_checked` | returns `Err("invalid number: <input>")` |
+| CLI | prints `error: invalid number: <input>` |
+
+```mbt
+@n2w.is_valid_number("12a")           // false
+@n2w.num2words_str("abc", "en", "cardinal")   // ""
+@n2w.num2words_str_checked("abc", "en", "cardinal")
+// Err("invalid number: abc")
+```
+
+```bash
+$ moon run cmd/main -- 1.2.3
+error: invalid number: 1.2.3
+```
+
+### Known limitations
+
+- **4 languages only** (`en`, `fr`, `es`, `de`). More are planned; see the
+  per-language extension layout above.
+- **`currency` is English-only.** Other languages fall back to `cardinal`.
+- **Fractional digits are spelled one by one** (`1234.56` → *… point five
+  six*), not as a fractional number.
+- **Decimals are not rounded.** The digits you pass in are the digits spelled.
+- **No reverse conversion** (`words → number`) is provided yet.
+- **No performance benchmark** has been published — no performance claims are
+  made.
+- Leading zeros are ignored (`"007"` → *seven*); `"-0"` → *zero*.
 
 ### Command-line tool
 

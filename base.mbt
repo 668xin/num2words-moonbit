@@ -17,6 +17,7 @@ pub enum Variant {
   Es
   De
   It
+  Pt
 }
 
 /// Word tables + behaviour flags for one language.
@@ -320,5 +321,6 @@ pub fn Lang::cardinal(self : Lang, n : BigInt) -> String {
     Es => self.cardinal_es(n)
     De => self.cardinal_de(n)
     It => self.cardinal_it(n)
+    Pt => self.cardinal_pt(n)
   }
 }

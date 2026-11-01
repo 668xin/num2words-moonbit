@@ -64,6 +64,7 @@ pub fn get_lang(code : String) -> Lang {
     "es" => lang_es()
     "de" => lang_de()
     "it" => lang_it()
+    "pt" => lang_pt()
     _ => lang_en()
   }
 }
@@ -89,6 +90,7 @@ fn year_for(l : Lang, value : BigInt) -> String {
     Es => year_es(value)
     De => year_de(value)
     It => year_it(value)
+    Pt => year_pt(value)
   }
 }
 

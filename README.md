@@ -8,7 +8,7 @@
 `num2words-moonbit` is a from-scratch MoonBit implementation of the classic
 *number → words* library. It spells out integers (of arbitrary size via
 `BigInt`), decimals, ordinals, years and currency amounts in **English,
-French, Spanish and German**.
+French, Spanish, German and Italian**.
 
 This project was built for the **MoonBit September Hackathon 2026**. It ports
 the well-known Python [`num2words`](https://github.com/savoirfairelinux/num2words)
@@ -20,7 +20,8 @@ general-purpose multilingual number-to-words package on
 
 ## Features
 
-- **4 languages**: English (`en`), French (`fr`), Spanish (`es`), German (`de`).
+- **5 languages**: English (`en`), French (`fr`), Spanish (`es`), German (`de`),
+  Italian (`it`).
 - **6 output modes**:
   - `cardinal` — `1234` → *one thousand, two hundred and thirty-four*
   - `ordinal` — `1` → *first*, `21` → *twenty-first*
@@ -85,7 +86,7 @@ import "668xin/num2words-moonbit" @n2w
 
 | Function | Signature | Notes |
 | --- | --- | --- |
-| `get_lang` | `(code : String) -> Lang` | `"en"\|"fr"\|"es"\|"de"`, default `en` |
+| `get_lang` | `(code : String) -> Lang` | `"en"\|"fr"\|"es"\|"de"\|"it"`, default `en` |
 | `num2words` | `(value : BigInt, lang : String, to : String) -> String` | core entry point |
 | `num2words_int` | `(value : Int, lang : String, to : String) -> String` | convenience |
 | `num2words_float` | `(value : Double, lang : String, to : String) -> String` | decimal literal |
@@ -137,8 +138,10 @@ error: invalid number: 1.2.3
 
 ### Known limitations
 
-- **4 languages only** (`en`, `fr`, `es`, `de`). More are planned; see the
+- **5 languages** (`en`, `fr`, `es`, `de`, `it`). More are planned; see the
   per-language extension layout above.
+- **Italian is cardinal + year only.** Ordinals, `ordinal_num` and `currency`
+  fall back to `cardinal` (same as `fr`, `es`, `de`).
 - **`currency` is English-only.** Other languages fall back to `cardinal`.
 - **Fractional digits are spelled one by one** (`1234.56` → *… point five
   six*), not as a fractional number.
@@ -160,7 +163,7 @@ moon run cmd/main -- --help
 ```
 
 ```
-num2words <value> [--lang en|fr|es|de] [--to cardinal|ordinal|ordinal_num|year|currency]
+num2words <value> [--lang en|fr|es|de|it] [--to cardinal|ordinal|ordinal_num|year|currency]
 ```
 
 ---
@@ -175,6 +178,7 @@ The library is split into a small core engine and one module per language:
 | `lang_fr.mbt` | French (vigesimal: *soixante-dix*, *quatre-vingts*) |
 | `lang_es.mbt` | Spanish (*veintiuno*, *cien/ciento*, *un millón*) |
 | `lang_de.mbt` | German (closed compounds: *einundvierzig*, *tausendzweihundert…*) |
+| `lang_it.mbt` | Italian (vowel elision: *ventuno*, *ventotto*, *centotto*; *ventitré*) |
 | `num2words-moonbit.mbt` | public API + per-mode dispatch |
 | `cmd/main/main.mbt` | CLI built on `@env.args()` |
 

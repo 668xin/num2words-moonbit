@@ -1,7 +1,7 @@
 // num2words — command line tool.
 // Converts a number (integer or decimal, optionally very large) into words.
 //
-//   num2words <value> [--lang en|fr|es|de] [--to cardinal|ordinal|ordinal_num|year|currency]
+//   num2words <value> [--lang en|fr|es|de|it] [--to cardinal|ordinal|ordinal_num|year|currency]
 //
 // Examples:
 //   num2words 1234
@@ -16,10 +16,12 @@ fn usage() -> Unit {
   println("")
   println("Usage:")
   println(
-    "  num2words <value> [--lang en|fr|es|de] [--to cardinal|ordinal|ordinal_num|year|currency]",
+    "  num2words <value> [--lang en|fr|es|de|it] [--to cardinal|ordinal|ordinal_num|year|currency]",
   )
   println("")
-  println("Languages: en (English), fr (French), es (Spanish), de (German)")
+  println(
+    "Languages: en (English), fr (French), es (Spanish), de (German), it (Italian)",
+  )
   println(
     "Modes    : cardinal (default), ordinal, ordinal_num, year, currency",
   )

@@ -136,6 +136,60 @@ test "de year" {
   assert_eq(year_de(BigInt::from_int(2024)), "zwanzig vierundzwanzig")
 }
 
+test "it cardinal" {
+  assert_eq(num2words_int(0, "it", "cardinal"), "zero")
+  assert_eq(num2words_int(1, "it", "cardinal"), "uno")
+  assert_eq(num2words_int(8, "it", "cardinal"), "otto")
+  assert_eq(num2words_int(20, "it", "cardinal"), "venti")
+  // tens drop their final vowel before "uno" and "otto"
+  assert_eq(num2words_int(21, "it", "cardinal"), "ventuno")
+  assert_eq(num2words_int(22, "it", "cardinal"), "ventidue")
+  assert_eq(num2words_int(23, "it", "cardinal"), "ventitré")
+  assert_eq(num2words_int(28, "it", "cardinal"), "ventotto")
+  assert_eq(num2words_int(31, "it", "cardinal"), "trentuno")
+  assert_eq(num2words_int(33, "it", "cardinal"), "trentatré")
+  assert_eq(num2words_int(38, "it", "cardinal"), "trentotto")
+  assert_eq(num2words_int(45, "it", "cardinal"), "quarantacinque")
+  // hundreds: "cento" elides its final vowel before an "o"-initial part
+  assert_eq(num2words_int(100, "it", "cardinal"), "cento")
+  assert_eq(num2words_int(101, "it", "cardinal"), "centouno")
+  assert_eq(num2words_int(108, "it", "cardinal"), "centotto")
+  assert_eq(num2words_int(110, "it", "cardinal"), "centodieci")
+  assert_eq(num2words_int(111, "it", "cardinal"), "centoundici")
+  assert_eq(num2words_int(118, "it", "cardinal"), "centodiciotto")
+  assert_eq(num2words_int(180, "it", "cardinal"), "centottanta")
+  assert_eq(num2words_int(181, "it", "cardinal"), "centottantuno")
+  assert_eq(num2words_int(200, "it", "cardinal"), "duecento")
+  assert_eq(num2words_int(201, "it", "cardinal"), "duecentouno")
+  assert_eq(num2words_int(208, "it", "cardinal"), "duecentotto")
+  assert_eq(num2words_int(245, "it", "cardinal"), "duecentoquarantacinque")
+  // "mille"/"mila" attach; million-and-above are separate words
+  assert_eq(num2words_int(1000, "it", "cardinal"), "mille")
+  assert_eq(num2words_int(1001, "it", "cardinal"), "milleuno")
+  assert_eq(num2words_int(2000, "it", "cardinal"), "duemila")
+  assert_eq(
+    num2words_int(2345, "it", "cardinal"),
+    "duemilatrecentoquarantacinque",
+  )
+  assert_eq(num2words_int(21000, "it", "cardinal"), "ventunomila")
+  assert_eq(num2words_int(1000000, "it", "cardinal"), "un milione")
+  assert_eq(num2words_int(2000000, "it", "cardinal"), "due milioni")
+  // 10^12 does not fit in Int, so it goes through the BigInt entry point
+  assert_eq(
+    num2words(BigInt::from_string("1000000000000"), "it", "cardinal"),
+    "un bilione",
+  )
+  assert_eq(num2words_int(-42, "it", "cardinal"), "meno quarantadue")
+}
+
+test "it year" {
+  assert_eq(year_it(BigInt::from_int(2024)), "duemilaventiquattro")
+  assert_eq(
+    year_it(BigInt::from_int(1984)),
+    "millenovecentottantaquattro",
+  )
+}
+
 test "decimal string input" {
   assert_eq(
     num2words_str("1234.56", "en", "cardinal"),
@@ -221,7 +275,7 @@ test "path consistency: string and int agree" {
 }
 
 test "path consistency: string and int agree in every language" {
-  let langs = ["en", "fr", "es", "de"]
+  let langs = ["en", "fr", "es", "de", "it"]
   let samples = [0, 21, 100, 1234, 1000000]
   for li = 0; li < langs.length(); li = li + 1 {
     for si = 0; si < samples.length(); si = si + 1 {

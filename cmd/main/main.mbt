@@ -72,5 +72,9 @@ fn main() -> Unit {
     return
   }
   // num2words_str handles integers, big integers and decimals uniformly.
-  println(@lib.num2words_str(value, lang, to))
+  // The checked variant reports malformed input instead of aborting.
+  match @lib.num2words_str_checked(value, lang, to) {
+    Ok(words) => println(words)
+    Err(msg) => println("error: " + msg)
+  }
 }

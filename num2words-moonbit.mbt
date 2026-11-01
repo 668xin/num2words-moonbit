@@ -8,6 +8,54 @@
 // "en" | "fr" | "es" | "de", and `to` is "cardinal" (default), "ordinal",
 // "ordinal_num", "year" or "currency".
 
+// --- input validation -------------------------------------------------------
+//
+// `BigInt::from_string` aborts on malformed input, so every string entry point
+// validates first. Accepted grammar: `-?\d+` or `-?\d+\.\d+`.
+
+/// True when `s` is non-empty and made only of ASCII digits.
+fn all_digits(s : String) -> Bool {
+  if s.length() == 0 {
+    return false
+  }
+  for i = 0; i < s.length(); i = i + 1 {
+    if !("0123456789".contains(s[i : i + 1].to_owned())) {
+      return false
+    }
+  }
+  true
+}
+
+/// True for an integer literal: an optional leading `-` followed by digits.
+fn is_int_part(s : String) -> Bool {
+  let body = if s.length() > 0 && s[0 : 1].to_owned() == "-" {
+    s[1 : s.length()].to_owned()
+  } else {
+    s
+  }
+  all_digits(body)
+}
+
+/// Validate a decimal/integer string before it reaches `BigInt`.
+///
+/// Accepted: `1234`, `-42`, `007`, `1234.56`
+/// Rejected: `""`, `"-"`, `"5."`, `".5"`, `"1.2.3"`, `"12a"`, `"abc"`, `"--5"`
+pub fn is_valid_number(s : String) -> Bool {
+  let parts = s.split(".").map(fn (w) { w.to_owned() }).collect()
+  if parts.length() > 2 {
+    return false
+  }
+  if !is_int_part(parts[0]) {
+    return false
+  }
+  if parts.length() == 2 {
+    if !all_digits(parts[1]) {
+      return false
+    }
+  }
+  true
+}
+
 /// Resolve a language code to its `Lang` descriptor.
 pub fn get_lang(code : String) -> Lang {
   match code {
@@ -90,7 +138,13 @@ pub fn num2words_float(value : Double, lang : String, _to : String) -> String {
 /// `num2words_str("1234.56", "en", "cardinal")` ->
 /// "one thousand, two hundred and thirty-four point five six".
 /// Integer and arbitrarily large values are supported via `BigInt`.
+///
+/// Malformed input returns `""` instead of aborting; use
+/// `num2words_str_checked` when the caller needs to tell the two apart.
 pub fn num2words_str(value : String, lang : String, to : String) -> String {
+  if !is_valid_number(value) {
+    return ""
+  }
   let l = get_lang(lang)
   let parts = value.split(".").map(fn (w) { w.to_owned() }).collect()
   if parts.length() > 1 {
@@ -105,5 +159,20 @@ pub fn num2words_str(value : String, lang : String, to : String) -> String {
     out
   } else {
     num2words(BigInt::from_string(value), lang, to)
+  }
+}
+
+/// Same as `num2words_str`, but rejects malformed input explicitly:
+/// `Ok(words)` on success, `Err(message)` when `value` is not a valid
+/// decimal/integer string.
+pub fn num2words_str_checked(
+  value : String,
+  lang : String,
+  to : String
+) -> Result[String, String] {
+  if !is_valid_number(value) {
+    Err("invalid number: " + value)
+  } else {
+    Ok(num2words_str(value, lang, to))
   }
 }

@@ -182,6 +182,63 @@ test "it cardinal" {
   assert_eq(num2words_int(-42, "it", "cardinal"), "meno quarantadue")
 }
 
+test "pt cardinal" {
+  assert_eq(num2words_int(0, "pt", "cardinal"), "zero")
+  assert_eq(num2words_int(1, "pt", "cardinal"), "um")
+  assert_eq(num2words_int(15, "pt", "cardinal"), "quinze")
+  assert_eq(num2words_int(16, "pt", "cardinal"), "dezesseis")
+  assert_eq(num2words_int(20, "pt", "cardinal"), "vinte")
+  // "e" links tens to units
+  assert_eq(num2words_int(21, "pt", "cardinal"), "vinte e um")
+  assert_eq(num2words_int(30, "pt", "cardinal"), "trinta")
+  assert_eq(num2words_int(32, "pt", "cardinal"), "trinta e dois")
+  // 100 is "cem" alone but "cento" when a remainder follows
+  assert_eq(num2words_int(100, "pt", "cardinal"), "cem")
+  assert_eq(num2words_int(101, "pt", "cardinal"), "cento e um")
+  assert_eq(num2words_int(110, "pt", "cardinal"), "cento e dez")
+  assert_eq(num2words_int(115, "pt", "cardinal"), "cento e quinze")
+  assert_eq(num2words_int(200, "pt", "cardinal"), "duzentos")
+  assert_eq(num2words_int(201, "pt", "cardinal"), "duzentos e um")
+  assert_eq(num2words_int(234, "pt", "cardinal"), "duzentos e trinta e quatro")
+  assert_eq(num2words_int(900, "pt", "cardinal"), "novecentos")
+  assert_eq(num2words_int(999, "pt", "cardinal"), "novecentos e noventa e nove")
+  // "e" after a scale group only when the next group is < 100 or a multiple
+  // of 100
+  assert_eq(num2words_int(1000, "pt", "cardinal"), "mil")
+  assert_eq(num2words_int(1001, "pt", "cardinal"), "mil e um")
+  assert_eq(num2words_int(1100, "pt", "cardinal"), "mil e cem")
+  assert_eq(num2words_int(1200, "pt", "cardinal"), "mil e duzentos")
+  assert_eq(num2words_int(1234, "pt", "cardinal"), "mil duzentos e trinta e quatro")
+  assert_eq(num2words_int(2000, "pt", "cardinal"), "dois mil")
+  assert_eq(num2words_int(21000, "pt", "cardinal"), "vinte e um mil")
+  assert_eq(num2words_int(1000000, "pt", "cardinal"), "um milhão")
+  assert_eq(num2words_int(2000000, "pt", "cardinal"), "dois milhões")
+  assert_eq(num2words_int(1000001, "pt", "cardinal"), "um milhão e um")
+  assert_eq(num2words_int(1000100, "pt", "cardinal"), "um milhão e cem")
+  assert_eq(
+    num2words_int(1234567, "pt", "cardinal"),
+    "um milhão duzentos e trinta e quatro mil quinhentos e sessenta e sete",
+  )
+  // 10^9 and 10^12 need the BigInt entry point
+  assert_eq(
+    num2words(BigInt::from_string("1000000000"), "pt", "cardinal"),
+    "um bilhão",
+  )
+  assert_eq(
+    num2words(BigInt::from_string("1000000000000"), "pt", "cardinal"),
+    "um trilhão",
+  )
+  assert_eq(num2words_int(-42, "pt", "cardinal"), "menos quarenta e dois")
+}
+
+test "pt year" {
+  assert_eq(year_pt(BigInt::from_int(2024)), "dois mil e vinte e quatro")
+  assert_eq(
+    year_pt(BigInt::from_int(1984)),
+    "mil novecentos e oitenta e quatro",
+  )
+}
+
 test "it year" {
   assert_eq(year_it(BigInt::from_int(2024)), "duemilaventiquattro")
   assert_eq(
@@ -275,7 +332,7 @@ test "path consistency: string and int agree" {
 }
 
 test "path consistency: string and int agree in every language" {
-  let langs = ["en", "fr", "es", "de", "it"]
+  let langs = ["en", "fr", "es", "de", "it", "pt"]
   let samples = [0, 21, 100, 1234, 1000000]
   for li = 0; li < langs.length(); li = li + 1 {
     for si = 0; si < samples.length(); si = si + 1 {

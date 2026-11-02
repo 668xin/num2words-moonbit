@@ -11,6 +11,9 @@
 //     `dicotto` typo for 118/218/... is normalised to `diciotto`;
 //   * pt: compared against upstream `pt_BR`, ignoring commas — upstream
 //     separates scale groups with a comma, ours follows Portuguese usage.
+//
+// Year mode is additionally compared for en/it/pt/ru (19 samples each);
+// fr/es/de use a pair-reading convention instead (see README).
 
 ///|
 let diff_en : Array[(String, String)] = [
@@ -3999,5 +4002,135 @@ test "differential: ru matches upstream num2words" {
   for i = 0; i < diff_ru.length(); i = i + 1 {
     let (value, want) = diff_ru[i]
     assert_eq(num2words_str(value, "ru", "cardinal"), want)
+  }
+}
+
+///|
+let diff_year_en : Array[(String, String)] = [
+  ("1000", "one thousand"),
+  ("1001", "one thousand and one"),
+  ("1010", "ten ten"),
+  ("1100", "eleven hundred"),
+  ("1500", "fifteen hundred"),
+  ("1900", "nineteen hundred"),
+  ("1984", "nineteen eighty-four"),
+  ("1999", "nineteen ninety-nine"),
+  ("2000", "two thousand"),
+  ("2001", "two thousand and one"),
+  ("2009", "two thousand and nine"),
+  ("2010", "twenty ten"),
+  ("2023", "twenty twenty-three"),
+  ("2024", "twenty twenty-four"),
+  ("2100", "twenty-one hundred"),
+  ("2134", "twenty-one thirty-four"),
+  ("3000", "three thousand"),
+  ("3001", "three thousand and one"),
+  ("9999", "ninety-nine ninety-nine"),
+]
+
+///|
+let diff_year_it : Array[(String, String)] = [
+  ("1000", "mille"),
+  ("1001", "milleuno"),
+  ("1010", "milledieci"),
+  ("1100", "millecento"),
+  ("1500", "millecinquecento"),
+  ("1900", "millenovecento"),
+  ("1984", "millenovecentottantaquattro"),
+  ("1999", "millenovecentonovantanove"),
+  ("2000", "duemila"),
+  ("2001", "duemilauno"),
+  ("2009", "duemilanove"),
+  ("2010", "duemiladieci"),
+  ("2023", "duemilaventitre"),
+  ("2024", "duemilaventiquattro"),
+  ("2100", "duemilacento"),
+  ("2134", "duemilacentotrentaquattro"),
+  ("3000", "tremila"),
+  ("3001", "tremilauno"),
+  ("9999", "novemilanovecentonovantanove"),
+]
+
+///|
+let diff_year_pt : Array[(String, String)] = [
+  ("1000", "mil"),
+  ("1001", "mil e um"),
+  ("1010", "mil e dez"),
+  ("1100", "mil e cem"),
+  ("1500", "mil e quinhentos"),
+  ("1900", "mil e novecentos"),
+  ("1984", "mil novecentos e oitenta e quatro"),
+  ("1999", "mil novecentos e noventa e nove"),
+  ("2000", "dois mil"),
+  ("2001", "dois mil e um"),
+  ("2009", "dois mil e nove"),
+  ("2010", "dois mil e dez"),
+  ("2023", "dois mil e vinte e três"),
+  ("2024", "dois mil e vinte e quatro"),
+  ("2100", "dois mil e cem"),
+  ("2134", "dois mil cento e trinta e quatro"),
+  ("3000", "três mil"),
+  ("3001", "três mil e um"),
+  ("9999", "nove mil novecentos e noventa e nove"),
+]
+
+///|
+let diff_year_ru : Array[(String, String)] = [
+  ("1000", "одна тысяча"),
+  ("1001", "одна тысяча один"),
+  ("1010", "одна тысяча десять"),
+  ("1100", "одна тысяча сто"),
+  ("1500", "одна тысяча пятьсот"),
+  ("1900", "одна тысяча девятьсот"),
+  (
+    "1984", "одна тысяча девятьсот восемьдесят четыре",
+  ),
+  (
+    "1999", "одна тысяча девятьсот девяносто девять",
+  ),
+  ("2000", "две тысячи"),
+  ("2001", "две тысячи один"),
+  ("2009", "две тысячи девять"),
+  ("2010", "две тысячи десять"),
+  ("2023", "две тысячи двадцать три"),
+  ("2024", "две тысячи двадцать четыре"),
+  ("2100", "две тысячи сто"),
+  ("2134", "две тысячи сто тридцать четыре"),
+  ("3000", "три тысячи"),
+  ("3001", "три тысячи один"),
+  (
+    "9999", "девять тысяч девятьсот девяносто девять",
+  ),
+]
+
+///|
+test "differential: en year matches upstream num2words" {
+  for i = 0; i < diff_year_en.length(); i = i + 1 {
+    let (value, want) = diff_year_en[i]
+    assert_eq(num2words_str(value, "en", "year"), want)
+  }
+}
+
+///|
+test "differential: it year matches upstream num2words" {
+  for i = 0; i < diff_year_it.length(); i = i + 1 {
+    let (value, want) = diff_year_it[i]
+    assert_eq(diff_strip_accents(num2words_str(value, "it", "year")), want)
+  }
+}
+
+///|
+test "differential: pt year matches upstream num2words" {
+  for i = 0; i < diff_year_pt.length(); i = i + 1 {
+    let (value, want) = diff_year_pt[i]
+    assert_eq(diff_strip_commas(num2words_str(value, "pt", "year")), want)
+  }
+}
+
+///|
+test "differential: ru year matches upstream num2words" {
+  for i = 0; i < diff_year_ru.length(); i = i + 1 {
+    let (value, want) = diff_year_ru[i]
+    assert_eq(num2words_str(value, "ru", "year"), want)
   }
 }

@@ -11,6 +11,7 @@
 //     tag). The heavy lifting (splitting into 3-digit groups) is shared; the
 //     per-language quirks live in the cardinal_* helpers.
 
+///|
 pub enum Variant {
   En
   Fr
@@ -18,8 +19,10 @@ pub enum Variant {
   De
   It
   Pt
+  Ru
 }
 
+///|
 /// Word tables + behaviour flags for one language.
 pub struct Lang {
   variant : Variant
@@ -34,6 +37,7 @@ pub struct Lang {
   comma_sep : Bool
 }
 
+///|
 /// Split `n` (>0) into 3-digit groups from low to high, return high-to-low.
 pub fn group3(n : BigInt) -> Array[(BigInt, Int)] {
   let low : Array[(BigInt, Int)] = []
@@ -51,6 +55,7 @@ pub fn group3(n : BigInt) -> Array[(BigInt, Int)] {
   res
 }
 
+///|
 fn join_parts(arr : Array[String], sep : String) -> String {
   let mut s = ""
   for i = 0; i < arr.length(); i = i + 1 {
@@ -62,15 +67,17 @@ fn join_parts(arr : Array[String], sep : String) -> String {
   s
 }
 
+///|
 fn split_to_array(s : String, sep : String) -> Array[String] {
-  s.split(sep).map(fn (w) { w.to_owned() }).collect()
+  s.split(sep).map(fn(w) { w.to_owned() }).collect()
 }
 
+///|
 fn split_hyphen(word : String) -> (String, String) {
   let n = word.length()
   for i = 0; i < n; i = i + 1 {
-    if word[i : i + 1].to_owned() == "-" {
-      return (word[0:i].to_owned(), word[i + 1 : n].to_owned())
+    if word[i:i + 1].to_owned() == "-" {
+      return (word[0:i].to_owned(), word[i + 1:n].to_owned())
     }
   }
   (word, "")
@@ -80,27 +87,26 @@ fn split_hyphen(word : String) -> (String, String) {
 // English
 // =====================================================================
 
+///|
 pub fn lang_en() -> Lang {
   {
     variant: En,
     zero: "zero",
     ones: [
-      "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
-      "nine",
+      "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
     ],
     teens: [
-      "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
-      "seventeen", "eighteen", "nineteen",
+      "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
+      "eighteen", "nineteen",
     ],
     tens: [
-      "", "ten", "twenty", "thirty", "forty", "fifty", "sixty", "seventy",
-      "eighty", "ninety",
+      "", "ten", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty",
+      "ninety",
     ],
     hundred: "hundred",
     thousands: [
-      "", "thousand", "million", "billion", "trillion", "quadrillion",
-      "quintillion", "sextillion", "septillion", "octillion", "nonillion",
-      "decillion",
+      "", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion",
+      "sextillion", "septillion", "octillion", "nonillion", "decillion",
     ],
     negative: "minus",
     decimal: "point",
@@ -108,6 +114,7 @@ pub fn lang_en() -> Lang {
   }
 }
 
+///|
 fn Lang::below100_en(self : Lang, r : Int) -> String {
   if r < 10 {
     return self.ones[r]
@@ -123,6 +130,7 @@ fn Lang::below100_en(self : Lang, r : Int) -> String {
   self.tens[d] + "-" + self.ones[u]
 }
 
+///|
 fn Lang::triple_en(self : Lang, t : Int) -> String {
   if t == 0 {
     return ""
@@ -139,6 +147,7 @@ fn Lang::triple_en(self : Lang, t : Int) -> String {
   hs + " and " + self.below100_en(r)
 }
 
+///|
 fn Lang::cardinal_en(self : Lang, n : BigInt) -> String {
   if n == BigInt::from_int(0) {
     return self.zero
@@ -174,6 +183,7 @@ fn Lang::cardinal_en(self : Lang, n : BigInt) -> String {
 // English ordinal ("first", "second", ...)
 // ---------------------------------------------------------------------
 
+///|
 pub fn ordinal_en(n : BigInt) -> String {
   if n == BigInt::from_int(0) {
     return "zeroth"
@@ -192,6 +202,7 @@ pub fn ordinal_en(n : BigInt) -> String {
   }
 }
 
+///|
 fn ordinalize(word : String) -> String {
   let (left, right) = split_hyphen(word)
   if right == "" {
@@ -201,6 +212,7 @@ fn ordinalize(word : String) -> String {
   }
 }
 
+///|
 fn ordinalize_simple(w : String) -> String {
   match w {
     "one" => "first"
@@ -234,16 +246,21 @@ fn ordinalize_simple(w : String) -> String {
   }
 }
 
+///|
 /// Ordinal number with numeric suffix: 1 -> "1st", 2 -> "2nd", 12 -> "12th".
 pub fn ordinal_num_en(n : BigInt) -> String {
   let neg = n < BigInt::from_int(0)
   let n = if neg { -n } else { n }
   let s = n.to_string()
-  let last = if s.length() >= 2 { s[s.length() - 2 : s.length()].to_owned() } else { s }
+  let last = if s.length() >= 2 {
+    s[s.length() - 2:s.length()].to_owned()
+  } else {
+    s
+  }
   let suffix = if last == "11" || last == "12" || last == "13" {
     "th"
   } else {
-    match s[s.length() - 1 : s.length()].to_owned() {
+    match s[s.length() - 1:s.length()].to_owned() {
       "1" => "st"
       "2" => "nd"
       "3" => "rd"
@@ -262,6 +279,7 @@ pub fn ordinal_num_en(n : BigInt) -> String {
 // English year ("2024" -> "twenty twenty-four")
 // ---------------------------------------------------------------------
 
+///|
 pub fn year_en(n : BigInt) -> String {
   if n < BigInt::from_int(1000) || n > BigInt::from_int(9999) {
     return lang_en().cardinal_en(n)
@@ -293,6 +311,7 @@ pub fn year_en(n : BigInt) -> String {
 // dollars and fifty-six cents")
 // ---------------------------------------------------------------------
 
+///|
 pub fn currency_en(dollars : BigInt, cents : BigInt) -> String {
   if dollars == BigInt::from_int(0) && cents == BigInt::from_int(0) {
     return "zero dollars"
@@ -317,6 +336,7 @@ pub fn currency_en(dollars : BigInt, cents : BigInt) -> String {
 // Dispatch
 // =====================================================================
 
+///|
 /// True when the magnitude of `n` fits inside the language's scale-word
 /// table. Scale tables are finite, so every language has a maximum supported
 /// power; values beyond it are reported as unsupported instead of indexing
@@ -331,11 +351,13 @@ pub fn Lang::supports(self : Lang, n : BigInt) -> Bool {
   top_power < self.thousands.length()
 }
 
+///|
 /// Highest power of 1000 the language can spell (e.g. English: 11 -> 10^33).
 pub fn Lang::max_power(self : Lang) -> Int {
   self.thousands.length() - 1
 }
 
+///|
 pub fn Lang::cardinal(self : Lang, n : BigInt) -> String {
   match self.variant {
     En => self.cardinal_en(n)
@@ -344,5 +366,6 @@ pub fn Lang::cardinal(self : Lang, n : BigInt) -> String {
     De => self.cardinal_de(n)
     It => self.cardinal_it(n)
     Pt => self.cardinal_pt(n)
+    Ru => self.cardinal_ru(n)
   }
 }

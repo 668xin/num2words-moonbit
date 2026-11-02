@@ -5,43 +5,46 @@
 //
 // API: `num2words(value, lang, to)` where `value` is a BigInt (or use the
 // `num2words_int` / `num2words_float` convenience wrappers), `lang` is
-// "en" | "fr" | "es" | "de", and `to` is "cardinal" (default), "ordinal",
-// "ordinal_num", "year" or "currency".
+// "en" | "fr" | "es" | "de" | "it" | "pt" | "ru", and `to` is "cardinal"
+// (default), "ordinal", "ordinal_num", "year" or "currency".
 
 // --- input validation -------------------------------------------------------
 //
 // `BigInt::from_string` aborts on malformed input, so every string entry point
 // validates first. Accepted grammar: `-?\d+` or `-?\d+\.\d+`.
 
+///|
 /// True when `s` is non-empty and made only of ASCII digits.
 fn all_digits(s : String) -> Bool {
   if s.length() == 0 {
     return false
   }
   for i = 0; i < s.length(); i = i + 1 {
-    if !("0123456789".contains(s[i : i + 1].to_owned())) {
+    if !"0123456789".contains(s[i:i + 1].to_owned()) {
       return false
     }
   }
   true
 }
 
+///|
 /// True for an integer literal: an optional leading `-` followed by digits.
 fn is_int_part(s : String) -> Bool {
-  let body = if s.length() > 0 && s[0 : 1].to_owned() == "-" {
-    s[1 : s.length()].to_owned()
+  let body = if s.length() > 0 && s[0:1].to_owned() == "-" {
+    s[1:s.length()].to_owned()
   } else {
     s
   }
   all_digits(body)
 }
 
+///|
 /// Validate a decimal/integer string before it reaches `BigInt`.
 ///
 /// Accepted: `1234`, `-42`, `007`, `1234.56`
 /// Rejected: `""`, `"-"`, `"5."`, `".5"`, `"1.2.3"`, `"12a"`, `"abc"`, `"--5"`
 pub fn is_valid_number(s : String) -> Bool {
-  let parts = s.split(".").map(fn (w) { w.to_owned() }).collect()
+  let parts = s.split(".").map(fn(w) { w.to_owned() }).collect()
   if parts.length() > 2 {
     return false
   }
@@ -56,6 +59,7 @@ pub fn is_valid_number(s : String) -> Bool {
   true
 }
 
+///|
 /// Resolve a language code to its `Lang` descriptor.
 pub fn get_lang(code : String) -> Lang {
   match code {
@@ -65,10 +69,12 @@ pub fn get_lang(code : String) -> Lang {
     "de" => lang_de()
     "it" => lang_it()
     "pt" => lang_pt()
+    "ru" => lang_ru()
     _ => lang_en()
   }
 }
 
+///|
 fn ordinal_for(l : Lang, value : BigInt) -> String {
   match l.variant {
     En => ordinal_en(value)
@@ -76,6 +82,7 @@ fn ordinal_for(l : Lang, value : BigInt) -> String {
   }
 }
 
+///|
 fn ordinal_num_for(l : Lang, value : BigInt) -> String {
   match l.variant {
     En => ordinal_num_en(value)
@@ -83,6 +90,7 @@ fn ordinal_num_for(l : Lang, value : BigInt) -> String {
   }
 }
 
+///|
 fn year_for(l : Lang, value : BigInt) -> String {
   match l.variant {
     En => year_en(value)
@@ -91,9 +99,11 @@ fn year_for(l : Lang, value : BigInt) -> String {
     De => year_de(value)
     It => year_it(value)
     Pt => year_pt(value)
+    Ru => year_ru(value)
   }
 }
 
+///|
 fn currency_for(l : Lang, value : BigInt) -> String {
   match l.variant {
     En => currency_en(value, BigInt::from_int(0))
@@ -101,6 +111,7 @@ fn currency_for(l : Lang, value : BigInt) -> String {
   }
 }
 
+///|
 /// Spell a big integer.
 pub fn num2words(value : BigInt, lang : String, to : String) -> String {
   let l = get_lang(lang)
@@ -119,30 +130,33 @@ pub fn num2words(value : BigInt, lang : String, to : String) -> String {
   }
 }
 
+///|
 /// Convenience wrapper for `Int` values.
 pub fn num2words_int(value : Int, lang : String, to : String) -> String {
   num2words(BigInt::from_int(value), lang, to)
 }
 
+///|
 /// Spell a decimal number: integer part in words, fractional digits spelled
 /// out one by one after the decimal word (e.g. 1234.56 -> "... point five six").
 pub fn num2words_float(value : Double, lang : String, _to : String) -> String {
   let l = get_lang(lang)
   let s = value.to_string()
-  let parts = s.split(".").map(fn (w) { w.to_owned() }).collect()
+  let parts = s.split(".").map(fn(w) { w.to_owned() }).collect()
   let int_part = BigInt::from_string(parts[0])
   let mut out = l.cardinal(int_part)
   if parts.length() > 1 {
     out = out + " " + l.decimal
     let frac = parts[1]
     for i = 0; i < frac.length(); i = i + 1 {
-      let d = BigInt::from_string(frac[i : i + 1].to_owned()).to_int()
+      let d = BigInt::from_string(frac[i:i + 1].to_owned()).to_int()
       out = out + " " + l.ones[d]
     }
   }
   out
 }
 
+///|
 /// Spell a number given directly as a decimal/integer string, e.g.
 /// `num2words_str("1234.56", "en", "cardinal")` ->
 /// "one thousand, two hundred and thirty-four point five six".
@@ -155,14 +169,14 @@ pub fn num2words_str(value : String, lang : String, to : String) -> String {
     return ""
   }
   let l = get_lang(lang)
-  let parts = value.split(".").map(fn (w) { w.to_owned() }).collect()
+  let parts = value.split(".").map(fn(w) { w.to_owned() }).collect()
   if parts.length() > 1 {
     let int_part = BigInt::from_string(parts[0])
     let mut out = l.cardinal(int_part)
     out = out + " " + l.decimal
     let frac = parts[1]
     for i = 0; i < frac.length(); i = i + 1 {
-      let d = BigInt::from_string(frac[i : i + 1].to_owned()).to_int()
+      let d = BigInt::from_string(frac[i:i + 1].to_owned()).to_int()
       out = out + " " + l.ones[d]
     }
     out
@@ -171,6 +185,7 @@ pub fn num2words_str(value : String, lang : String, to : String) -> String {
   }
 }
 
+///|
 /// Same as `num2words_str`, but rejects bad input explicitly:
 /// `Ok(words)` on success, `Err(message)` when `value` is either malformed
 /// (`Err("invalid number: ...")`) or larger than the language's scale-word
@@ -178,13 +193,13 @@ pub fn num2words_str(value : String, lang : String, to : String) -> String {
 pub fn num2words_str_checked(
   value : String,
   lang : String,
-  to : String
+  to : String,
 ) -> Result[String, String] {
   if !is_valid_number(value) {
     return Err("invalid number: " + value)
   }
   let l = get_lang(lang)
-  let int_part = value.split(".").map(fn (w) { w.to_owned() }).collect()[0]
+  let int_part = value.split(".").map(fn(w) { w.to_owned() }).collect()[0]
   if !l.supports(BigInt::from_string(int_part)) {
     return Err("magnitude out of supported range: " + value)
   }

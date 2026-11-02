@@ -1,6 +1,7 @@
 // lang_es.mbt — Spanish number spelling (cardinal, year).
 
 // Long-scale scale words. Index = group power.
+
 ///|
 let es_scale_sing : Array[String] = [
   "", "mil", "millón", "mil millones", "billón", "mil billones", "trillón", "mil trillones",
@@ -127,7 +128,12 @@ fn Lang::cardinal_es(self : Lang, n : BigInt) -> String {
           s = s + " mil"
         }
       } else if t == 1 {
-        s = "un " + es_scale_sing[power]
+        // "mil millones" is already a scale phrase: never "un mil millones".
+        if power >= 3 && power % 2 == 1 {
+          s = es_scale_sing[power]
+        } else {
+          s = "un " + es_scale_sing[power]
+        }
       } else {
         s = s + " " + es_scale_plur[power]
       }

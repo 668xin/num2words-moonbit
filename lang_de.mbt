@@ -5,6 +5,7 @@
 // word, but "ein" when it leads "und" (einund...).
 
 // Long-scale scale words. Index = group power.
+
 ///|
 let de_scale_sing : Array[String] = [
   "", "tausend", "Million", "Milliarde", "Billion", "Billiarde", "Trillion", "Trilliarde",
@@ -109,7 +110,7 @@ fn Lang::cardinal_de(self : Lang, n : BigInt) -> String {
     if power > 0 {
       if power == 1 {
         if t == 1 {
-          s = "tausend"
+          s = "eintausend"
         } else {
           s = s + "tausend"
         }

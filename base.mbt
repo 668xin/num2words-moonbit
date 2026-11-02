@@ -158,7 +158,7 @@ fn Lang::cardinal_en(self : Lang, n : BigInt) -> String {
   let neg = n < BigInt::from_int(0)
   let n = if neg { -n } else { n }
   let groups = group3(n)
-  let parts : Array[String] = []
+  let mut joined = ""
   for i = 0; i < groups.length(); i = i + 1 {
     let (triple, power) = groups[i]
     let t = triple.to_int()
@@ -169,9 +169,13 @@ fn Lang::cardinal_en(self : Lang, n : BigInt) -> String {
     if power > 0 {
       s = s + " " + self.thousands[power]
     }
-    parts.push(s)
+    if joined != "" {
+      // Only the final units group is joined with "and" ("one thousand and
+      // one", "one million, one thousand"); everything else uses a comma.
+      joined = joined + (if power == 0 && t < 100 { " and " } else { ", " })
+    }
+    joined = joined + s
   }
-  let joined = join_parts(parts, ", ")
   if neg {
     self.negative + " " + joined
   } else {

@@ -20,7 +20,12 @@ test "en cardinal basics" {
 
 ///|
 test "en cardinal groups" {
-  assert_eq(num2words_int(1000001, "en", "cardinal"), "one million, one")
+  assert_eq(num2words_int(1000001, "en", "cardinal"), "one million and one")
+  assert_eq(num2words_int(1001, "en", "cardinal"), "one thousand and one")
+  assert_eq(
+    num2words_int(2024, "en", "cardinal"),
+    "two thousand and twenty-four",
+  )
   assert_eq(
     num2words_int(1234567, "en", "cardinal"),
     "one million, two hundred and thirty-four thousand, five hundred and sixty-seven",
@@ -124,6 +129,15 @@ test "es cardinal" {
     num2words_int(1234, "es", "cardinal"),
     "mil doscientos treinta y cuatro",
   )
+  // long scale: 10^9 is "mil millones", never "un mil millones"
+  assert_eq(
+    num2words(BigInt::from_string("1000000000"), "es", "cardinal"),
+    "mil millones",
+  )
+  assert_eq(
+    num2words(BigInt::from_string("2000000000"), "es", "cardinal"),
+    "dos mil millones",
+  )
 }
 
 ///|
@@ -138,12 +152,13 @@ test "de cardinal" {
   assert_eq(num2words_int(100, "de", "cardinal"), "einhundert")
   assert_eq(num2words_int(101, "de", "cardinal"), "einhunderteins")
   assert_eq(num2words_int(200, "de", "cardinal"), "zweihundert")
-  assert_eq(num2words_int(1000, "de", "cardinal"), "tausend")
+  assert_eq(num2words_int(1000, "de", "cardinal"), "eintausend")
+  assert_eq(num2words_int(1001, "de", "cardinal"), "eintausendeins")
   assert_eq(num2words_int(2000, "de", "cardinal"), "zweitausend")
   assert_eq(num2words_int(1000000, "de", "cardinal"), "eine Million")
   assert_eq(
     num2words_int(1234, "de", "cardinal"),
-    "tausendzweihundertvierunddreißig",
+    "eintausendzweihundertvierunddreißig",
   )
 }
 
@@ -163,6 +178,12 @@ test "it cardinal" {
   assert_eq(num2words_int(22, "it", "cardinal"), "ventidue")
   assert_eq(num2words_int(23, "it", "cardinal"), "ventitré")
   assert_eq(num2words_int(28, "it", "cardinal"), "ventotto")
+  // the accent only survives on the final word of the whole number
+  assert_eq(num2words_int(123, "it", "cardinal"), "centoventitré")
+  assert_eq(num2words_int(123000, "it", "cardinal"), "centoventitremila")
+  assert_eq(num2words_int(1003, "it", "cardinal"), "milletré")
+  assert_eq(num2words_int(1000023, "it", "cardinal"), "un milione e ventitré")
+  assert_eq(num2words_int(1000003, "it", "cardinal"), "un milione e tre")
   assert_eq(num2words_int(31, "it", "cardinal"), "trentuno")
   assert_eq(num2words_int(33, "it", "cardinal"), "trentatré")
   assert_eq(num2words_int(38, "it", "cardinal"), "trentotto")
@@ -190,6 +211,11 @@ test "it cardinal" {
   )
   assert_eq(num2words_int(21000, "it", "cardinal"), "ventunomila")
   assert_eq(num2words_int(1000000, "it", "cardinal"), "un milione")
+  assert_eq(num2words_int(1000001, "it", "cardinal"), "un milione e uno")
+  assert_eq(
+    num2words_int(1234567, "it", "cardinal"),
+    "un milione e duecentotrentaquattromilacinquecentosessantasette",
+  )
   assert_eq(num2words_int(2000000, "it", "cardinal"), "due milioni")
   // 10^12 does not fit in Int, so it goes through the BigInt entry point
   assert_eq(

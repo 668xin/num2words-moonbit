@@ -11,6 +11,7 @@
 
 // Scale words for a group value of exactly 1. Index = group power:
 // 1 -> 10^3, 2 -> 10^6, 3 -> 10^9, 4 -> 10^12 ...
+
 ///|
 let it_scale_sing : Array[String] = [
   "", "mille", "milione", "miliardo", "bilione", "biliardo", "trilione", "triliardo",
@@ -31,12 +32,13 @@ let it_hundreds : Array[String] = [
   "ottocento", "novecento",
 ]
 
-// Units as they appear inside a compound: "tre" becomes "tré" in final
-// position ("ventitré").
+// Units as they appear inside a compound. "tre" stays unaccented while a
+// further morpheme follows ("ventitremila"); the accent is restored on the
+// final word by `it_accent_final` ("ventitré").
 
 ///|
 let it_units_compound : Array[String] = [
-  "", "uno", "due", "tré", "quattro", "cinque", "sei", "sette", "otto", "nove",
+  "", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove",
 ]
 
 ///|
@@ -70,6 +72,19 @@ fn it_truncate(w : String) -> String {
     return w
   }
   w[0:w.length() - 1].to_owned()
+}
+
+///|
+/// Restore the accent on a final "tre" glued to a preceding morpheme:
+/// "ventitre" -> "ventitré", "milletre" -> "milletré". A standalone "tre"
+/// (3, or after a space) stays unaccented.
+fn it_accent_final(s : String) -> String {
+  let n = s.length()
+  if n > 3 && s[n - 3:n].to_owned() == "tre" && s[n - 4:n - 3].to_owned() != " " {
+    s[0:n - 3].to_owned() + "tré"
+  } else {
+    s
+  }
 }
 
 ///|
@@ -152,17 +167,18 @@ fn Lang::cardinal_it(self : Lang, n : BigInt) -> String {
     parts.push(s)
     powers.push(power)
   }
-  // Italian writes a number as one word; a space appears only after a
-  // million-or-larger scale word: 1234567 -> "un milione duecento-
-  // trentaquattromilacinquecentosessantasette", 2345 -> "duemilatrecento-
-  // quarantacinque", 1001 -> "milleuno".
+  // Italian writes a number as one word; a space (and the conjunction "e")
+  // appears only after a million-or-larger scale word: 1234567 -> "un milione
+  // e duecentotrentaquattromilacinquecentosessantasette", 2345 ->
+  // "duemilatrecentoquarantacinque", 1001 -> "milleuno".
   let mut joined = ""
   for i = 0; i < parts.length(); i = i + 1 {
     if i > 0 && powers[i - 1] >= 2 {
-      joined = joined + " "
+      joined = joined + " e "
     }
     joined = joined + parts[i]
   }
+  joined = it_accent_final(joined)
   if neg {
     "meno " + joined
   } else {

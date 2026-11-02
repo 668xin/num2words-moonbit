@@ -19,7 +19,7 @@ repository = "https://github.com/668xin/num2words-moonbit"
 
 license = "LGPL-2.1"
 
-keywords = ["num2words", "i18n", "numbers", "moonbit", "hackathon"]
+keywords = [ "num2words", "i18n", "numbers", "moonbit", "hackathon" ]
 
 preferred_target = "native"
 

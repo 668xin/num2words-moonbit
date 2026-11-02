@@ -12,38 +12,42 @@
 //   * short scale: mil (10^3), milhao (10^6), bilhao (10^9), trilhao (10^12).
 
 // Scale words for a group value of exactly 1. Index = group power.
+///|
 let pt_scale_sing : Array[String] = [
-  "", "mil", "milhão", "bilhão", "trilhão", "quatrilhão", "quintilhão",
-  "sextilhão",
+  "", "mil", "milhão", "bilhão", "trilhão", "quatrilhão", "quintilhão", "sextilhão",
 ]
 
 // Scale words for group values >= 2. Index = group power.
+
+///|
 let pt_scale_plur : Array[String] = [
   "", "mil", "milhões", "bilhões", "trilhões", "quatrilhões", "quintilhões",
   "sextilhões",
 ]
 
 // Hundreds: 2 -> "duzentos", 3 -> "trezentos", ... 9 -> "novecentos".
+
+///|
 let pt_hundreds : Array[String] = [
-  "", "", "duzentos", "trezentos", "quatrocentos", "quinhentos",
-  "seiscentos", "setecentos", "oitocentos", "novecentos",
+  "", "", "duzentos", "trezentos", "quatrocentos", "quinhentos", "seiscentos", "setecentos",
+  "oitocentos", "novecentos",
 ]
 
+///|
 pub fn lang_pt() -> Lang {
   {
     variant: Pt,
     zero: "zero",
     ones: [
-      "zero", "um", "dois", "três", "quatro", "cinco", "seis", "sete",
-      "oito", "nove",
+      "zero", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove",
     ],
     teens: [
-      "dez", "onze", "doze", "treze", "catorze", "quinze", "dezesseis",
-      "dezessete", "dezoito", "dezenove",
+      "dez", "onze", "doze", "treze", "catorze", "quinze", "dezesseis", "dezessete",
+      "dezoito", "dezenove",
     ],
     tens: [
-      "", "dez", "vinte", "trinta", "quarenta", "cinquenta", "sessenta",
-      "setenta", "oitenta", "noventa",
+      "", "dez", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta",
+      "oitenta", "noventa",
     ],
     hundred: "cento",
     thousands: pt_scale_plur,
@@ -53,6 +57,7 @@ pub fn lang_pt() -> Lang {
   }
 }
 
+///|
 fn Lang::below100_pt(self : Lang, r : Int) -> String {
   if r < 10 {
     return self.ones[r]
@@ -69,6 +74,7 @@ fn Lang::below100_pt(self : Lang, r : Int) -> String {
   return self.tens[d] + " e " + self.ones[u]
 }
 
+///|
 fn Lang::triple_pt(self : Lang, t : Int) -> String {
   if t == 0 {
     return ""
@@ -92,6 +98,7 @@ fn Lang::triple_pt(self : Lang, t : Int) -> String {
   return pt_hundreds[h] + " e " + self.below100_pt(r)
 }
 
+///|
 /// "e" joins a scale group to the next one when the next group is below 100
 /// or an exact multiple of 100 ("mil e um", "mil e cem"); otherwise a plain
 /// space is used ("mil duzentos e trinta e quatro").
@@ -103,6 +110,7 @@ fn pt_group_sep(next_triple : Int) -> String {
   }
 }
 
+///|
 fn Lang::cardinal_pt(self : Lang, n : BigInt) -> String {
   if n == BigInt::from_int(0) {
     return self.zero
@@ -151,6 +159,7 @@ fn Lang::cardinal_pt(self : Lang, n : BigInt) -> String {
   }
 }
 
+///|
 /// Portuguese years are read as a plain cardinal ("2024" ->
 /// "dois mil e vinte e quatro"), so this delegates to `cardinal_pt`.
 pub fn year_pt(n : BigInt) -> String {

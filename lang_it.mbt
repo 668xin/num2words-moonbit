@@ -11,45 +11,49 @@
 
 // Scale words for a group value of exactly 1. Index = group power:
 // 1 -> 10^3, 2 -> 10^6, 3 -> 10^9, 4 -> 10^12 ...
+///|
 let it_scale_sing : Array[String] = [
-  "", "mille", "milione", "miliardo", "bilione", "biliardo", "trilione",
-  "triliardo",
+  "", "mille", "milione", "miliardo", "bilione", "biliardo", "trilione", "triliardo",
 ]
 
 // Scale words for group values >= 2. Index = group power.
+
+///|
 let it_scale_plur : Array[String] = [
-  "", "mila", "milioni", "miliardi", "bilioni", "biliardi", "trilioni",
-  "triliardi",
+  "", "mila", "milioni", "miliardi", "bilioni", "biliardi", "trilioni", "triliardi",
 ]
 
 // Hundreds: 2 -> "duecento", 3 -> "trecento", ... 9 -> "novecento".
+
+///|
 let it_hundreds : Array[String] = [
-  "", "", "duecento", "trecento", "quattrocento", "cinquecento", "seicento",
-  "settecento", "ottocento", "novecento",
+  "", "", "duecento", "trecento", "quattrocento", "cinquecento", "seicento", "settecento",
+  "ottocento", "novecento",
 ]
 
 // Units as they appear inside a compound: "tre" becomes "tré" in final
 // position ("ventitré").
+
+///|
 let it_units_compound : Array[String] = [
-  "", "uno", "due", "tré", "quattro", "cinque", "sei", "sette", "otto",
-  "nove",
+  "", "uno", "due", "tré", "quattro", "cinque", "sei", "sette", "otto", "nove",
 ]
 
+///|
 pub fn lang_it() -> Lang {
   {
     variant: It,
     zero: "zero",
     ones: [
-      "zero", "uno", "due", "tre", "quattro", "cinque", "sei", "sette",
-      "otto", "nove",
+      "zero", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove",
     ],
     teens: [
-      "dieci", "undici", "dodici", "tredici", "quattordici", "quindici",
-      "sedici", "diciassette", "diciotto", "diciannove",
+      "dieci", "undici", "dodici", "tredici", "quattordici", "quindici", "sedici",
+      "diciassette", "diciotto", "diciannove",
     ],
     tens: [
-      "", "dieci", "venti", "trenta", "quaranta", "cinquanta", "sessanta",
-      "settanta", "ottanta", "novanta",
+      "", "dieci", "venti", "trenta", "quaranta", "cinquanta", "sessanta", "settanta",
+      "ottanta", "novanta",
     ],
     hundred: "cento",
     thousands: it_scale_plur,
@@ -59,14 +63,16 @@ pub fn lang_it() -> Lang {
   }
 }
 
+///|
 /// Drop the final vowel of a tens/hundreds word (venti -> "vent").
 fn it_truncate(w : String) -> String {
   if w.length() == 0 {
     return w
   }
-  w[0 : w.length() - 1].to_owned()
+  w[0:w.length() - 1].to_owned()
 }
 
+///|
 fn Lang::below100_it(self : Lang, r : Int) -> String {
   if r < 10 {
     return self.ones[r]
@@ -87,6 +93,7 @@ fn Lang::below100_it(self : Lang, r : Int) -> String {
   return self.tens[d] + it_units_compound[u]
 }
 
+///|
 fn Lang::triple_it(self : Lang, t : Int) -> String {
   if t == 0 {
     return ""
@@ -104,12 +111,13 @@ fn Lang::triple_it(self : Lang, t : Int) -> String {
   // The final vowel of "...cento" is dropped when the following part starts
   // with "o": 108 -> "centotto", 180 -> "centottanta", 208 -> "duecentotto".
   // It is kept before other vowels: 101 -> "centouno", 111 -> "centoundici".
-  if low[0 : 1].to_owned() == "o" {
+  if low[0:1].to_owned() == "o" {
     return it_truncate(prefix) + low
   }
   return prefix + low
 }
 
+///|
 fn Lang::cardinal_it(self : Lang, n : BigInt) -> String {
   if n == BigInt::from_int(0) {
     return self.zero
@@ -162,6 +170,7 @@ fn Lang::cardinal_it(self : Lang, n : BigInt) -> String {
   }
 }
 
+///|
 /// Italian years are read as a plain cardinal ("2024" ->
 /// "duemilaventiquattro"), so this simply delegates to `cardinal_it`.
 pub fn year_it(n : BigInt) -> String {

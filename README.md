@@ -33,7 +33,7 @@ general-purpose multilingual number-to-words package on
 - **Arbitrarily large integers** via `BigInt` (no 64-bit ceiling).
 - **Zero dependencies** beyond the MoonBit core.
 - A small **command-line tool** for ad-hoc conversions.
-- **Differential-tested against upstream `num2words`**: 3857 recorded
+- **Differential-tested against upstream `num2words`**: 3933 recorded
   comparisons across the 7 languages — see [DIFF_REPORT.md](DIFF_REPORT.md).
 
 ---
@@ -203,6 +203,59 @@ num2words <value> [--lang en|fr|es|de|it|pt|ru] [--to cardinal|ordinal|ordinal_n
 
 ---
 
+## Comparison with upstream num2words
+
+The reference implementation is the Python
+[`num2words`](https://github.com/savoirfairelinux/num2words) library, version
+**0.5.14** (LGPL-2.1). Cardinal parity for the seven shared languages, plus
+year parity for English, Italian, Portuguese and Russian, is machine-checked by
+3933 recorded comparisons; see [DIFF_REPORT.md](DIFF_REPORT.md) for the method
+and results.
+
+Upstream implements all five output modes for each of these seven languages.
+This project's coverage is:
+
+| Mode | `en` | `fr` | `es` | `de` | `it` | `pt` | `ru` |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `cardinal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `year` | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ |
+| `ordinal` | ✅ | ↩ | ↩ | ↩ | ↩ | ↩ | ↩ |
+| `ordinal_num` | ✅ | ↩ | ↩ | ↩ | ↩ | ↩ | ↩ |
+| `currency` | ✅ | ↩ | ↩ | ↩ | ↩ | ↩ | ↩ |
+
+Legend: ✅ native and aligned with upstream · ⚠️ native but a different year
+convention · ↩ falls back to `cardinal`.
+
+### Per-language differences
+
+| Language | Upstream | This project | Differences |
+| --- | --- | --- | --- |
+| `en` | `en` | `en` | Cardinal and year convention aligned; `currency` is **USD** while upstream defaults to **EUR** |
+| `fr` | `fr` | `fr` | Years read as digit pairs (`2024` → *vingt vingt-quatre*) instead of upstream's full cardinal (*deux mille vingt-quatre*); ordinal/currency fall back |
+| `es` | `es` | `es` | Long scale aligned (`10⁹` → *mil millones*); years read as pairs (*veinte veinticuatro*); ordinal/currency fall back |
+| `de` | `de` | `de` | `1000` → *eintausend* (aligned); years read as pairs without *-hundert* (*zwanzig vierundzwanzig*); ordinal/currency fall back |
+| `it` | `it` | `it` | Accent on *tré* only on the final word (*centoventitremila* vs *centoventitré*); upstream's `…dicotto` typo is not reproduced; ordinal/currency fall back |
+| `pt` | `pt` (European) + `pt_BR` | `pt` (Brazilian) | Matches upstream `pt_BR` vocabulary (*dezesseis*, *bilhão*); scale groups are separated by spaces, upstream `pt_BR` writes a comma (*mil, duzentos*) |
+| `ru` | `ru` | `ru` | Cardinal aligned (three plural forms, feminine *одна тысяча*); ordinal/currency fall back |
+
+### Other differences
+
+- **Breadth.** Upstream exposes ~55 language codes (including regional
+  variants); this project covers seven, each as one `lang_xx.mbt` file.
+- **Ordinals and currency.** Upstream implements them per language; here only
+  English does, and the other languages explicitly fall back to `cardinal`.
+- **Scale ceilings.** Both sides use a finite scale-word table, but the
+  ceilings differ; see [Supported magnitude](#supported-magnitude) for ours.
+- **Input handling.** Upstream raises exceptions on malformed numbers; this
+  library validates first and returns `""` (`num2words_str`) or
+  `Err(message)` (`num2words_str_checked`).
+- **Runtime and API.** Upstream is Python; this is pure MoonBit with no
+  dependencies, `BigInt` input, positional `(value, lang, to)` arguments and no
+  defaults.
+- **Decimals.** Fractional digits are spelled one by one and are never rounded.
+
+---
+
 ## Architecture
 
 The library is split into a small core engine and one module per language:
@@ -219,7 +272,7 @@ The library is split into a small core engine and one module per language:
 | `num2words-moonbit.mbt` | public API + per-mode dispatch |
 | `cmd/main/main.mbt` | CLI built on `@env.args()` |
 | `tools/gen_fixtures.py` | regenerates the differential fixtures from upstream `num2words` |
-| `diff_fixtures_wbtest.mbt` | generated fixtures + differential tests (3857 comparisons) |
+| `diff_fixtures_wbtest.mbt` | generated fixtures + differential tests (3933 comparisons) |
 
 Each language is described declaratively by a `Lang` struct (ones, teens, tens,
 hundreds, scale words, conjunctions, negative word, decimal word), and a few
@@ -232,7 +285,7 @@ self-contained file.
 ## Development
 
 ```bash
-moon test          # 37 tests, including 3857 differential comparisons
+moon test          # 41 tests, including 3933 differential comparisons
 moon build         # build the library + CLI
 moon run cmd/main -- 1234 --lang en
 

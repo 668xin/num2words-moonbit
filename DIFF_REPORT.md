@@ -7,9 +7,10 @@ code.
 
 - Upstream version: **num2words 0.5.14**
 - Upstream languages used: `en`, `fr`, `es`, `de`, `it`, `pt_BR`, `ru`
-- Samples per language: **551** (`0..500` plus 51 multi-scale / signed values)
-- Total comparisons: **3857** (7 × 551)
-- MoonBit test suite: **37 tests, 37 passed, 0 failed**
+- Cardinal samples per language: **551** (`0..500` plus 51 multi-scale / signed values)
+- Year samples: **19** each for `en`, `it`, `pt`, `ru`
+- Total comparisons: **3933** (7 × 551 cardinal + 4 × 19 year)
+- MoonBit test suite: **41 tests, 41 passed, 0 failed**
 
 Run `moon test` from the project root to replay every comparison.
 
@@ -20,7 +21,8 @@ Run `moon test` from the project root to replay every comparison.
 1. `tools/gen_fixtures.py` calls upstream `num2words` for each sample and writes
    the expected strings to `diff_fixtures_wbtest.mbt`.
 2. The generated MoonBit test feeds the same input strings through our public
-   `num2words_str(value, lang, "cardinal")` entry point and asserts equality.
+   `num2words_str(value, lang, "cardinal" | "year")` entry point and asserts
+   equality.
 3. Fixtures are committed, so CI and reviewers do not need Python: `moon test`
    replays the recorded expectations on every platform.
 
@@ -36,11 +38,15 @@ Sample set:
 | Large | `100000, 100001, 123000, 123456, 999999, 1000000, 1000001, 1000021, 1000100, 1001000, 1100000, 1234567, 2000000, 5000000, 10^9, 2×10^9, 10^12` |
 | Signed | `-1, -42, -1000, -123456` |
 
+Year samples (`en`, `it`, `pt`, `ru` only): `1000, 1001, 1010, 1100, 1500,
+1900, 1984, 1999, 2000, 2001, 2009, 2010, 2023, 2024, 2100, 2134, 3000, 3001,
+9999`.
+
 ---
 
 ## 2. Results
 
-| Language | Samples | Passed | Comparison |
+| Language | Cardinal samples | Passed | Comparison |
 | --- | --- | --- | --- |
 | `en` | 551 | 551 | verbatim |
 | `fr` | 551 | 551 | verbatim |
@@ -50,7 +56,17 @@ Sample set:
 | `pt` | 551 | 551 | upstream `pt_BR`, commas ignored (see §4) |
 | `ru` | 551 | 551 | verbatim |
 
-All 3857 comparisons pass under the two documented comparison rules in §4.
+| Language | Year samples | Passed | Comparison |
+| --- | --- | --- | --- |
+| `en` | 19 | 19 | verbatim |
+| `it` | 19 | 19 | accents ignored |
+| `pt` | 19 | 19 | upstream `pt_BR`, commas ignored |
+| `ru` | 19 | 19 | verbatim |
+
+All 3933 comparisons pass under the two documented comparison rules in §4.
+French, Spanish and German years use this project's pair-reading convention
+instead of the upstream cardinal reading and are therefore not part of the
+differential set (they are documented in the README comparison table).
 
 ---
 
@@ -71,12 +87,16 @@ orthographic rules were fixed in the implementation rather than papered over.
 | 8 | `it` | `123456` | `centoventitrémila…` | `centoventitremila…` |
 | 9 | `it` | `1000001` | `un milione uno` | `un milione e uno` |
 | 10 | `it` | `1234567` | `un milione duecento…` | `un milione e duecento…` |
+| 11 | `en` (year) | `2001` | `twenty one` | `two thousand and one` |
+| 12 | `en` (year) | `1001`, `3009` | `ten one`, `thirty nine` | `one thousand and one`, `three thousand and nine` |
 
 Notes on the fixes:
 
 - **English group joining:** the conjunction `and` is now used only before the
   final units group below 100 (`one thousand and one`); other groups keep the
   comma (`one million, one thousand`).
+- **English years:** years ending in `01..09` keep the cardinal form
+  (`2001` → `two thousand and one`, not `twenty one`).
 - **Spanish long scale:** `mil millones` is already a scale phrase, so it never
   takes a preceding `un`.
 - **German thousand:** a group value of 1 is spelled `eintausend`
@@ -114,5 +134,5 @@ compared byte-for-byte.
 ```bash
 pip install num2words==0.5.14
 python tools/gen_fixtures.py   # rewrites diff_fixtures_wbtest.mbt
-moon test                      # replays all 3857 comparisons
+moon test                      # replays all 3933 comparisons
 ```

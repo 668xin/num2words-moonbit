@@ -35,8 +35,8 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 - **多形态 API**：`num2words`(BigInt) / `num2words_int` / `num2words_float` / `num2words_str` / `num2words_str_checked` / `is_valid_number`。
 - **量级上限守卫**：`Lang::supports` / `Lang::max_power`，越界返回明确错误而非越界访问。
 - **CLI**（`cmd/main`，`--lang` / `--to` / `--help`），可直接演示与按需调用。
-- **37 个 whitebox 测试**（`moon test` 37/37 通过，0 warning 0 error），覆盖：七语言基数、英文序数 / 序数数字 / 年份 / 金额 / 小数、输入校验的接受与拒绝表、边界值（`-0`、前导零、`1.50`、1e21、0 在各模式下）、量级上限内外、以及 Int/String/Float 三路路径一致性与七语言一致性。
-- **与上游的差分对照测试**：`tools/gen_fixtures.py` 调用上游 num2words 0.5.14 生成 551×7 = **3857 条**期望值，MoonBit 侧逐条断言；本轮对照发现并修复了英语 `and` 连接、西语 `mil millones`、德语 `eintausend`、意大利语重音与连接词等真实缺陷。报告见 `DIFF_REPORT.md`。
+- **41 个 whitebox 测试**（`moon test` 41/41 通过，0 warning 0 error），覆盖：七语言基数、英文序数 / 序数数字 / 年份 / 金额 / 小数、输入校验的接受与拒绝表、边界值（`-0`、前导零、`1.50`、1e21、0 在各模式下）、量级上限内外、以及 Int/String/Float 三路路径一致性与七语言一致性。
+- **与上游的差分对照测试**：`tools/gen_fixtures.py` 调用上游 num2words 0.5.14 生成 551×7 + 19×4 = **3933 条**期望值，MoonBit 侧逐条断言；本轮对照发现并修复了英语 `and` 连接与年份读法、西语 `mil millones`、德语 `eintausend`、意大利语重音与连接词等真实缺陷。报告见 `DIFF_REPORT.md`。
 - **README** 示例覆盖各语言各模式调用、CLI 用法、合法输入语法、错误处理行为与已知限制。
 - **三平台 CI**（ubuntu / macOS / windows）自动运行 `moon test`。
 
@@ -44,7 +44,7 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 
 - 公开仓库 `668xin/num2words-moonbit`，含 `moon.mod` 元数据与全部源码；当前以**公开仓库 / git 依赖**方式引入（见验收边界第 2 条）。
 - 7 种语言的数字读法，在**各语言量级上限以内**输出正确结果；对非法输入与越界输入返回明确错误而非崩溃。
-- 37 个测试与三平台 CI 测试记录，其中含 3857 条与上游 num2words 的差分对照。
+- 41 个测试与三平台 CI 测试记录，其中含 3933 条与上游 num2words 的差分对照。
 - `DIFF_REPORT.md`：差分测试方法、覆盖范围、逐语言结果与两条明示的对照规则。
 - 完整 README + **LGPL-2.1 LICENSE**（与上游一致，许可证正文已与 SPDX / GitHub Licenses API 权威文本校验一致）+ 来源署名。
 - 相对上游的差异化：纯 MoonBit 零运行时依赖、声明式扩展新语言、BigInt 与十进制字符串避免精度损失。

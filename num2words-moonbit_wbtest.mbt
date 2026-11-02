@@ -3,6 +3,7 @@
 // function (including the per-language helpers) is in scope directly.
 // Run with `moon test` from the project root.
 
+///|
 test "en cardinal basics" {
   assert_eq(num2words_int(0, "en", "cardinal"), "zero")
   assert_eq(num2words_int(1, "en", "cardinal"), "one")
@@ -17,6 +18,7 @@ test "en cardinal basics" {
   assert_eq(num2words_int(-42, "en", "cardinal"), "minus forty-two")
 }
 
+///|
 test "en cardinal groups" {
   assert_eq(num2words_int(1000001, "en", "cardinal"), "one million, one")
   assert_eq(
@@ -29,6 +31,7 @@ test "en cardinal groups" {
   )
 }
 
+///|
 test "en ordinal" {
   assert_eq(ordinal_en(BigInt::from_int(1)), "first")
   assert_eq(ordinal_en(BigInt::from_int(2)), "second")
@@ -41,6 +44,7 @@ test "en ordinal" {
   assert_eq(ordinal_en(BigInt::from_int(101)), "one hundred and first")
 }
 
+///|
 test "en ordinal_num" {
   assert_eq(ordinal_num_en(BigInt::from_int(1)), "1st")
   assert_eq(ordinal_num_en(BigInt::from_int(2)), "2nd")
@@ -52,6 +56,7 @@ test "en ordinal_num" {
   assert_eq(ordinal_num_en(BigInt::from_int(21)), "21st")
 }
 
+///|
 test "en year" {
   assert_eq(year_en(BigInt::from_int(2024)), "twenty twenty-four")
   assert_eq(year_en(BigInt::from_int(1984)), "nineteen eighty-four")
@@ -59,6 +64,7 @@ test "en year" {
   assert_eq(year_en(BigInt::from_int(1900)), "nineteen hundred")
 }
 
+///|
 test "en currency" {
   assert_eq(
     currency_en(BigInt::from_int(1234), BigInt::from_int(0)),
@@ -70,6 +76,7 @@ test "en currency" {
   )
 }
 
+///|
 test "en float" {
   assert_eq(
     num2words_float(1234.56, "en", "cardinal"),
@@ -77,6 +84,7 @@ test "en float" {
   )
 }
 
+///|
 test "fr cardinal" {
   assert_eq(num2words_int(42, "fr", "cardinal"), "quarante-deux")
   assert_eq(num2words_int(70, "fr", "cardinal"), "soixante-dix")
@@ -90,14 +98,19 @@ test "fr cardinal" {
   assert_eq(num2words_int(1000, "fr", "cardinal"), "mille")
   assert_eq(num2words_int(2000, "fr", "cardinal"), "deux mille")
   assert_eq(num2words_int(1000000, "fr", "cardinal"), "un million")
-  assert_eq(num2words_int(1234, "fr", "cardinal"), "mille deux cent trente-quatre")
+  assert_eq(
+    num2words_int(1234, "fr", "cardinal"),
+    "mille deux cent trente-quatre",
+  )
   assert_eq(num2words_int(-42, "fr", "cardinal"), "moins quarante-deux")
 }
 
+///|
 test "fr year" {
   assert_eq(year_fr(BigInt::from_int(2024)), "vingt vingt-quatre")
 }
 
+///|
 test "es cardinal" {
   assert_eq(num2words_int(42, "es", "cardinal"), "cuarenta y dos")
   assert_eq(num2words_int(21, "es", "cardinal"), "veintiuno")
@@ -113,10 +126,12 @@ test "es cardinal" {
   )
 }
 
+///|
 test "es year" {
   assert_eq(year_es(BigInt::from_int(2024)), "veinte veinticuatro")
 }
 
+///|
 test "de cardinal" {
   assert_eq(num2words_int(42, "de", "cardinal"), "zweiundvierzig")
   assert_eq(num2words_int(21, "de", "cardinal"), "einundzwanzig")
@@ -132,10 +147,12 @@ test "de cardinal" {
   )
 }
 
+///|
 test "de year" {
   assert_eq(year_de(BigInt::from_int(2024)), "zwanzig vierundzwanzig")
 }
 
+///|
 test "it cardinal" {
   assert_eq(num2words_int(0, "it", "cardinal"), "zero")
   assert_eq(num2words_int(1, "it", "cardinal"), "uno")
@@ -182,6 +199,7 @@ test "it cardinal" {
   assert_eq(num2words_int(-42, "it", "cardinal"), "meno quarantadue")
 }
 
+///|
 test "pt cardinal" {
   assert_eq(num2words_int(0, "pt", "cardinal"), "zero")
   assert_eq(num2words_int(1, "pt", "cardinal"), "um")
@@ -208,7 +226,10 @@ test "pt cardinal" {
   assert_eq(num2words_int(1001, "pt", "cardinal"), "mil e um")
   assert_eq(num2words_int(1100, "pt", "cardinal"), "mil e cem")
   assert_eq(num2words_int(1200, "pt", "cardinal"), "mil e duzentos")
-  assert_eq(num2words_int(1234, "pt", "cardinal"), "mil duzentos e trinta e quatro")
+  assert_eq(
+    num2words_int(1234, "pt", "cardinal"),
+    "mil duzentos e trinta e quatro",
+  )
   assert_eq(num2words_int(2000, "pt", "cardinal"), "dois mil")
   assert_eq(num2words_int(21000, "pt", "cardinal"), "vinte e um mil")
   assert_eq(num2words_int(1000000, "pt", "cardinal"), "um milhão")
@@ -231,6 +252,7 @@ test "pt cardinal" {
   assert_eq(num2words_int(-42, "pt", "cardinal"), "menos quarenta e dois")
 }
 
+///|
 test "pt year" {
   assert_eq(year_pt(BigInt::from_int(2024)), "dois mil e vinte e quatro")
   assert_eq(
@@ -239,14 +261,106 @@ test "pt year" {
   )
 }
 
+///|
 test "it year" {
   assert_eq(year_it(BigInt::from_int(2024)), "duemilaventiquattro")
+  assert_eq(year_it(BigInt::from_int(1984)), "millenovecentottantaquattro")
+}
+
+///|
+test "ru cardinal" {
+  assert_eq(num2words_int(0, "ru", "cardinal"), "ноль")
+  assert_eq(num2words_int(1, "ru", "cardinal"), "один")
+  assert_eq(num2words_int(2, "ru", "cardinal"), "два")
+  assert_eq(num2words_int(10, "ru", "cardinal"), "десять")
+  assert_eq(num2words_int(11, "ru", "cardinal"), "одиннадцать")
+  assert_eq(num2words_int(21, "ru", "cardinal"), "двадцать один")
+  assert_eq(num2words_int(42, "ru", "cardinal"), "сорок два")
   assert_eq(
-    year_it(BigInt::from_int(1984)),
-    "millenovecentottantaquattro",
+    num2words_int(99, "ru", "cardinal"),
+    "девяносто девять",
+  )
+  assert_eq(num2words_int(100, "ru", "cardinal"), "сто")
+  assert_eq(num2words_int(101, "ru", "cardinal"), "сто один")
+  assert_eq(num2words_int(200, "ru", "cardinal"), "двести")
+  assert_eq(
+    num2words_int(999, "ru", "cardinal"),
+    "девятьсот девяносто девять",
+  )
+  // "тысяча" is feminine and takes three plural forms
+  assert_eq(num2words_int(1000, "ru", "cardinal"), "одна тысяча")
+  assert_eq(num2words_int(2000, "ru", "cardinal"), "две тысячи")
+  assert_eq(num2words_int(5000, "ru", "cardinal"), "пять тысяч")
+  assert_eq(
+    num2words_int(21000, "ru", "cardinal"),
+    "двадцать одна тысяча",
+  )
+  assert_eq(
+    num2words_int(22000, "ru", "cardinal"),
+    "двадцать две тысячи",
+  )
+  assert_eq(
+    num2words_int(25000, "ru", "cardinal"),
+    "двадцать пять тысяч",
+  )
+  assert_eq(
+    num2words_int(1234, "ru", "cardinal"),
+    "одна тысяча двести тридцать четыре",
+  )
+  // 11..14 take the "many" form even though they end in 1..4
+  assert_eq(
+    num2words_int(11000, "ru", "cardinal"),
+    "одиннадцать тысяч",
+  )
+  assert_eq(
+    num2words_int(12000, "ru", "cardinal"),
+    "двенадцать тысяч",
+  )
+  assert_eq(
+    num2words_int(14000, "ru", "cardinal"),
+    "четырнадцать тысяч",
+  )
+  assert_eq(num2words_int(1000000, "ru", "cardinal"), "один миллион")
+  assert_eq(num2words_int(2000000, "ru", "cardinal"), "два миллиона")
+  assert_eq(
+    num2words_int(5000000, "ru", "cardinal"),
+    "пять миллионов",
+  )
+  assert_eq(
+    num2words_int(1000001, "ru", "cardinal"),
+    "один миллион один",
+  )
+  assert_eq(
+    num2words_int(1234567, "ru", "cardinal"),
+    "один миллион двести тридцать четыре тысячи пятьсот шестьдесят семь",
+  )
+  assert_eq(
+    num2words(BigInt::from_string("1000000000"), "ru", "cardinal"),
+    "один миллиард",
+  )
+  assert_eq(
+    num2words(BigInt::from_string("1000000000000"), "ru", "cardinal"),
+    "один триллион",
+  )
+  assert_eq(
+    num2words_int(-42, "ru", "cardinal"),
+    "минус сорок два",
   )
 }
 
+///|
+test "ru year" {
+  assert_eq(
+    year_ru(BigInt::from_int(2024)),
+    "две тысячи двадцать четыре",
+  )
+  assert_eq(
+    year_ru(BigInt::from_int(1984)),
+    "одна тысяча девятьсот восемьдесят четыре",
+  )
+}
+
+///|
 test "decimal string input" {
   assert_eq(
     num2words_str("1234.56", "en", "cardinal"),
@@ -258,6 +372,7 @@ test "decimal string input" {
 
 // --- M1: validation and boundaries ------------------------------------------
 
+///|
 test "input validation accepts well-formed numbers" {
   assert_eq(is_valid_number("0"), true)
   assert_eq(is_valid_number("1234"), true)
@@ -268,6 +383,7 @@ test "input validation accepts well-formed numbers" {
   assert_eq(is_valid_number("1000000000000000000000"), true)
 }
 
+///|
 test "input validation rejects malformed numbers" {
   assert_eq(is_valid_number(""), false)
   assert_eq(is_valid_number("-"), false)
@@ -281,6 +397,7 @@ test "input validation rejects malformed numbers" {
   assert_eq(is_valid_number("1,234"), false)
 }
 
+///|
 test "malformed input returns empty string instead of aborting" {
   assert_eq(num2words_str("abc", "en", "cardinal"), "")
   assert_eq(num2words_str("1.2.3", "en", "cardinal"), "")
@@ -288,6 +405,7 @@ test "malformed input returns empty string instead of aborting" {
   assert_eq(num2words_str("-", "en", "cardinal"), "")
 }
 
+///|
 test "checked API reports success and failure" {
   assert_eq(
     num2words_str_checked("abc", "en", "cardinal"),
@@ -299,6 +417,7 @@ test "checked API reports success and failure" {
   )
 }
 
+///|
 test "boundaries" {
   assert_eq(num2words_str("0", "en", "cardinal"), "zero")
   assert_eq(num2words_str("-0", "en", "cardinal"), "zero")
@@ -320,8 +439,11 @@ test "boundaries" {
 // The Int / BigInt / String entry points must agree on the same value; this is
 // the invariant that guards against divergence between the parsing paths.
 
+///|
 test "path consistency: string and int agree" {
-  let samples = [0, 1, 9, 10, 21, 42, 100, 101, 999, 1000, 1234, 1000000, 1234567]
+  let samples = [
+    0, 1, 9, 10, 21, 42, 100, 101, 999, 1000, 1234, 1000000, 1234567,
+  ]
   for i = 0; i < samples.length(); i = i + 1 {
     let n = samples[i]
     assert_eq(
@@ -331,8 +453,9 @@ test "path consistency: string and int agree" {
   }
 }
 
+///|
 test "path consistency: string and int agree in every language" {
-  let langs = ["en", "fr", "es", "de", "it", "pt"]
+  let langs = ["en", "fr", "es", "de", "it", "pt", "ru"]
   let samples = [0, 21, 100, 1234, 1000000]
   for li = 0; li < langs.length(); li = li + 1 {
     for si = 0; si < samples.length(); si = si + 1 {
@@ -349,6 +472,7 @@ test "path consistency: string and int agree in every language" {
 // Scale-word tables are finite, so each language has a ceiling. Values past
 // it must be reported, never crash by indexing off the end of the table.
 
+///|
 fn zeros(n : Int) -> String {
   let mut s = ""
   for i = 0; i < n; i = i + 1 {
@@ -357,14 +481,20 @@ fn zeros(n : Int) -> String {
   s
 }
 
+///|
 test "magnitude within the scale table" {
   assert_eq(num2words_str("1" + zeros(33), "en", "cardinal"), "one decillion")
   assert_eq(num2words_str("1" + zeros(30), "fr", "cardinal"), "un sextillion")
   assert_eq(num2words_str("1" + zeros(21), "it", "cardinal"), "un triliardo")
   assert_eq(num2words_str("1" + zeros(21), "pt", "cardinal"), "um sextilhão")
+  assert_eq(
+    num2words_str("1" + zeros(33), "ru", "cardinal"),
+    "один дециллион",
+  )
   assert_eq(lang_en().max_power(), 11)
 }
 
+///|
 test "magnitude beyond the scale table is reported, not crashed" {
   let too_big = "1" + zeros(36)
   assert_eq(num2words_str(too_big, "en", "cardinal"), "")
@@ -375,8 +505,10 @@ test "magnitude beyond the scale table is reported, not crashed" {
   // Italian and Portuguese tables stop at 10^21
   assert_eq(num2words_str("1" + zeros(24), "it", "cardinal"), "")
   assert_eq(num2words_str("1" + zeros(24), "pt", "cardinal"), "")
+  assert_eq(num2words_str("1" + zeros(36), "ru", "cardinal"), "")
 }
 
+///|
 test "path consistency: string and float agree" {
   assert_eq(
     num2words_str("1234.56", "en", "cardinal"),

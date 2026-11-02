@@ -4,3 +4,6 @@ target/
 target
 .mooncakes/
 .moonagent/
+
+# 内部开发计划，不提交到仓库
+DEV_PLAN.md

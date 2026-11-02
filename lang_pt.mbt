@@ -12,6 +12,7 @@
 //   * short scale: mil (10^3), milhao (10^6), bilhao (10^9), trilhao (10^12).
 
 // Scale words for a group value of exactly 1. Index = group power.
+
 ///|
 let pt_scale_sing : Array[String] = [
   "", "mil", "milhão", "bilhão", "trilhão", "quatrilhão", "quintilhão", "sextilhão",

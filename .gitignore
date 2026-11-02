@@ -5,5 +5,8 @@ target
 .mooncakes/
 .moonagent/
 
+# Python cache (tools/gen_fixtures.py)
+__pycache__/
+
 # 内部开发计划，不提交到仓库
 DEV_PLAN.md

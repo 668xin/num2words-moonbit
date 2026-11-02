@@ -11,6 +11,7 @@
 //   * groups are separated by a single space and no commas are written.
 
 // Scale words for a group value of 1. Index = group power.
+
 ///|
 let ru_scale_one : Array[String] = [
   "", "тысяча", "миллион", "миллиард", "триллион", "квадриллион",

@@ -67,6 +67,10 @@ test "en year" {
   assert_eq(year_en(BigInt::from_int(1984)), "nineteen eighty-four")
   assert_eq(year_en(BigInt::from_int(2000)), "two thousand")
   assert_eq(year_en(BigInt::from_int(1900)), "nineteen hundred")
+  // years ending in 01..09 keep the cardinal "thousand and" form
+  assert_eq(year_en(BigInt::from_int(1001)), "one thousand and one")
+  assert_eq(year_en(BigInt::from_int(2001)), "two thousand and one")
+  assert_eq(year_en(BigInt::from_int(3009)), "three thousand and nine")
 }
 
 ///|

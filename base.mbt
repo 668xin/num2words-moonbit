@@ -290,6 +290,10 @@ pub fn year_en(n : BigInt) -> String {
   }
   let neg = n < BigInt::from_int(0)
   let n = if neg { -n } else { n }
+  // 2001 -> "two thousand and one", not "twenty one"; likewise 1001, 3001.
+  if n % BigInt::from_int(1000) < BigInt::from_int(10) {
+    return lang_en().cardinal_en(n)
+  }
   if n % BigInt::from_int(1000) == BigInt::from_int(0) {
     // 2000 -> "two thousand"
     return lang_en().cardinal_en(n)

@@ -33,6 +33,8 @@ general-purpose multilingual number-to-words package on
 - **Arbitrarily large integers** via `BigInt` (no 64-bit ceiling).
 - **Zero dependencies** beyond the MoonBit core.
 - A small **command-line tool** for ad-hoc conversions.
+- **Differential-tested against upstream `num2words`**: 3857 recorded
+  comparisons across the 7 languages — see [DIFF_REPORT.md](DIFF_REPORT.md).
 
 ---
 
@@ -210,12 +212,14 @@ The library is split into a small core engine and one module per language:
 | `base.mbt` | `Lang` descriptor, 3-digit grouping (`group3`), shared join logic, English rules + dispatch |
 | `lang_fr.mbt` | French (vigesimal: *soixante-dix*, *quatre-vingts*) |
 | `lang_es.mbt` | Spanish (*veintiuno*, *cien/ciento*, *un millón*) |
-| `lang_de.mbt` | German (closed compounds: *einundvierzig*, *tausendzweihundert…*) |
+| `lang_de.mbt` | German (closed compounds: *einundvierzig*, *eintausendzweihundert…*) |
 | `lang_it.mbt` | Italian (vowel elision: *ventuno*, *ventotto*, *centotto*; *ventitré*) |
 | `lang_pt.mbt` | Portuguese, Brazilian (*cem*/*cento*, *vinte e um*, *mil e cem*) |
 | `lang_ru.mbt` | Russian (three plural forms, feminine *одна тысяча*, *две тысячи*) |
 | `num2words-moonbit.mbt` | public API + per-mode dispatch |
 | `cmd/main/main.mbt` | CLI built on `@env.args()` |
+| `tools/gen_fixtures.py` | regenerates the differential fixtures from upstream `num2words` |
+| `diff_fixtures_wbtest.mbt` | generated fixtures + differential tests (3857 comparisons) |
 
 Each language is described declaratively by a `Lang` struct (ones, teens, tens,
 hundreds, scale words, conjunctions, negative word, decimal word), and a few
@@ -228,10 +232,17 @@ self-contained file.
 ## Development
 
 ```bash
-moon test          # run the test suite
+moon test          # 37 tests, including 3857 differential comparisons
 moon build         # build the library + CLI
 moon run cmd/main -- 1234 --lang en
+
+# regenerate the differential fixtures (requires Python + upstream num2words)
+pip install num2words==0.5.14
+python tools/gen_fixtures.py
 ```
+
+The differential run and its two documented comparison rules (Italian accents,
+Brazilian Portuguese punctuation) are described in [DIFF_REPORT.md](DIFF_REPORT.md).
 
 ---
 

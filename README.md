@@ -8,7 +8,7 @@
 `num2words-moonbit` is a from-scratch MoonBit implementation of the classic
 *number → words* library. It spells out integers (of arbitrary size via
 `BigInt`), decimals, ordinals, years and currency amounts in **English,
-French, Spanish, German, Italian and Portuguese**.
+French, Spanish, German, Italian, Portuguese and Russian**.
 
 This project was built for the **MoonBit September Hackathon 2026**. It ports
 the well-known Python [`num2words`](https://github.com/savoirfairelinux/num2words)
@@ -20,8 +20,8 @@ general-purpose multilingual number-to-words package on
 
 ## Features
 
-- **6 languages**: English (`en`), French (`fr`), Spanish (`es`), German (`de`),
-  Italian (`it`), Portuguese (`pt`, Brazilian variant).
+- **7 languages**: English (`en`), French (`fr`), Spanish (`es`), German (`de`),
+  Italian (`it`), Portuguese (`pt`, Brazilian variant), Russian (`ru`).
 - **6 output modes**:
   - `cardinal` — `1234` → *one thousand, two hundred and thirty-four*
   - `ordinal` — `1` → *first*, `21` → *twenty-first*
@@ -86,7 +86,7 @@ import "668xin/num2words-moonbit" @n2w
 
 | Function | Signature | Notes |
 | --- | --- | --- |
-| `get_lang` | `(code : String) -> Lang` | `"en"\|"fr"\|"es"\|"de"\|"it"\|"pt"`, default `en` |
+| `get_lang` | `(code : String) -> Lang` | `"en"\|"fr"\|"es"\|"de"\|"it"\|"pt"\|"ru"`, default `en` |
 | `num2words` | `(value : BigInt, lang : String, to : String) -> String` | core entry point |
 | `num2words_int` | `(value : Int, lang : String, to : String) -> String` | convenience |
 | `num2words_float` | `(value : Double, lang : String, to : String) -> String` | decimal literal |
@@ -147,6 +147,7 @@ are **reported, never crashed**:
 | `fr` | 10³⁰ | `10^30` → *un sextillion* |
 | `es`, `de` | 10²⁴ | — |
 | `it`, `pt` | 10²¹ | `10^21` → *un triliardo* / *um sextilhão* |
+| `ru` | 10³³ | `10^33` → *один дециллион* |
 
 ```mbt
 @n2w.num2words_str_checked("1" + <36 zeros>, "en", "cardinal")
@@ -163,8 +164,8 @@ error: magnitude out of supported range: 1000000000000000000000000000000000000
 
 ### Known limitations
 
-- **6 languages** (`en`, `fr`, `es`, `de`, `it`, `pt`). More are planned; see
-  the per-language extension layout above.
+- **7 languages** (`en`, `fr`, `es`, `de`, `it`, `pt`, `ru`). More are planned;
+  see the per-language extension layout above.
 - **Magnitudes are bounded** by each language's scale-word table — see
   *Supported magnitude* above. "Arbitrarily large" is **not** claimed.
 - **Not yet published to mooncakes.io**, so `moon add 668xin/num2words-moonbit`
@@ -172,8 +173,8 @@ error: magnitude out of supported range: 1000000000000000000000000000000000000
 - **Portuguese is the Brazilian variant** (`dezesseis`, short scale
   *bilhão* = 10⁹). European Portuguese forms (`dezasseis`, *mil milhões*)
   are not provided.
-- **Only English has ordinals / `ordinal_num` / currency.** For `it` and `pt`
-  (like `fr`, `es`, `de`) those modes fall back to `cardinal`.
+- **Only English has ordinals / `ordinal_num` / currency.** For the other six
+  languages those modes fall back to `cardinal` (`ordinal_num` appends `.`).
 - **`currency` is English-only.** Other languages fall back to `cardinal`.
 - **Fractional digits are spelled one by one** (`1234.56` → *… point five
   six*), not as a fractional number.
@@ -195,7 +196,7 @@ moon run cmd/main -- --help
 ```
 
 ```
-num2words <value> [--lang en|fr|es|de|it|pt] [--to cardinal|ordinal|ordinal_num|year|currency]
+num2words <value> [--lang en|fr|es|de|it|pt|ru] [--to cardinal|ordinal|ordinal_num|year|currency]
 ```
 
 ---
@@ -212,6 +213,7 @@ The library is split into a small core engine and one module per language:
 | `lang_de.mbt` | German (closed compounds: *einundvierzig*, *tausendzweihundert…*) |
 | `lang_it.mbt` | Italian (vowel elision: *ventuno*, *ventotto*, *centotto*; *ventitré*) |
 | `lang_pt.mbt` | Portuguese, Brazilian (*cem*/*cento*, *vinte e um*, *mil e cem*) |
+| `lang_ru.mbt` | Russian (three plural forms, feminine *одна тысяча*, *две тысячи*) |
 | `num2words-moonbit.mbt` | public API + per-mode dispatch |
 | `cmd/main/main.mbt` | CLI built on `@env.args()` |
 

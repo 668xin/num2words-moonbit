@@ -285,7 +285,7 @@ self-contained file.
 ## Development
 
 ```bash
-moon test          # 41 tests, including 3933 differential comparisons
+moon test          # 42 tests, including 3933 differential comparisons
 moon build         # build the library + CLI
 moon run cmd/main -- 1234 --lang en
 

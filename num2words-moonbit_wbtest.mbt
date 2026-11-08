@@ -549,3 +549,26 @@ test "path consistency: string and float agree" {
     num2words_float(0.5, "en", "cardinal"),
   )
 }
+
+///|
+test "float scientific notation, negative zero and decimal magnitude guard" {
+  // `Double::to_string` switches to scientific notation at 10^21 / 10^-6;
+  // these must be expanded rather than handed to `BigInt::from_string`.
+  assert_eq(num2words_float(1.0e21, "en", "cardinal"), "one sextillion")
+  assert_eq(
+    num2words_float(1.5e21, "en", "cardinal"),
+    "one sextillion, five hundred quintillion",
+  )
+  assert_eq(
+    num2words_float(1.0e-7, "en", "cardinal"),
+    "zero point zero zero zero zero zero zero one",
+  )
+  assert_eq(num2words_float(1.0e33, "en", "cardinal"), "one decillion")
+  // Beyond the scale table and non-finite values -> "" instead of aborting.
+  assert_eq(num2words_float(1.0e36, "en", "cardinal"), "")
+  // Negative decimals below one keep their sign.
+  assert_eq(num2words_float(-0.5, "en", "cardinal"), "minus zero point five")
+  assert_eq(num2words_str("-0.5", "en", "cardinal"), "minus zero point five")
+  // Out-of-range integer part in a decimal string -> "" (no " point ..." leak).
+  assert_eq(num2words_str("1" + zeros(36) + ".5", "en", "cardinal"), "")
+}

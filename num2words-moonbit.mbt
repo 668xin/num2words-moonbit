@@ -60,6 +60,104 @@ pub fn is_valid_number(s : String) -> Bool {
 }
 
 ///|
+/// Position of the single-character string `target` inside `s`, or -1.
+fn index_of_char(s : String, target : String) -> Int {
+  for i = 0; i < s.length(); i = i + 1 {
+    if s[i:i + 1].to_owned() == target {
+      return i
+    }
+  }
+  -1
+}
+
+///|
+/// Parse the (signed) exponent digits of a scientific-notation string.
+fn parse_exp_int(s : String) -> Int {
+  let mut neg = false
+  let mut i = 0
+  if s.length() > 0 && s[0:1].to_owned() == "+" {
+    i = 1
+  } else if s.length() > 0 && s[0:1].to_owned() == "-" {
+    neg = true
+    i = 1
+  }
+  let mut v = 0
+  while i < s.length() {
+    v = v * 10 + BigInt::from_string(s[i:i + 1].to_owned()).to_int()
+    i = i + 1
+  }
+  if neg {
+    -v
+  } else {
+    v
+  }
+}
+
+///|
+/// Expand a `Double` rendered in scientific notation (e.g. `1e+21`, `1e-7`,
+/// `1.5e+21`) into a plain decimal string. Values already in plain form are
+/// returned unchanged. `Double::to_string` switches to scientific notation for
+/// magnitudes at or above 10^21 and below 10^-6; passing that form straight to
+/// `BigInt::from_string` would abort, so it is expanded first.
+fn expand_scientific(s : String) -> String {
+  let e_pos = index_of_char(s, "e")
+  let e_pos_upper = index_of_char(s, "E")
+  let pos = if e_pos >= 0 { e_pos } else { e_pos_upper }
+  if pos < 0 {
+    return s
+  }
+  let mantissa = s[0:pos].to_owned()
+  let exp = parse_exp_int(s[pos + 1:s.length()].to_owned())
+  let neg = mantissa.length() > 0 && mantissa[0:1].to_owned() == "-"
+  let body = if neg {
+    mantissa[1:mantissa.length()].to_owned()
+  } else {
+    mantissa
+  }
+  let dot = index_of_char(body, ".")
+  let int_len = if dot >= 0 { dot } else { body.length() }
+  let digits = if dot >= 0 {
+    body[0:dot].to_owned() + body[dot + 1:body.length()].to_owned()
+  } else {
+    body
+  }
+  let point = int_len + exp
+  let mut out = ""
+  if point <= 0 {
+    out = "0."
+    for i = point; i < 0; i = i + 1 {
+      out = out + "0"
+    }
+    out = out + digits
+  } else if point >= digits.length() {
+    out = digits
+    for i = digits.length(); i < point; i = i + 1 {
+      out = out + "0"
+    }
+  } else {
+    out = digits[0:point].to_owned() +
+      "." +
+      digits[point:digits.length()].to_owned()
+  }
+  if neg {
+    "-" + out
+  } else {
+    out
+  }
+}
+
+///|
+/// Spell the fractional digits of a decimal: `"5"` -> `" point five"`.
+fn decimal_tail(l : Lang, frac : String) -> String {
+  let mut out = " " + l.decimal
+  for i = 0; i < frac.length(); i = i + 1 {
+    let d = BigInt::from_string(frac[i:i + 1].to_owned()).to_int()
+    out = out + " " + l.ones[d]
+  }
+  out
+}
+
+///|
 /// Resolve a language code to its `Lang` descriptor.
 pub fn get_lang(code : String) -> Lang {
   match code {
@@ -139,18 +237,29 @@ pub fn num2words_int(value : Int, lang : String, to : String) -> String {
 ///|
 /// Spell a decimal number: integer part in words, fractional digits spelled
 /// out one by one after the decimal word (e.g. 1234.56 -> "... point five six").
+///
+/// Scientific-notation values (very large or very small doubles) are expanded
+/// to a plain decimal first. Values too large for the language's scale table,
+/// and non-finite values (`NaN` / infinity), return `""` instead of aborting.
 pub fn num2words_float(value : Double, lang : String, _to : String) -> String {
   let l = get_lang(lang)
-  let s = value.to_string()
+  let s = expand_scientific(value.to_string())
+  if !is_valid_number(s) {
+    return ""
+  }
+  let neg = s.length() > 0 && s[0:1].to_owned() == "-"
   let parts = s.split(".").map(fn(w) { w.to_owned() }).collect()
   let int_part = BigInt::from_string(parts[0])
+  if !l.supports(int_part) {
+    return ""
+  }
   let mut out = l.cardinal(int_part)
   if parts.length() > 1 {
-    out = out + " " + l.decimal
-    let frac = parts[1]
-    for i = 0; i < frac.length(); i = i + 1 {
-      let d = BigInt::from_string(frac[i:i + 1].to_owned()).to_int()
-      out = out + " " + l.ones[d]
+    out = out + decimal_tail(l, parts[1])
+    // `-0` is normalised to zero by `BigInt`, so restore the minus sign for
+    // negative values below one (e.g. -0.5 -> "minus zero point five").
+    if neg && int_part == BigInt::from_int(0) {
+      out = l.negative + " " + out
     }
   }
   out
@@ -172,12 +281,16 @@ pub fn num2words_str(value : String, lang : String, to : String) -> String {
   let parts = value.split(".").map(fn(w) { w.to_owned() }).collect()
   if parts.length() > 1 {
     let int_part = BigInt::from_string(parts[0])
-    let mut out = l.cardinal(int_part)
-    out = out + " " + l.decimal
-    let frac = parts[1]
-    for i = 0; i < frac.length(); i = i + 1 {
-      let d = BigInt::from_string(frac[i:i + 1].to_owned()).to_int()
-      out = out + " " + l.ones[d]
+    if !l.supports(int_part) {
+      // An out-of-range integer part must yield "" as a whole; spelling the
+      // decimal tail on its own would leak " point five" and friends.
+      return ""
+    }
+    let mut out = l.cardinal(int_part) + decimal_tail(l, parts[1])
+    // Restore the sign for negative values below one (e.g. -0.5).
+    let neg = value.length() > 0 && value[0:1].to_owned() == "-"
+    if neg && int_part == BigInt::from_int(0) {
+      out = l.negative + " " + out
     }
     out
   } else {

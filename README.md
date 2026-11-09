@@ -26,7 +26,7 @@ general-purpose multilingual number-to-words package on
 - **11 language codes**: English (`en`), French (`fr`), Spanish (`es`), German
   (`de`), Italian (`it`), Portuguese (`pt` Brazilian, `pt_PT` European), Russian
   (`ru`), Dutch (`nl`), Turkish (`tr`) and Vietnamese (`vi`).
-- **6 output modes**:
+- **5 output modes plus decimals**:
   - `cardinal` — `1234` → *one thousand, two hundred and thirty-four*
   - `ordinal` — `1` → *first*, `21` → *twenty-first*
   - `ordinal_num` — `1` → *1st*, `21` → *21st*
@@ -38,7 +38,7 @@ general-purpose multilingual number-to-words package on
   scale table).
 - **Zero dependencies** beyond the MoonBit core.
 - A small **command-line tool** for ad-hoc conversions.
-- **Differential-tested against upstream `num2words`**: 14555 recorded
+- **Differential-tested against upstream `num2words`**: 14633 recorded
   comparisons across the 11 language codes — see [DIFF_REPORT.md](DIFF_REPORT.md).
 
 ---
@@ -197,6 +197,15 @@ error: magnitude out of supported range: 1000000000000000000000000000000000000
 - **Vietnamese negatives are fixed, not copied**: upstream 0.5.14 reads `-1` as
   *mười chín* and raises `IndexError` for smaller values; this project spells
   them properly (*âm bốn mươi hai*).
+- **Negative years**: `en` appends `BC` and `pt`/`pt_PT` `antes de Cristo`,
+  exactly as upstream (`-44` → *forty-four BC*, *quarenta e quatro antes de
+  Cristo*). German and Dutch upstream compute the hundreds split on the negative
+  value and emit nonsense (`-1` → *minuseinshundertneunundneunzig*,
+  *min één honderd negenennegentig*); this project writes *minus eins* / *min
+  één* instead. `fr`/`es`/`it`/`ru`/`tr` match upstream.
+- **English years use the `oh-` form** for a low part below ten (`1904` →
+  *nineteen oh-four*), like upstream, and fall back to the cardinal for `00XX`,
+  `X00X` and five-digit years.
 - **Turkish currency is a single lira/kuruş pair** upstream (its
   `to_currency` accepts no ISO code); only `TRY` is exposed here, and an exact
   zero amount is *bedelsiz*.
@@ -228,7 +237,11 @@ error: magnitude out of supported range: 1000000000000000000000000000000000000
 - **Fractional digits are spelled one by one** (`1234.56` → *… point five
   six*), not as a fractional number.
 - **Decimals are not rounded in `cardinal` mode.** The digits you pass in are
-  the digits spelled; only `currency` rounds to cents.
+  the digits spelled; only `currency` rounds to cents. Upstream normalises the
+  input through `Decimal`, which this project does not: `1.10` → *one point one
+  zero* here (*one point one* upstream), `0.0` → *zero point zero* here (*zero*
+  upstream), and `-0.5` keeps its sign (*minus zero point five*) where upstream
+  drops it (*zero point five*).
 - **No reverse conversion** (`words → number`) is provided yet.
 - **No performance benchmark** has been published — no performance claims are
   made.
@@ -251,6 +264,11 @@ moon run cmd/main -- --help
 num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]
 ```
 
+Conversion errors are written to **stderr** as `error: <message>`. The process
+still exits with status 0: the MoonBit core library exposes no exit-code API,
+and adding a dependency for it was not worth it for a demo CLI — check stderr
+rather than `$?`.
+
 ### Runnable example
 
 ```bash
@@ -268,7 +286,7 @@ The reference implementation is the Python
 [`num2words`](https://github.com/savoirfairelinux/num2words) library, version
 **0.5.14** (LGPL-2.1). Cardinal, year, ordinal, `ordinal_num` and currency
 parity for all eleven language codes are machine-checked by
-**14555 recorded comparisons**; see [DIFF_REPORT.md](DIFF_REPORT.md) for the
+**14633 recorded comparisons**; see [DIFF_REPORT.md](DIFF_REPORT.md) for the
 method and results, and [COMPAT.md](COMPAT.md) for a call-by-call mapping,
 currency-code coverage and the known gaps.
 
@@ -348,7 +366,7 @@ The library is split into a small core engine and one module per language:
 | `num2words-moonbit.mbt` | public API + per-mode dispatch |
 | `cmd/main/main.mbt` | CLI built on `@env.args()` |
 | `tools/gen_fixtures.py` | regenerates the differential fixtures from upstream `num2words` |
-| `diff_fixtures_wbtest.mbt` | generated fixtures + differential tests (14555 comparisons) |
+| `diff_fixtures_wbtest.mbt` | generated fixtures + differential tests (14633 comparisons) |
 
 Each language is described declaratively by a `Lang` struct (ones, teens, tens,
 hundreds, scale words, conjunctions, negative word, decimal word), and a few
@@ -381,7 +399,7 @@ cross-language comparison. Regenerate them with
 ## Development
 
 ```bash
-moon test          # 102 tests, including 14555 differential comparisons
+moon test          # 102 tests, including 14633 differential comparisons
 moon build         # build the library + CLI
 moon run cmd/main -- 1234 --lang en
 

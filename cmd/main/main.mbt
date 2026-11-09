@@ -31,7 +31,7 @@ fn usage() -> Unit {
   )
   println("Modes    : cardinal (default), ordinal, ordinal_num, year, currency")
   println(
-    "Currency : ISO code, default EUR (BRL for pt, TRY for tr); en/fr/de/it EUR/USD/GBP, es 20 codes, ru 6, nl 4, pt_PT EUR/USD/GBP/CAD/AUD",
+    "Currency : ISO code, default EUR (BRL for pt, TRY for tr); en 20, fr/de 5, it/nl 4, es 171, ru 8, pt_PT 5, tr TRY",
   )
   println("")
   println("Examples:")
@@ -95,7 +95,7 @@ fn main {
     // choose the language default (EUR, or BRL for pt).
     match @lib.num2words_currency(value, lang, currency) {
       Ok(words) => println(words)
-      Err(msg) => println("error: " + msg)
+      Err(msg) => eprintln("error: " + msg)
     }
     return
   }
@@ -103,6 +103,6 @@ fn main {
   // The checked variant reports malformed input instead of aborting.
   match @lib.num2words_str_checked(value, lang, to) {
     Ok(words) => println(words)
-    Err(msg) => println("error: " + msg)
+    Err(msg) => eprintln("error: " + msg)
   }
 }

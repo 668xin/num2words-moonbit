@@ -179,7 +179,16 @@ fn nl_floor_mod(a : BigInt, b : BigInt) -> BigInt {
 /// Dutch years read as "nineteen hundred" for most values, but stay cardinal
 /// when the hundreds digit is 0: 1900 -> "negentien honderd", 2024 ->
 /// "tweeduizendvierentwintig", 1001 -> "duizendéén".
+
+///|
+/// Dutch years are read in hundreds (`1900` -> "negentien honderd"). Upstream
+/// applies its `//`/`%` to the negative value and produces nonsense
+/// ("min één honderd negenennegentig" for -1); we spell `min <year>` instead,
+/// consistent with `de` and the other languages.
 pub fn year_nl(n : BigInt) -> String {
+  if n < BigInt::from_int(0) {
+    return "min " + lang_nl().cardinal_nl(-n)
+  }
   let hundred = BigInt::from_int(100)
   let high = nl_floor_div(n, hundred)
   if nl_floor_mod(high, BigInt::from_int(10)) == BigInt::from_int(0) {

@@ -3,7 +3,7 @@
 Reference: Python [`num2words`](https://github.com/savoirfairelinux/num2words)
 **0.5.14** (LGPL-2.1). This document maps the two APIs call by call, records the
 supported surface, and lists every known behavioural difference. Output parity
-is machine-checked by **14555 recorded comparisons** (see
+is machine-checked by **14633 recorded comparisons** (see
 [DIFF_REPORT.md](DIFF_REPORT.md)); `moon test` replays them without Python.
 
 ---
@@ -145,9 +145,13 @@ for `pt_BR` and `ru`. Values past the ceiling return `""`
 | out-of-range | may raise | `""` or `Err("magnitude out of supported range: ...")` |
 | negative ordinal | `TypeError` | `""` (Italian: `meno ...`) |
 | unsupported currency code | `NotImplementedError` | `Err(...)` / `""` |
+| unknown language in `num2words_currency` | `NotImplementedError` | `Err("currency not implemented for language: ...")` (the other entry points fall back to English) |
 | mode absent upstream (`vi` year / `ordinal_num` / currency) | `AttributeError` | `""` / `Err(...)` |
 | negative cardinal (`vi`) | broken (`-1` → *mười chín*, smaller values raise) | `"âm ..."` |
 | return type | `str` (or `int` for `it`/`ru` `ordinal_num`) | `String` / `Result[String, String]` |
+
+The CLI prints `error: <message>` to **stderr** and still exits 0 (the MoonBit
+core library has no exit-code API; see README).
 
 ---
 
@@ -184,18 +188,29 @@ These are deliberate and recorded in [DIFF_REPORT.md](DIFF_REPORT.md) §4.
     (`12.34` → *… virgül üç dört* / *… phẩy ba bốn* in `tr`/`vi`), while
     upstream reads the last two decimal digits as a number (*otuz dört*,
     *ba mươi bốn*). Decimal comparisons are therefore not part of the
-    differential fixtures.
+    differential fixtures. Upstream's `Decimal` also normalises the input, which
+    this project does not: `1.10` → *one point one zero* here (*one point one*
+    upstream), `0.0` → *zero point zero* here (*zero* upstream), and `-0.5`
+    keeps its sign here (*minus zero point five*) while upstream drops it
+    (*zero point five*).
+11. **Negative years.** `en` ends with `BC` and `pt`/`pt_PT` with
+    `antes de Cristo`, matching upstream. German and Dutch upstream compute the
+    hundreds split on the negative value and produce nonsense (`-1` →
+    *minuseinshundertneunundneunzig*, *min één honderd negenennegentig*); here
+    they spell `minus` / `min` followed by the year (`minus eins`, `min één`).
+    `fr`/`es`/`it`/`ru`/`tr` match upstream
+    (`moins`/`menos`/`meno`/`минус`/`eksi`).
 
-Everything else — cardinals, years, ordinals and `ordinal_num` for the codes
-that implement them, and currency for the codes listed in §4 — matches upstream
-byte-for-byte (after the normalisations above).
+Everything else — cardinals, positive years, ordinals and `ordinal_num` for the
+codes that implement them, and currency for the codes listed in §4 — matches
+upstream byte-for-byte (after the normalisations above).
 
 ---
 
 ## 8. Verification
 
 ```bash
-moon test          # 102 tests, 14555 differential comparisons
+moon test          # 102 tests, 14633 differential comparisons
 moon build         # library + CLI
 ```
 

@@ -117,7 +117,13 @@ fn Lang::cardinal_pt_pt(self : Lang, n : BigInt) -> String {
 ///|
 /// European Portuguese years are read as a plain cardinal, like the Brazilian
 /// variant ("2024" -> "dois mil e vinte e quatro").
+
+///|
+/// Upstream reads a negative year as `<year> antes de Cristo`.
 pub fn year_pt_pt(n : BigInt) -> String {
+  if n < BigInt::from_int(0) {
+    return lang_pt_pt().cardinal_pt_pt(-n) + " antes de Cristo"
+  }
   lang_pt_pt().cardinal_pt_pt(n)
 }
 

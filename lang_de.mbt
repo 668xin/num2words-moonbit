@@ -152,14 +152,19 @@ fn Lang::cardinal_de(self : Lang, n : BigInt) -> String {
 /// "einundzwanzighundert").
 pub fn year_de(n : BigInt) -> String {
   let l = lang_de()
-  if n < BigInt::from_int(0) || n < BigInt::from_int(1100) {
+  // Upstream applies its `//`/`%` to the negative value and emits nonsense
+  // ("minuseinshundertneunundneunzig" for -1); we spell "minus <year>".
+  if n < BigInt::from_int(0) {
     return l.cardinal_de(n)
   }
-  let high = n / BigInt::from_int(100)
-  let low = n % BigInt::from_int(100)
+  let hundred = BigInt::from_int(100)
+  let high = n / hundred
   if high % BigInt::from_int(10) == BigInt::from_int(0) {
     return l.cardinal_de(n)
   }
+  let low = n % hundred
+  // The hundreds morpheme keeps the cardinal form of the head, so 101 reads
+  // "einshunderteins" (unlike the cardinal "einhunderteins").
   let mut s = l.cardinal_de(high) + "hundert"
   if low > BigInt::from_int(0) {
     s = s + l.cardinal_de(low)

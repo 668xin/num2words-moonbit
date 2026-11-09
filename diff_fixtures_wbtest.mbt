@@ -14,9 +14,9 @@
 //
 // Year mode is additionally compared for all languages that implement it
 // upstream (en/fr/es/de/it/pt/pt_PT/ru/nl/tr; Vietnamese has no `to_year`).
-// Currency mode is compared for every language with the code set each
-// upstream language implements (en/fr/de/it: EUR/USD/GBP; es: 20 codes;
-// ru: 6 codes; pt: BRL only; nl: 4 codes; tr: TRY only). Upstream int inputs
+// Currency mode is compared for every language with the complete code set
+// each upstream language implements (en: 20 codes; fr/de: 5; it/nl: 4;
+// es: 171; ru: 8; pt: BRL only; pt_PT: 5; tr: TRY only). Upstream int inputs
 // are avoided (they are read as cents), Turkish amounts must be free of
 // float truncation, and Italian negative amounts are skipped (upstream raises
 // AttributeError). Exact `x.xx5` amounts are excluded because this project
@@ -6275,16 +6275,21 @@ test "differential: vi matches upstream num2words" {
 
 ///|
 let diff_year_en : Array[(String, String)] = [
+  ("101", "one oh-one"),
+  ("999", "nine ninety-nine"),
   ("1000", "one thousand"),
   ("1001", "one thousand and one"),
   ("1010", "ten ten"),
   ("1100", "eleven hundred"),
+  ("1104", "eleven oh-four"),
   ("1500", "fifteen hundred"),
   ("1900", "nineteen hundred"),
+  ("1904", "nineteen oh-four"),
   ("1984", "nineteen eighty-four"),
   ("1999", "nineteen ninety-nine"),
   ("2000", "two thousand"),
   ("2001", "two thousand and one"),
+  ("2004", "two thousand and four"),
   ("2009", "two thousand and nine"),
   ("2010", "twenty ten"),
   ("2023", "twenty twenty-three"),
@@ -6294,20 +6299,32 @@ let diff_year_en : Array[(String, String)] = [
   ("3000", "three thousand"),
   ("3001", "three thousand and one"),
   ("9999", "ninety-nine ninety-nine"),
+  ("12345", "twelve thousand, three hundred and forty-five"),
+  ("-1", "one BC"),
+  ("-44", "forty-four BC"),
+  ("-156", "one fifty-six BC"),
+  ("-1000", "one thousand BC"),
+  ("-1900", "nineteen hundred BC"),
+  ("-2001", "two thousand and one BC"),
 ]
 
 ///|
 let diff_year_fr : Array[(String, String)] = [
+  ("101", "cent un"),
+  ("999", "neuf cent quatre-vingt-dix-neuf"),
   ("1000", "mille"),
   ("1001", "mille un"),
   ("1010", "mille dix"),
   ("1100", "mille cent"),
+  ("1104", "mille cent quatre"),
   ("1500", "mille cinq cents"),
   ("1900", "mille neuf cents"),
+  ("1904", "mille neuf cent quatre"),
   ("1984", "mille neuf cent quatre-vingt-quatre"),
   ("1999", "mille neuf cent quatre-vingt-dix-neuf"),
   ("2000", "deux mille"),
   ("2001", "deux mille un"),
+  ("2004", "deux mille quatre"),
   ("2009", "deux mille neuf"),
   ("2010", "deux mille dix"),
   ("2023", "deux mille vingt-trois"),
@@ -6317,20 +6334,26 @@ let diff_year_fr : Array[(String, String)] = [
   ("3000", "trois mille"),
   ("3001", "trois mille un"),
   ("9999", "neuf mille neuf cent quatre-vingt-dix-neuf"),
+  ("12345", "douze mille trois cent quarante-cinq"),
 ]
 
 ///|
 let diff_year_es : Array[(String, String)] = [
+  ("101", "ciento uno"),
+  ("999", "novecientos noventa y nueve"),
   ("1000", "mil"),
   ("1001", "mil uno"),
   ("1010", "mil diez"),
   ("1100", "mil cien"),
+  ("1104", "mil ciento cuatro"),
   ("1500", "mil quinientos"),
   ("1900", "mil novecientos"),
+  ("1904", "mil novecientos cuatro"),
   ("1984", "mil novecientos ochenta y cuatro"),
   ("1999", "mil novecientos noventa y nueve"),
   ("2000", "dos mil"),
   ("2001", "dos mil uno"),
+  ("2004", "dos mil cuatro"),
   ("2009", "dos mil nueve"),
   ("2010", "dos mil diez"),
   ("2023", "dos mil veintitrés"),
@@ -6340,20 +6363,26 @@ let diff_year_es : Array[(String, String)] = [
   ("3000", "tres mil"),
   ("3001", "tres mil uno"),
   ("9999", "nueve mil novecientos noventa y nueve"),
+  ("12345", "doce mil trescientos cuarenta y cinco"),
 ]
 
 ///|
 let diff_year_de : Array[(String, String)] = [
+  ("101", "einshunderteins"),
+  ("999", "neunhundertneunundneunzig"),
   ("1000", "eintausend"),
   ("1001", "eintausendeins"),
   ("1010", "eintausendzehn"),
   ("1100", "elfhundert"),
+  ("1104", "elfhundertvier"),
   ("1500", "fünfzehnhundert"),
   ("1900", "neunzehnhundert"),
+  ("1904", "neunzehnhundertvier"),
   ("1984", "neunzehnhundertvierundachtzig"),
   ("1999", "neunzehnhundertneunundneunzig"),
   ("2000", "zweitausend"),
   ("2001", "zweitausendeins"),
+  ("2004", "zweitausendvier"),
   ("2009", "zweitausendneun"),
   ("2010", "zweitausendzehn"),
   ("2023", "zweitausenddreiundzwanzig"),
@@ -6363,20 +6392,26 @@ let diff_year_de : Array[(String, String)] = [
   ("3000", "dreitausend"),
   ("3001", "dreitausendeins"),
   ("9999", "neunundneunzighundertneunundneunzig"),
+  ("12345", "einhundertdreiundzwanzighundertfünfundvierzig"),
 ]
 
 ///|
 let diff_year_it : Array[(String, String)] = [
+  ("101", "centouno"),
+  ("999", "novecentonovantanove"),
   ("1000", "mille"),
   ("1001", "milleuno"),
   ("1010", "milledieci"),
   ("1100", "millecento"),
+  ("1104", "millecentoquattro"),
   ("1500", "millecinquecento"),
   ("1900", "millenovecento"),
+  ("1904", "millenovecentoquattro"),
   ("1984", "millenovecentottantaquattro"),
   ("1999", "millenovecentonovantanove"),
   ("2000", "duemila"),
   ("2001", "duemilauno"),
+  ("2004", "duemilaquattro"),
   ("2009", "duemilanove"),
   ("2010", "duemiladieci"),
   ("2023", "duemilaventitre"),
@@ -6386,20 +6421,26 @@ let diff_year_it : Array[(String, String)] = [
   ("3000", "tremila"),
   ("3001", "tremilauno"),
   ("9999", "novemilanovecentonovantanove"),
+  ("12345", "dodicimilatrecentoquarantacinque"),
 ]
 
 ///|
 let diff_year_pt : Array[(String, String)] = [
+  ("101", "cento e um"),
+  ("999", "novecentos e noventa e nove"),
   ("1000", "mil"),
   ("1001", "mil e um"),
   ("1010", "mil e dez"),
   ("1100", "mil e cem"),
+  ("1104", "mil cento e quatro"),
   ("1500", "mil e quinhentos"),
   ("1900", "mil e novecentos"),
+  ("1904", "mil novecentos e quatro"),
   ("1984", "mil novecentos e oitenta e quatro"),
   ("1999", "mil novecentos e noventa e nove"),
   ("2000", "dois mil"),
   ("2001", "dois mil e um"),
+  ("2004", "dois mil e quatro"),
   ("2009", "dois mil e nove"),
   ("2010", "dois mil e dez"),
   ("2023", "dois mil e vinte e três"),
@@ -6409,20 +6450,32 @@ let diff_year_pt : Array[(String, String)] = [
   ("3000", "três mil"),
   ("3001", "três mil e um"),
   ("9999", "nove mil novecentos e noventa e nove"),
+  ("12345", "doze mil trezentos e quarenta e cinco"),
+  ("-1", "um antes de Cristo"),
+  ("-44", "quarenta e quatro antes de Cristo"),
+  ("-156", "cento e cinquenta e seis antes de Cristo"),
+  ("-1000", "mil antes de Cristo"),
+  ("-1900", "mil e novecentos antes de Cristo"),
+  ("-2001", "dois mil e um antes de Cristo"),
 ]
 
 ///|
 let diff_year_pt_PT : Array[(String, String)] = [
+  ("101", "cento e um"),
+  ("999", "novecentos e noventa e nove"),
   ("1000", "mil"),
   ("1001", "mil e um"),
   ("1010", "mil e dez"),
   ("1100", "mil e cem"),
+  ("1104", "mil cento e quatro"),
   ("1500", "mil e quinhentos"),
   ("1900", "mil e novecentos"),
+  ("1904", "mil novecentos e quatro"),
   ("1984", "mil novecentos e oitenta e quatro"),
   ("1999", "mil novecentos e noventa e nove"),
   ("2000", "dois mil"),
   ("2001", "dois mil e um"),
+  ("2004", "dois mil e quatro"),
   ("2009", "dois mil e nove"),
   ("2010", "dois mil e dez"),
   ("2023", "dois mil e vinte e três"),
@@ -6432,16 +6485,27 @@ let diff_year_pt_PT : Array[(String, String)] = [
   ("3000", "três mil"),
   ("3001", "três mil e um"),
   ("9999", "nove mil novecentos e noventa e nove"),
+  ("12345", "doze mil trezentos e quarenta e cinco"),
+  ("-1", "um antes de Cristo"),
+  ("-44", "quarenta e quatro antes de Cristo"),
+  ("-156", "cento e cinquenta e seis antes de Cristo"),
+  ("-1000", "mil antes de Cristo"),
+  ("-1900", "mil e novecentos antes de Cristo"),
+  ("-2001", "dois mil e um antes de Cristo"),
 ]
 
 ///|
 let diff_year_ru : Array[(String, String)] = [
+  ("101", "сто один"),
+  ("999", "девятьсот девяносто девять"),
   ("1000", "одна тысяча"),
   ("1001", "одна тысяча один"),
   ("1010", "одна тысяча десять"),
   ("1100", "одна тысяча сто"),
+  ("1104", "одна тысяча сто четыре"),
   ("1500", "одна тысяча пятьсот"),
   ("1900", "одна тысяча девятьсот"),
+  ("1904", "одна тысяча девятьсот четыре"),
   (
     "1984", "одна тысяча девятьсот восемьдесят четыре",
   ),
@@ -6450,6 +6514,7 @@ let diff_year_ru : Array[(String, String)] = [
   ),
   ("2000", "две тысячи"),
   ("2001", "две тысячи один"),
+  ("2004", "две тысячи четыре"),
   ("2009", "две тысячи девять"),
   ("2010", "две тысячи десять"),
   ("2023", "две тысячи двадцать три"),
@@ -6461,20 +6526,26 @@ let diff_year_ru : Array[(String, String)] = [
   (
     "9999", "девять тысяч девятьсот девяносто девять",
   ),
+  ("12345", "двенадцать тысяч триста сорок пять"),
 ]
 
 ///|
 let diff_year_nl : Array[(String, String)] = [
+  ("101", "één honderd één"),
+  ("999", "negen honderd negenennegentig"),
   ("1000", "duizend"),
   ("1001", "duizendéén"),
   ("1010", "duizendtien"),
   ("1100", "elf honderd"),
+  ("1104", "elf honderd vier"),
   ("1500", "vijftien honderd"),
   ("1900", "negentien honderd"),
+  ("1904", "negentien honderd vier"),
   ("1984", "negentien honderd vierentachtig"),
   ("1999", "negentien honderd negenennegentig"),
   ("2000", "tweeduizend"),
   ("2001", "tweeduizendéén"),
+  ("2004", "tweeduizendvier"),
   ("2009", "tweeduizendnegen"),
   ("2010", "tweeduizendtien"),
   ("2023", "tweeduizenddrieëntwintig"),
@@ -6484,20 +6555,26 @@ let diff_year_nl : Array[(String, String)] = [
   ("3000", "drieduizend"),
   ("3001", "drieduizendéén"),
   ("9999", "negenennegentig honderd negenennegentig"),
+  ("12345", "honderddrieëntwintig honderd vijfenveertig"),
 ]
 
 ///|
 let diff_year_tr : Array[(String, String)] = [
+  ("101", "yüzbir"),
+  ("999", "dokuzyüzdoksandokuz"),
   ("1000", "bin"),
   ("1001", "binbir"),
   ("1010", "binon"),
   ("1100", "binyüz"),
+  ("1104", "binyüzdört"),
   ("1500", "binbeşyüz"),
   ("1900", "bindokuzyüz"),
+  ("1904", "bindokuzyüzdört"),
   ("1984", "bindokuzyüzseksendört"),
   ("1999", "bindokuzyüzdoksandokuz"),
   ("2000", "ikibin"),
   ("2001", "ikibinbir"),
+  ("2004", "ikibindört"),
   ("2009", "ikibindokuz"),
   ("2010", "ikibinon"),
   ("2023", "ikibinyirmiüç"),
@@ -6507,6 +6584,7 @@ let diff_year_tr : Array[(String, String)] = [
   ("3000", "üçbin"),
   ("3001", "üçbinbir"),
   ("9999", "dokuzbindokuzyüzdoksandokuz"),
+  ("12345", "onikibinüçyüzkırkbeş"),
 ]
 
 ///|

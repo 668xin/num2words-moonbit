@@ -47,6 +47,11 @@ test "en ordinal" {
   assert_eq(ordinal_en(BigInt::from_int(21)), "twenty-first")
   assert_eq(ordinal_en(BigInt::from_int(100)), "one hundredth")
   assert_eq(ordinal_en(BigInt::from_int(101)), "one hundred and first")
+  // scale ordinals beyond the common table (10^21)
+  assert_eq(
+    ordinal_en(BigInt::from_string("1000000000000000000000")),
+    "one sextillionth",
+  )
 }
 
 ///|
@@ -71,6 +76,16 @@ test "en year" {
   assert_eq(year_en(BigInt::from_int(1001)), "one thousand and one")
   assert_eq(year_en(BigInt::from_int(2001)), "two thousand and one")
   assert_eq(year_en(BigInt::from_int(3009)), "three thousand and nine")
+  // a low part below ten takes the upstream "oh-" prefix
+  assert_eq(year_en(BigInt::from_int(1904)), "nineteen oh-four")
+  assert_eq(year_en(BigInt::from_int(1104)), "eleven oh-four")
+  // sub-thousand years are read in hundreds, like upstream
+  assert_eq(year_en(BigInt::from_int(101)), "one oh-one")
+  assert_eq(year_en(BigInt::from_int(999)), "nine ninety-nine")
+  // negative years take the upstream "BC" suffix
+  assert_eq(year_en(BigInt::from_int(-44)), "forty-four BC")
+  assert_eq(year_en(BigInt::from_int(-1900)), "nineteen hundred BC")
+  assert_eq(year_en(BigInt::from_int(-2001)), "two thousand and one BC")
 }
 
 ///|
@@ -152,6 +167,10 @@ test "currency: Spanish gender agreement" {
   assert_eq(
     currency_ok("200", "es", "GBP"),
     "doscientas libras con cero peniques",
+  )
+  assert_eq(
+    currency_ok("300", "es", "GBP"),
+    "trescientas libras con cero peniques",
   )
   // Upstream keeps "quinientos" masculine, unlike doscientas/trescientas.
   assert_eq(
@@ -335,6 +354,14 @@ test "currency: rejected input" {
   // The non-Result entry points turn the error into "".
   assert_eq(num2words_str("1", "xx", "currency"), "")
   assert_eq(num2words_str("abc", "en", "currency"), "")
+  // An amount past the scale table is reported, not crashed.
+  assert_eq(
+    num2words_currency("1" + "0".repeat(36), "en", "EUR"),
+    Err(
+      "magnitude out of supported range: 1000000000000000000000000000000000000",
+    ),
+  )
+  assert_eq(num2words_str("1" + "0".repeat(36), "en", "currency"), "")
   // Codes are case-insensitive and "" selects the language default.
   assert_eq(currency_ok("1", "en", "usd"), "one dollar, zero cents")
   assert_eq(currency_ok("1", "pt", ""), "um real")
@@ -443,6 +470,11 @@ test "de year" {
   assert_eq(year_de(BigInt::from_int(1900)), "neunzehnhundert")
   assert_eq(year_de(BigInt::from_int(2100)), "einundzwanzighundert")
   assert_eq(year_de(BigInt::from_int(1000)), "eintausend")
+  // the hundreds morpheme keeps the cardinal head: 101 -> "einshunderteins"
+  assert_eq(year_de(BigInt::from_int(101)), "einshunderteins")
+  assert_eq(year_de(BigInt::from_int(1101)), "elfhunderteins")
+  // upstream emits nonsense for negative years; we spell "minus <year>"
+  assert_eq(year_de(BigInt::from_int(-44)), "minus vierundvierzig")
 }
 
 ///|
@@ -562,6 +594,12 @@ test "pt year" {
   assert_eq(
     year_pt(BigInt::from_int(1984)),
     "mil novecentos e oitenta e quatro",
+  )
+  // negative years take the upstream "antes de Cristo" suffix
+  assert_eq(year_pt(BigInt::from_int(-44)), "quarenta e quatro antes de Cristo")
+  assert_eq(
+    year_pt_pt(BigInt::from_int(-44)),
+    "quarenta e quatro antes de Cristo",
   )
 }
 
@@ -894,7 +932,9 @@ test "nl year" {
   assert_eq(num2words_int(1100, "nl", "year"), "elf honderd")
   assert_eq(num2words_int(1001, "nl", "year"), "duizendéén")
   assert_eq(num2words_int(100, "nl", "year"), "één honderd")
-  assert_eq(num2words_int(-44, "nl", "year"), "min één honderd zesenvijftig")
+  // Upstream emits "min één honderd zesenvijftig" here (its `//`/`%` run on the
+  // negative value); we spell a clean "min <year>", like `de`.
+  assert_eq(num2words_int(-44, "nl", "year"), "min vierenveertig")
 }
 
 ///|

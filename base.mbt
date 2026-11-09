@@ -283,33 +283,35 @@ pub fn ordinal_num_en(n : BigInt) -> String {
 // ---------------------------------------------------------------------
 
 ///|
+/// Mirrors upstream `to_year`: a negative year takes a `BC` suffix, a two-digit
+/// low part below 10 takes an `oh-` prefix (`1904` -> "nineteen oh-four"), and
+/// `00XX`, `X00X` or five-digit years fall back to the cardinal.
 pub fn year_en(n : BigInt) -> String {
-  if n < BigInt::from_int(1000) || n > BigInt::from_int(9999) {
-    return lang_en().cardinal_en(n)
-  }
   let neg = n < BigInt::from_int(0)
-  let n = if neg { -n } else { n }
-  // 2001 -> "two thousand and one", not "twenty one"; likewise 1001, 3001.
-  if n % BigInt::from_int(1000) < BigInt::from_int(10) {
-    return lang_en().cardinal_en(n)
-  }
-  if n % BigInt::from_int(1000) == BigInt::from_int(0) {
-    // 2000 -> "two thousand"
-    return lang_en().cardinal_en(n)
-  }
-  let s = n.to_string()
-  let first = BigInt::from_string(s[0:2].to_owned()).to_int()
-  let second = BigInt::from_string(s[2:4].to_owned()).to_int()
-  if second == 0 {
-    // 1900 -> "nineteen hundred"
-    return lang_en().cardinal_en(BigInt::from_int(first)) + " hundred"
-  }
-  let a = lang_en().cardinal_en(BigInt::from_int(first))
-  let b = lang_en().cardinal_en(BigInt::from_int(second))
-  if neg {
-    "minus " + a + " " + b
+  let abs_n = if neg { -n } else { n }
+  let hundred = BigInt::from_int(100)
+  let ten = BigInt::from_int(10)
+  let high = abs_n / hundred
+  let low = abs_n % hundred
+  let body = if high == BigInt::from_int(0) ||
+    (high % ten == BigInt::from_int(0) && low < ten) ||
+    high >= hundred {
+    lang_en().cardinal_en(abs_n)
   } else {
-    a + " " + b
+    let head = lang_en().cardinal_en(high)
+    if low == BigInt::from_int(0) {
+      // 1900 -> "nineteen hundred"
+      head + " hundred"
+    } else if low < ten {
+      head + " oh-" + lang_en().cardinal_en(low)
+    } else {
+      head + " " + lang_en().cardinal_en(low)
+    }
+  }
+  if neg {
+    body + " BC"
+  } else {
+    body
   }
 }
 

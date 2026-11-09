@@ -163,6 +163,12 @@ fn Lang::cardinal_pt(self : Lang, n : BigInt) -> String {
 ///|
 /// Portuguese years are read as a plain cardinal ("2024" ->
 /// "dois mil e vinte e quatro"), so this delegates to `cardinal_pt`.
+
+///|
+/// Upstream reads a negative year as `<year> antes de Cristo`.
 pub fn year_pt(n : BigInt) -> String {
+  if n < BigInt::from_int(0) {
+    return lang_pt().cardinal_pt(-n) + " antes de Cristo"
+  }
   lang_pt().cardinal_pt(n)
 }

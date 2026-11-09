@@ -8,11 +8,12 @@ code.
 - Upstream version: **num2words 0.5.14**
 - Upstream languages used: `en`, `fr`, `es`, `de`, `it`, `pt_BR`, `pt`, `ru`,
   `nl`, `tr`, `vi`
-- Cardinal samples per language: **551** (`0..500` plus 51 multi-scale / signed
+- Cardinal samples per language: **551** (`0..500` plus 50 multi-scale / signed
   values); Vietnamese uses **547** (negative samples excluded — upstream's
   negative handling is broken)
-- Year samples: **19** each for the ten language codes that implement `to_year`
-  (Vietnamese has none)
+- Year samples: **25** each for the ten language codes that implement `to_year`,
+  plus **6 negative years** for `en`/`pt`/`pt_PT` (**31** each) — Vietnamese has
+  no `to_year`
 - Ordinal samples per language: **249** (dense `0..200` plus
   hundreds/thousands/scale boundaries; Portuguese drops the `10^18` sample
   that upstream rejects), `ordinal_num`: **11** per language (Vietnamese
@@ -22,7 +23,7 @@ code.
   (4 × 17 minus its 8 rejected negative samples), **4446** for `es` (171 × 26),
   **208** for `ru` (8 × 26), **26** for `pt`, **130** for `pt_PT` (26 × 5) and
   **13** for `tr` (clean amounts only, see §4)
-- Total comparisons: **14555** (6057 cardinal + 190 year + 2737 ordinal
+- Total comparisons: **14633** (6057 cardinal + 268 year + 2737 ordinal
   + 110 ordinal_num + 5461 currency)
 - MoonBit test suite: **102 tests, 102 passed, 0 failed**
 
@@ -48,16 +49,20 @@ Sample set:
 | Dense | `0..500` |
 | Hundreds | `600, 700, 800, 900` |
 | Boundaries | `999, 1000, 1001, 1003, 1010, 1023, 1100, 1111` |
-| Years | `1234, 1900, 1999, 2000, 2003, 2023, 2024` |
+| Years | `101, 999, 1000, 1001, 1010, 1100, 1104, 1500, 1900, 1904, 1984, 1999, 2000, 2001, 2004, 2009, 2010, 2023, 2024, 2100, 2134, 3000, 3001, 9999, 12345` |
 | Scales | `2345, 3000, 5000, 9999, 10000, 11000, 12000, 21000, 22000, 25000` |
 | Large | `100000, 100001, 123000, 123456, 999999, 1000000, 1000001, 1000021, 1000100, 1001000, 1100000, 1234567, 2000000, 5000000, 10^9, 2×10^9, 10^12` |
 | Signed | `-1, -42, -1000, -123456` |
 
-Year samples (all ten codes that implement it upstream): `1000, 1001, 1010,
-1100, 1500, 1900, 1984, 1999, 2000, 2001, 2009, 2010, 2023, 2024, 2100, 2134,
-3000, 3001, 9999`. German uses upstream's *-hundert* form for 1100–9999
-(`1900` → *neunzehnhundert*), Dutch its *-honderd* form (`1900` →
-*negentien honderd*); Turkish years are plain cardinals.
+Year samples (all ten codes that implement it upstream): `101, 999, 1000, 1001,
+1010, 1100, 1104, 1500, 1900, 1904, 1984, 1999, 2000, 2001, 2004, 2009, 2010,
+2023, 2024, 2100, 2134, 3000, 3001, 9999, 12345`, plus the negative years
+`-1, -44, -156, -1000, -1900, -2001` for `en`/`pt`/`pt_PT` (§4 rule 7 explains
+why `de`/`nl` are excluded). German uses upstream's *-hundert* form for
+1100–9999 (`1900` → *neunzehnhundert*, `101` → *einshunderteins*), Dutch its
+*-honderd* form (`1900` → *negentien honderd*); Turkish years are plain
+cardinals, English uses the `oh-` form for a low part below ten and `BC` for
+negative years.
 
 Currency samples: `en` uses its 20 codes, `fr`/`de` their 5 and `it`/`nl`
 their 4 codes with the 17 amounts `0, 0.01, 0.5, 1, 2, 21, 28, 81, 101, 1000,
@@ -88,16 +93,16 @@ so its type-dependent int-as-cents quirk does not apply.
 
 | Language | Year samples | Passed | Comparison |
 | --- | --- | --- | --- |
-| `en` | 19 | 19 | verbatim |
-| `fr` | 19 | 19 | verbatim |
-| `es` | 19 | 19 | verbatim |
-| `de` | 19 | 19 | verbatim (*-hundert* form) |
-| `it` | 19 | 19 | accents ignored |
-| `pt` | 19 | 19 | upstream `pt_BR`, commas ignored |
-| `pt_PT` | 19 | 19 | upstream `pt`, commas ignored |
-| `ru` | 19 | 19 | verbatim |
-| `nl` | 19 | 19 | verbatim (*-honderd* form) |
-| `tr` | 19 | 19 | verbatim (cardinal) |
+| `en` | 31 | 31 | verbatim, including `BC` and the `oh-` form (`1904` → *nineteen oh-four*) |
+| `fr` | 25 | 25 | verbatim |
+| `es` | 25 | 25 | verbatim |
+| `de` | 25 | 25 | verbatim (*-hundert* form; `101` → *einshunderteins*) |
+| `it` | 25 | 25 | accents ignored |
+| `pt` | 31 | 31 | upstream `pt_BR`, commas ignored; *antes de Cristo* |
+| `pt_PT` | 31 | 31 | upstream `pt`, commas ignored; *antes de Cristo* |
+| `ru` | 25 | 25 | verbatim |
+| `nl` | 25 | 25 | verbatim (*-honderd* form; negatives excluded, see §4) |
+| `tr` | 25 | 25 | verbatim (cardinal) |
 
 | Language | Ordinal samples | `ordinal_num` | Passed | Comparison |
 | --- | --- | --- | --- | --- |
@@ -126,7 +131,7 @@ so its type-dependent int-as-cents quirk does not apply.
 | `nl` | 68 | 68 | verbatim (4 codes; invariant nouns) |
 | `tr` | 13 | 13 | verbatim (TRY only; clean amounts, see §4) |
 
-All 14555 comparisons pass under the documented comparison rules in §4.
+All 14633 comparisons pass under the documented comparison rules in §4.
 
 ### Ordinal comparison rules
 
@@ -265,12 +270,27 @@ regular):
 6. **Decimals.** Fractional digits are spelled one by one here, while `tr`/`vi`
    upstream read the last two digits as a number (`12.34` → *otuz dört* /
    *ba mươi bốn*). Decimal cardinals are therefore not part of the fixtures
-   (this also applies to the earlier languages).
+   (this also applies to the earlier languages). Three further consequences of
+   upstream's `Decimal` pipeline are not reproduced, because this project
+   spells the digits exactly as given:
+   * a trailing fractional zero is spoken here but dropped upstream
+     (`1.10` → *one point one zero* here, *one point one* upstream);
+   * `0.0` → *zero point zero* here, *zero* upstream;
+   * a negative amount keeps its sign here (`-0.5` → *minus zero point five*),
+     while upstream loses it (*zero point five*).
+7. **Negative years.** English appends `BC` and Portuguese `antes de Cristo`,
+   exactly as upstream (`-44` → *forty-four BC* / *quarenta e quatro antes de
+   Cristo*); German and Dutch upstream apply `//`/`%` to the negative value and
+   emit nonsense (`-1` → *minuseinshundertneunundneunzig* /
+   *min één honderd negenennegentig*), so those two spell a clean
+   *minus* / *min* followed by the year here and are excluded from the year
+   fixtures. All other languages match upstream (`moins`, `menos`, `meno`,
+   `минус`, `eksi`).
 
-No other comparison rule is applied: cardinal/year/ordinal output for `en`,
+No other comparison rule is applied: cardinal output for `en`,
 `fr`, `es`, `de`, `ru`, `nl` and `tr` is compared byte-for-byte (and `vi` after
-excluding its broken negatives); the currency rules above only affect the cases
-they name.
+excluding its broken negatives), and so are years for positive values; the
+currency and negative-year rules above only affect the cases they name.
 
 ---
 
@@ -279,5 +299,5 @@ they name.
 ```bash
 pip install num2words==0.5.14
 python tools/gen_fixtures.py   # rewrites diff_fixtures_wbtest.mbt
-moon test                      # replays all 14555 comparisons
+moon test                      # replays all 14633 comparisons
 ```

@@ -1,0 +1,5 @@
+import {
+  "668xin/num2words-moonbit" @lib,
+}
+
+pkgtype(kind: "executable")

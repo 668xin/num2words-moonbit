@@ -28,7 +28,8 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 - **模式分发**：`cardinal` / `ordinal` / `ordinal_num` / `year` / `currency` / 小数。`ordinal` 与 `ordinal_num` **八种语言代码全部原生实现**并与上游逐条差分对齐（含上游怪癖，如西语 `décimoprimero`、`es`/`pt` 的 0 号序数为空串、欧葡长标度 `milésimo milionésimo`）；负数序数返回 `""`（上游抛 TypeError），意语除外（`meno terzo`）；**`currency` 八种语言代码全部原生实现，覆盖上游全部 55 个语言/币种对**（新增带币种代码的 `num2words_currency`，默认 EUR、`pt` 默认 BRL；en 11 种、fr/de/it 各 4 种、es 20 种、ru 6 种、pt 1 种、pt_PT 5 种），并处理了西语性数一致、俄语三档复数与性别、葡语零分省略（欧葡 GBP 保留零分）等规则；`year` 在 `it` / `pt` / `pt_PT` / `ru` 中为基数读法。
 - **多形态 API**：`num2words`(BigInt) / `num2words_int` / `num2words_float` / `num2words_str` / `num2words_str_checked` / `num2words_currency` / `is_valid_number`。
 - **量级上限守卫**：`Lang::supports` / `Lang::max_power`，越界返回明确错误而非越界访问。
-- **CLI**（`cmd/main`，`--lang` / `--to` / `--currency` / `--help`），可直接演示与按需调用。
+- **CLI**（`cmd/main`，`--lang` / `--to` / `--currency` / `--help`）与**可运行示例**（`examples/`，`moon run examples`），可直接演示与按需调用。
+- **微基准**（`benchmarks/`，`moon bench --release benchmarks`）：覆盖基数、大整数、序数与货币路径，README 记录了本机（AMD Ryzen 5 5600H / Windows 11 / MoonBit 0.1.20260921）release 模式下的均值，仅作参考、不构成跨平台性能承诺。
 - **76 个 whitebox 测试**（`moon test` 76/76 通过，0 warning 0 error），覆盖：八种语言代码的基数、序数 / 序数数字、货币（全部 55 个语言/币种对、性别 / 复数、舍入与符号）、语言变体差异、英文年份 / 小数、输入校验的接受与拒绝表、边界值（`-0`、前导零、`1.50`、1e21、1e-7、0 在各模式下）、浮点科学计数法展开与负零小数、量级上限内外、以及 Int/String/Float 三路路径一致性与跨语言一致性。
 - **与上游的差分对照测试**：`tools/gen_fixtures.py` 调用上游 num2words 0.5.14 生成 551×8（基数）+ 19×5（年份）+ 249×7 + 248（序数）+ 11×8（序数数字）+ 187（英语货币）+ 68×2（法/德货币）+ 60（意语货币）+ 520（西语货币）+ 156（俄语货币）+ 26（巴葡货币）+ 130（欧葡货币）≈ **7796 条**期望值，MoonBit 侧逐条断言；对照发现并修复了英语 `and` 连接与年份读法、西语 `mil millones`、德语 `eintausend`、意大利语重音与连接词、法语 `trois cent mille`、西语序数十位边界、货币模式绕过小数路径、欧葡长标度序数与 GBP 零分等真实缺陷。报告见 `DIFF_REPORT.md`。
 - **README** 示例覆盖各语言各模式调用、CLI 用法、合法输入语法、错误处理行为与已知限制。
@@ -41,6 +42,7 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 - 76 个测试与三平台 CI 测试记录，其中含 7796 条与上游 num2words 的差分对照。
 - `DIFF_REPORT.md`：差分测试方法、覆盖范围、逐语言结果与明示的对照规则（意语重音、葡语标点、货币舍入与整数语义）。
 - `COMPAT.md`：与上游的逐调用 API 映射、语言 / 币种覆盖矩阵、量级上限与已知差异清单。
+- 可运行示例 `examples/`（`moon run examples`）与微基准 `benchmarks/`（`moon bench --release benchmarks`）及其 README 记录。
 - 完整 README + **LGPL-2.1 LICENSE**（与上游一致，许可证正文已与 SPDX / GitHub Licenses API 权威文本校验一致）+ 来源署名。
 - 相对上游的差异化：纯 MoonBit 零运行时依赖、声明式扩展新语言、BigInt 与十进制字符串避免精度损失。
 
@@ -50,7 +52,7 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 2. **不承诺已发布到 mooncakes.io。** 当前 `moon add 668xin/num2words-moonbit` 无法解析（`Module not found in registry`）；发布到 mooncakes 列为后续项，需联网与账号操作。
 3. **`currency` 八种语言代码均已原生实现，覆盖上游全部 55 个语言/币种对**：en 11 种、fr/de/it 各 4 种、es 20 种、ru 6 种、pt 1 种（BRL）、pt_PT 5 种；不适用于该语言的币种返回 `Err` / `""`。
 4. **不提供反向转换**（`words → number`）。
-5. **不作性能声明**——未发布性能基准。
+5. **性能数据仅为本机微基准**（AMD Ryzen 5 5600H / Windows 11 / native release），不作为跨平台或跨语言性能承诺。
 6. **葡萄牙语提供巴西与欧洲两个变体**：`pt` 为 `dezesseis`、短标度 `bilhão`=10⁹；`pt_PT` 为 `dezasseis`、长标度 `mil milhões`=10⁹ / `bilião`=10¹²，两者的序数、currency 币种集与零分规则差异均已按上游对齐。
 7. 小数在 `cardinal` 模式下按**逐位朗读**（`1234.56` → *… point five six*），不做四舍五入；`currency` 模式按第三位小数四舍五入到分。
 

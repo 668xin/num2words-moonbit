@@ -232,6 +232,15 @@ moon run cmd/main -- --help
 num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]
 ```
 
+### Runnable example
+
+```bash
+moon run examples
+```
+
+The `examples/` package exercises every mode, all eight language codes, two
+currency conversions and the error path.
+
 ---
 
 ## Comparison with upstream num2words
@@ -309,6 +318,8 @@ The library is split into a small core engine and one module per language:
 | `lang_ru.mbt` | Russian (three plural forms, feminine *одна тысяча*, *две тысячи*) |
 | `lang_ordinal.mbt` | ordinals and `ordinal_num` for the seven non-English language codes |
 | `lang_currency.mbt` | currency tables and formatting (all eight language codes; per-language code sets, gender and plural rules) |
+| `examples/` | runnable demo (`moon run examples`) |
+| `benchmarks/` | `moon bench` microbenchmarks |
 | `num2words-moonbit.mbt` | public API + per-mode dispatch |
 | `cmd/main/main.mbt` | CLI built on `@env.args()` |
 | `tools/gen_fixtures.py` | regenerates the differential fixtures from upstream `num2words` |
@@ -319,6 +330,26 @@ hundreds, scale words, conjunctions, negative word, decimal word), and a few
 small per-language functions (`below100_*`, `triple_*`, `cardinal_*`) encode
 the language-specific grammar. This keeps adding a new language to a single
 self-contained file.
+
+---
+
+## Performance
+
+Native release-mode microbenchmarks (`moon bench --release benchmarks`) on
+AMD Ryzen 5 5600H, Windows 11, MoonBit 0.1.20260921:
+
+| Benchmark | Mean ± σ |
+| --- | --- |
+| `cardinal` en `1234` | 3.6 µs ± 0.06 |
+| `cardinal` en 15 digits | 12.2 µs ± 0.07 |
+| `cardinal` fr `1234` | 3.9 µs ± 0.34 |
+| `cardinal` ru `1234` | 3.5 µs ± 0.05 |
+| `ordinal` es `2024` | 5.3 µs ± 0.08 |
+| `currency` en USD `1234.56` | 8.7 µs ± 0.08 |
+
+The figures include string allocation and are indicative only; they are not a
+cross-language comparison. Regenerate them with
+`moon bench --release benchmarks`.
 
 ---
 

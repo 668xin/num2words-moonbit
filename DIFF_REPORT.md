@@ -12,13 +12,13 @@ code.
 - Ordinal samples per language: **249** (dense `0..200` plus
   hundreds/thousands/scale boundaries; Portuguese drops the `10^18` sample
   that upstream rejects), `ordinal_num`: **11** per language
-- Currency samples: **1030** total — **51** each for `en`/`fr`/`de`/`it`
-  (`it` has 45 because upstream rejects its two negative samples), **520** for
-  `es` (26 amounts × 20 codes), **156** for `ru` (26 × 6), **26** for `pt`
-  (26 × BRL) and **130** for `pt_PT` (26 × 5)
-- Total comparisons: **7611** (4408 cardinal + 95 year + 1990 ordinal
-  + 88 ordinal_num + 1030 currency)
-- MoonBit test suite: **75 tests, 75 passed, 0 failed**
+- Currency samples: **1215** total — **187** for `en` (11 codes × 17 amounts),
+  **68** each for `fr`/`de` (4 × 17), **60** for `it` (4 × 17 minus its 8
+  rejected negative samples), **520** for `es` (26 × 20), **156** for `ru`
+  (26 × 6), **26** for `pt` and **130** for `pt_PT` (26 × 5)
+- Total comparisons: **7796** (4408 cardinal + 95 year + 1990 ordinal
+  + 88 ordinal_num + 1215 currency)
+- MoonBit test suite: **76 tests, 76 passed, 0 failed**
 
 Run `moon test` from the project root to replay every comparison.
 
@@ -51,12 +51,12 @@ Year samples (`en`, `it`, `pt`, `pt_PT`, `ru` only): `1000, 1001, 1010, 1100,
 1500, 1900, 1984, 1999, 2000, 2001, 2009, 2010, 2023, 2024, 2100, 2134, 3000,
 3001, 9999`.
 
-Currency samples: `en`/`fr`/`de`/`it` use 17 amounts with `EUR`/`USD`/`GBP`
-(`0, 0.01, 0.5, 1, 2, 21, 28, 81, 101, 1000, 1001, 1234.56, 999.99, 1.999,
-1234.567, -3.5, -1.999`); `es` uses 26 amounts × 20 codes, `ru` 26 × 6, `pt`
-26 × `BRL` and `pt_PT` 26 × `EUR`/`USD`/`GBP`/`CAD`/`AUD`, adding `5, 11, 22,
-25, 100, 200, 500, 2000, 21000, 1000000, 1000001, 2000000`. Amounts are passed
-to upstream as floats, so its type-dependent int-as-cents quirk does not apply.
+Currency samples: `en` uses its 11 codes and `fr`/`de`/`it` their 4 codes with
+the 17 amounts `0, 0.01, 0.5, 1, 2, 21, 28, 81, 101, 1000, 1001, 1234.56,
+999.99, 1.999, 1234.567, -3.5, -1.999`; `es` uses 26 amounts × 20 codes, `ru`
+26 × 6, `pt` 26 × `BRL` and `pt_PT` 26 × 5, adding `5, 11, 22, 25, 100, 200,
+500, 2000, 21000, 1000000, 1000001, 2000000`. Amounts are passed to upstream as
+floats, so its type-dependent int-as-cents quirk does not apply.
 
 ---
 
@@ -94,20 +94,16 @@ to upstream as floats, so its type-dependent int-as-cents quirk does not apply.
 
 | Language | Currency samples | Passed | Comparison |
 | --- | --- | --- | --- |
-| `en` | 51 | 51 | verbatim |
-| `fr` | 51 | 51 | verbatim |
-| `de` | 51 | 51 | verbatim |
-| `it` | 45 | 45 | verbatim (negative amounts excluded, see §4) |
+| `en` | 187 | 187 | verbatim (11 codes) |
+| `fr` | 68 | 68 | verbatim (4 codes) |
+| `de` | 68 | 68 | verbatim (4 codes) |
+| `it` | 60 | 60 | verbatim (4 codes; negative amounts excluded, see §4) |
 | `es` | 520 | 520 | verbatim (upstream quirks included, e.g. masculine *quinientos*) |
 | `ru` | 156 | 156 | verbatim; PLN paucal typo normalised (see §4) |
 | `pt` | 26 | 26 | upstream `pt_BR`, commas ignored (see §4) |
 | `pt_PT` | 130 | 130 | upstream `pt`, commas ignored; GBP zero *pence* (see §4) |
 
-For `en`/`fr`/`de`/`it` these fixtures cover the implemented EUR/USD/GBP
-subset; the remaining upstream codes are listed in
-[COMPAT.md](COMPAT.md) §4.
-
-All 7611 comparisons pass under the documented comparison rules in §4.
+All 7796 comparisons pass under the documented comparison rules in §4.
 French, Spanish and German years use this project's pair-reading convention
 instead of the upstream cardinal reading and are therefore not part of the
 differential set (they are documented in the README comparison table).
@@ -174,8 +170,8 @@ Notes on the fixes:
   always used USD, could only express whole units, and was bypassed by the
   decimal entry points (`num2words_str("1234.56", "en", "currency")` spelled
   `… point five six`). It is replaced by native formatting for all eight
-  language codes with each language's upstream code set, covered by 1030
-  differential comparisons. The `pt_PT` fixtures also pinned two variant
+  language codes with each language's complete upstream code set, covered by
+  1215 differential comparisons. The `pt_PT` fixtures also pinned two variant
   differences found during this step: long-scale ordinal separators
   (`milésimo milionésimo`) and zero *pence* for GBP.
 
@@ -224,5 +220,5 @@ only affect the cases they name.
 ```bash
 pip install num2words==0.5.14
 python tools/gen_fixtures.py   # rewrites diff_fixtures_wbtest.mbt
-moon test                      # replays all 7611 comparisons
+moon test                      # replays all 7796 comparisons
 ```

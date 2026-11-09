@@ -301,6 +301,23 @@ test "pt_PT: long scale, teens and currency" {
 }
 
 ///|
+test "currency: remaining upstream codes" {
+  assert_eq(currency_ok("1.01", "en", "RUB"), "one rouble, one kopek")
+  assert_eq(currency_ok("2.02", "en", "INR"), "two rupees, two paise")
+  assert_eq(currency_ok("2.02", "en", "SEK"), "two kronor, two öre")
+  assert_eq(currency_ok("2.02", "en", "NOK"), "two kroner, two øre")
+  assert_eq(currency_ok("2.02", "en", "PLN"), "two zlotys, two groszy")
+  assert_eq(currency_ok("2.02", "en", "MXN"), "two pesos, two cents")
+  assert_eq(currency_ok("2.02", "en", "CAD"), "two dollars, two cents")
+  assert_eq(currency_ok("1.01", "en", "AUD"), "one dollar, one cent")
+  assert_eq(currency_ok("1.01", "fr", "CNY"), "un yuan et un fen")
+  assert_eq(currency_ok("2.02", "fr", "CNY"), "deux yuans et deux jiaos")
+  assert_eq(currency_ok("1.01", "de", "CNY"), "ein Yuan und ein Jiao")
+  assert_eq(currency_ok("2.02", "de", "CNY"), "zwei Yuan und zwei Fen")
+  assert_eq(currency_ok("2.02", "it", "CNY"), "due yuan e due fen")
+}
+
+///|
 test "currency: rejected input" {
   assert_eq(num2words_currency("abc", "en", "EUR"), Err("invalid number: abc"))
   assert_eq(

@@ -30,10 +30,10 @@ import "668xin/num2words-moonbit" @n2w
 
 `lang` ∈ `{"en","fr","es","de","it","pt","pt_PT","ru"}` (default `en`); `to` ∈
 `{"cardinal","ordinal","ordinal_num","year","currency"}` (default `cardinal`).
-Currency codes are language-dependent: `es` takes 20 codes, `ru` 6, `pt` only
-`BRL`, and `pt_PT` 5; `en`/`fr`/`de`/`it` cover `EUR`/`USD`/`GBP` (a subset of
-their upstream sets — see `COMPAT.md`). The empty code `""` selects the
-language default (EUR, or BRL for `pt`).
+Currency codes are language-dependent: `en` has 11 (EUR/USD/GBP/RUB/CAD/AUD/
+INR/SEK/NOK/PLN/MXN), `fr`/`de`/`it` have 4 (EUR/USD/GBP/CNY), `es` 20, `ru` 6,
+`pt` only `BRL`, and `pt_PT` 5 (EUR/USD/GBP/CAD/AUD). The empty code `""`
+selects the language default (EUR, or BRL for `pt`).
 
 ## License
 

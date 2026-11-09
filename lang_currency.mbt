@@ -104,6 +104,14 @@ fn currency_form_en(code : String) -> Result[CurrencyForm, String] {
           "pound sterling", "pounds sterling", "penny", "pence", false,
         ),
       )
+    "RUB" => Ok(currency_entry("rouble", "roubles", "kopek", "kopeks", false))
+    "CAD" => Ok(currency_entry("dollar", "dollars", "cent", "cents", false))
+    "AUD" => Ok(currency_entry("dollar", "dollars", "cent", "cents", false))
+    "INR" => Ok(currency_entry("rupee", "rupees", "paisa", "paise", false))
+    "SEK" => Ok(currency_entry("krona", "kronor", "öre", "öre", false))
+    "NOK" => Ok(currency_entry("krone", "kroner", "øre", "øre", false))
+    "PLN" => Ok(currency_entry("zloty", "zlotys", "grosz", "groszy", false))
+    "MXN" => Ok(currency_entry("peso", "pesos", "cent", "cents", false))
     _ => Err(code)
   }
 }
@@ -114,6 +122,7 @@ fn currency_form_fr(code : String) -> Result[CurrencyForm, String] {
     "EUR" => Ok(currency_entry("euro", "euros", "centime", "centimes", false))
     "USD" => Ok(currency_entry("dollar", "dollars", "cent", "cents", false))
     "GBP" => Ok(currency_entry("livre", "livres", "penny", "pence", false))
+    "CNY" => Ok(currency_entry("yuan", "yuans", "fen", "jiaos", false))
     _ => Err(code)
   }
 }
@@ -124,6 +133,7 @@ fn currency_form_de(code : String) -> Result[CurrencyForm, String] {
     "EUR" => Ok(currency_entry("Euro", "Euro", "Cent", "Cent", false))
     "USD" => Ok(currency_entry("Dollar", "Dollar", "Cent", "Cent", false))
     "GBP" => Ok(currency_entry("Pfund", "Pfund", "Penny", "Pence", false))
+    "CNY" => Ok(currency_entry("Yuan", "Yuan", "Jiao", "Fen", false))
     _ => Err(code)
   }
 }
@@ -135,6 +145,7 @@ fn currency_form_it(code : String) -> Result[CurrencyForm, String] {
     "USD" =>
       Ok(currency_entry("dollaro", "dollari", "centesimo", "centesimi", false))
     "GBP" => Ok(currency_entry("sterlina", "sterline", "penny", "penny", true))
+    "CNY" => Ok(currency_entry("yuan", "yuan", "fen", "fen", false))
     _ => Err(code)
   }
 }
@@ -464,9 +475,7 @@ fn currency_join(
 /// Spell a currency amount. `code` is an ISO-4217 code (case-insensitive) or
 /// `""` for the language default (EUR, or BRL for `pt`).
 ///
-/// Supported code sets match upstream for `es`/`ru`/`pt`/`pt_PT`; the other
-/// four currently cover EUR/USD/GBP, a subset of upstream's 11/4/4/4 codes
-/// (see COMPAT.md).
+/// Supported code sets match upstream for every language (see COMPAT.md §4).
 ///
 /// Returns `Err` for malformed amounts, unsupported languages or codes, and
 /// amounts past the language's scale table.

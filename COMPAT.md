@@ -3,7 +3,7 @@
 Reference: Python [`num2words`](https://github.com/savoirfairelinux/num2words)
 **0.5.14** (LGPL-2.1). This document maps the two APIs call by call, records the
 supported surface, and lists every known behavioural difference. Output parity
-is machine-checked by **7611 recorded comparisons** (see
+is machine-checked by **7796 recorded comparisons** (see
 [DIFF_REPORT.md](DIFF_REPORT.md)); `moon test` replays them without Python.
 
 ---
@@ -72,16 +72,17 @@ Currency is native for every code; the exact ISO-code coverage differs — see �
 
 | Code | Upstream codes | Implemented here | Missing |
 | --- | --- | --- | --- |
-| `en` | 11: EUR, USD, GBP, RUB, CAD, AUD, INR, SEK, NOK, PLN, MXN | EUR, USD, GBP | RUB, CAD, AUD, INR, SEK, NOK, PLN, MXN |
-| `fr` | 4: EUR, USD, GBP, CNY | EUR, USD, GBP | CNY |
-| `de` | 4: EUR, USD, GBP, CNY | EUR, USD, GBP | CNY |
-| `it` | 4: EUR, USD, GBP, CNY | EUR, USD, GBP | CNY |
+| `en` | 11: EUR, USD, GBP, RUB, CAD, AUD, INR, SEK, NOK, PLN, MXN | all 11 | — |
+| `fr` | 4: EUR, USD, GBP, CNY | all 4 | — |
+| `de` | 4: EUR, USD, GBP, CNY | all 4 | — |
+| `it` | 4: EUR, USD, GBP, CNY | all 4 | — |
 | `es` | 20: EUR, USD, GBP, RUB, JPY, CNY, CHF, CAD, AUD, BRL, INR, KRW, SEK, NOK, PLN, UAH, KZT, TRY, MXN, ZAR | all 20 | — |
 | `ru` | 6: EUR, USD, RUB, PLN, UAH, KZT | all 6 | — |
 | `pt` | 5: EUR, USD, GBP, CAD, AUD | all 5 | — |
 | `pt_BR` | BRL (upstream `to_currency` takes no code argument) | BRL | — |
 
-Coverage is **44 of 55 upstream language/code pairs**. Unsupported codes return
+Coverage is **55 of 55 upstream language/code pairs**. Unsupported codes (and
+codes that are valid upstream but not for a given language) return
 `Err("currency code not supported for ...")` (or `""` from the non-`Result`
 entry points), while upstream raises `NotImplementedError`.
 
@@ -148,10 +149,8 @@ These are deliberate and recorded in [DIFF_REPORT.md](DIFF_REPORT.md) §4.
    this project returns `meno ...`.
 6. **Russian PLN.** Upstream's paucal form contains the typo `слотых`; this
    project writes `злотых` (normalised in the fixtures).
-7. **Currency code coverage.** `en`/`fr`/`de`/`it` implement the three common
-   codes (EUR/USD/GBP) rather than their full upstream sets — see §4.
-8. **Year reading for `fr`/`es`/`de`** — see §3.
-9. **Unknown language / mode / out-of-range** return a value instead of raising
+7. **Year reading for `fr`/`es`/`de`** — see §3.
+8. **Unknown language / mode / out-of-range** return a value instead of raising
    — see §6.
 
 Everything else — cardinals for all eight codes, years for `en`/`it`/`pt`/
@@ -164,7 +163,7 @@ above).
 ## 8. Verification
 
 ```bash
-moon test          # 75 tests, 7611 differential comparisons
+moon test          # 76 tests, 7796 differential comparisons
 moon build         # library + CLI
 ```
 
@@ -180,7 +179,6 @@ python tools/gen_fixtures.py
 
 ## 9. Not implemented / roadmap
 
-* Remaining 11 upstream currency language/code pairs (see §4).
 * The other 48 upstream language codes.
 * Reverse conversion (`words → number`).
 * Performance benchmarks (no performance claims are made).

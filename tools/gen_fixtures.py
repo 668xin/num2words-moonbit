@@ -100,10 +100,13 @@ CURRENCY_LANGS = {
     "pt": "pt_PT",
 }
 CURRENCY_CODES = {
-    "en": ["EUR", "USD", "GBP"],
-    "fr": ["EUR", "USD", "GBP"],
-    "de": ["EUR", "USD", "GBP"],
-    "it": ["EUR", "USD", "GBP"],
+    "en": [
+        "EUR", "USD", "GBP", "RUB", "CAD", "AUD", "INR", "SEK", "NOK", "PLN",
+        "MXN",
+    ],
+    "fr": ["EUR", "USD", "GBP", "CNY"],
+    "de": ["EUR", "USD", "GBP", "CNY"],
+    "it": ["EUR", "USD", "GBP", "CNY"],
     "es": [
         "EUR", "USD", "GBP", "RUB", "JPY", "CNY", "CHF", "CAD", "AUD", "BRL",
         "INR", "KRW", "SEK", "NOK", "PLN", "UAH", "KZT", "TRY", "MXN", "ZAR",

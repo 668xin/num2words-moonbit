@@ -30,8 +30,8 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 - **量级上限守卫**：`Lang::supports` / `Lang::max_power`，越界返回明确错误而非越界访问。
 - **CLI**（`cmd/main`，`--lang` / `--to` / `--currency` / `--help`）与**可运行示例**（`examples/`，`moon run examples`），可直接演示与按需调用。
 - **微基准**（`benchmarks/`，`moon bench --release benchmarks`）：覆盖基数、大整数、序数与货币路径，README 记录了本机（AMD Ryzen 5 5600H / Windows 11 / MoonBit 0.1.20260921）release 模式下的均值，仅作参考、不构成跨平台性能承诺。
-- **102 个 whitebox 测试**（`moon test` 102/102 通过，0 warning 0 error），覆盖：十一种语言代码的基数、年份、序数 / 序数数字、货币（全部 60 个语言/币种对、性别 / 复数、舍入与符号）、语言变体差异、小数、输入校验的接受与拒绝表、边界值（`-0`、前导零、`1.50`、1e21、1e-7、0 在各模式下）、浮点科学计数法展开与负零小数、量级上限内外、以及 Int/String/Float 三路路径一致性与跨语言一致性。
-- **与上游的差分对照测试**：`tools/gen_fixtures.py` 调用上游 num2words 0.5.14 生成 551×10 + 547（基数）+ 19×10（年份）+ 249×9 + 248×2（序数）+ 11×10（序数数字）+ 187（英语货币）+ 68×4（法/德/荷/意语货币）+ 520（西语货币）+ 156（俄语货币）+ 26（巴葡货币）+ 130（欧葡货币）+ 13（土耳其语货币）= **10390 条**期望值，MoonBit 侧逐条断言；对照发现并修复了英语 `and` 连接与年份读法、西语 `mil millones`、德语 `eintausend`、意大利语重音与连接词、法语 `trois cent mille`、西语序数十位边界、货币模式绕过小数路径、欧葡长标度序数与 GBP 零分、fr/es/de 的 year 约定、以及 `to="currency"` 写死 EUR 导致 `pt` 丢失 BRL 默认值等真实缺陷。报告见 `DIFF_REPORT.md`。
+- **102 个 whitebox 测试**（`moon test` 102/102 通过，0 warning 0 error），覆盖：十一种语言代码的基数、年份、序数 / 序数数字、货币（全部 224 个语言/币种对、性别 / 复数、舍入与符号）、语言变体差异、小数、输入校验的接受与拒绝表、边界值（`-0`、前导零、`1.50`、1e21、1e-7、0 在各模式下）、浮点科学计数法展开与负零小数、量级上限内外、以及 Int/String/Float 三路路径一致性与跨语言一致性。
+- **与上游的差分对照测试**：`tools/gen_fixtures.py` 调用上游 num2words 0.5.14 生成 551×10 + 547（基数）+ 19×10（年份）+ 249×9 + 248×2（序数）+ 11×10（序数数字）+ 340（英语货币）+ 85×2（法/德语货币）+ 68（荷兰语货币）+ 60（意语货币）+ 4446（西语货币，171 币种全集）+ 208（俄语货币）+ 26（巴葡货币）+ 130（欧葡货币）+ 13（土耳其语货币）= **14555 条**期望值，MoonBit 侧逐条断言；对照发现并修复了英语 `and` 连接与年份读法、西语 `mil millones`、德语 `eintausend`、意大利语重音与连接词、法语 `trois cent mille`、西语序数十位边界、货币模式绕过小数路径、欧葡长标度序数与 GBP 零分、fr/es/de 的 year 约定、以及 `to="currency"` 写死 EUR 导致 `pt` 丢失 BRL 默认值等真实缺陷。报告见 `DIFF_REPORT.md`。
 - **README** 示例覆盖各语言各模式调用、CLI 用法、合法输入语法、错误处理行为与已知限制。
 - **三平台 CI**（ubuntu / macOS / windows）自动运行 `moon test`。
 
@@ -39,7 +39,7 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 
 - 公开仓库 `668xin/num2words-moonbit`，含 `moon.mod` 元数据与全部源码；已发布到 mooncakes.io（`668xin/num2words-moonbit@0.1.0`，`moon add 668xin/num2words-moonbit` 可用）。
 - 11 个语言代码的数字读法，在**各语言量级上限以内**输出正确结果；对非法输入与越界输入返回明确错误而非崩溃。
-- 102 个测试与三平台 CI 测试记录，其中含 10390 条与上游 num2words 的差分对照。
+- 102 个测试与三平台 CI 测试记录，其中含 14555 条与上游 num2words 的差分对照。
 - `DIFF_REPORT.md`：差分测试方法、覆盖范围、逐语言结果与明示的对照规则（意语重音、葡语标点、货币舍入与整数语义）。
 - `COMPAT.md`：与上游的逐调用 API 映射、语言 / 币种覆盖矩阵、量级上限与已知差异清单。
 - 可运行示例 `examples/`（`moon run examples`）与微基准 `benchmarks/`（`moon bench --release benchmarks`）及其 README 记录。

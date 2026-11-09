@@ -17,13 +17,13 @@ code.
   hundreds/thousands/scale boundaries; Portuguese drops the `10^18` sample
   that upstream rejects), `ordinal_num`: **11** per language (Vietnamese
   upstream has no `ordinal_num`)
-- Currency samples: **1296** total — **187** for `en` (11 codes × 17 amounts),
-  **68** each for `fr`/`de`/`nl` (4 × 17), **60** for `it` (4 × 17 minus its 8
-  rejected negative samples), **520** for `es` (26 × 20), **156** for `ru`
-  (26 × 6), **26** for `pt`, **130** for `pt_PT` (26 × 5) and **13** for `tr`
-  (clean amounts only, see §4)
-- Total comparisons: **10390** (6057 cardinal + 190 year + 2737 ordinal
-  + 110 ordinal_num + 1296 currency)
+- Currency samples: **5461** total — **340** for `en` (20 codes × 17 amounts),
+  **85** each for `fr`/`de` (5 × 17), **68** for `nl` (4 × 17), **60** for `it`
+  (4 × 17 minus its 8 rejected negative samples), **4446** for `es` (171 × 26),
+  **208** for `ru` (8 × 26), **26** for `pt`, **130** for `pt_PT` (26 × 5) and
+  **13** for `tr` (clean amounts only, see §4)
+- Total comparisons: **14555** (6057 cardinal + 190 year + 2737 ordinal
+  + 110 ordinal_num + 5461 currency)
 - MoonBit test suite: **102 tests, 102 passed, 0 failed**
 
 Run `moon test` from the project root to replay every comparison.
@@ -59,11 +59,12 @@ Year samples (all ten codes that implement it upstream): `1000, 1001, 1010,
 (`1900` → *neunzehnhundert*), Dutch its *-honderd* form (`1900` →
 *negentien honderd*); Turkish years are plain cardinals.
 
-Currency samples: `en` uses its 11 codes and `fr`/`de`/`it`/`nl` their 4 codes
-with the 17 amounts `0, 0.01, 0.5, 1, 2, 21, 28, 81, 101, 1000, 1001, 1234.56,
-999.99, 1.999, 1234.567, -3.5, -1.999`; `es` uses 26 amounts × 20 codes, `ru`
-26 × 6, `pt` 26 × `BRL` and `pt_PT` 26 × 5, adding `5, 11, 22, 25, 100, 200,
-500, 2000, 21000, 1000000, 1000001, 2000000`. `tr` uses 13 amounts that are
+Currency samples: `en` uses its 20 codes, `fr`/`de` their 5 and `it`/`nl`
+their 4 codes with the 17 amounts `0, 0.01, 0.5, 1, 2, 21, 28, 81, 101, 1000,
+1001, 1234.56, 999.99, 1.999, 1234.567, -3.5, -1.999`; `es` uses 26 amounts ×
+its complete upstream set of 171 codes, `ru` 26 × 8, `pt` 26 × `BRL` and
+`pt_PT` 26 × 5, adding `5, 11, 22, 25, 100, 200, 500, 2000, 21000, 1000000,
+1000001, 2000000`. `tr` uses 13 amounts that are
 free of upstream's float truncation. Amounts are passed to upstream as floats,
 so its type-dependent int-as-cents quirk does not apply.
 
@@ -114,18 +115,18 @@ so its type-dependent int-as-cents quirk does not apply.
 
 | Language | Currency samples | Passed | Comparison |
 | --- | --- | --- | --- |
-| `en` | 187 | 187 | verbatim (11 codes) |
-| `fr` | 68 | 68 | verbatim (4 codes) |
-| `de` | 68 | 68 | verbatim (4 codes) |
+| `en` | 340 | 340 | verbatim (20 codes) |
+| `fr` | 85 | 85 | verbatim (5 codes) |
+| `de` | 85 | 85 | verbatim (5 codes) |
 | `it` | 60 | 60 | verbatim (4 codes; negative amounts excluded, see §4) |
-| `es` | 520 | 520 | verbatim (upstream quirks included, e.g. masculine *quinientos*) |
-| `ru` | 156 | 156 | verbatim; PLN paucal typo normalised (see §4) |
+| `es` | 4446 | 4446 | verbatim (171 codes; upstream quirks included, e.g. masculine *quinientos*, double-space *lek*) |
+| `ru` | 208 | 208 | verbatim (8 codes); PLN paucal typo normalised (see §4) |
 | `pt` | 26 | 26 | upstream `pt_BR`, commas ignored (see §4) |
 | `pt_PT` | 130 | 130 | upstream `pt`, commas ignored; GBP zero *pence* (see §4) |
 | `nl` | 68 | 68 | verbatim (4 codes; invariant nouns) |
 | `tr` | 13 | 13 | verbatim (TRY only; clean amounts, see §4) |
 
-All 10390 comparisons pass under the documented comparison rules in §4.
+All 14555 comparisons pass under the documented comparison rules in §4.
 
 ### Ordinal comparison rules
 
@@ -193,7 +194,7 @@ Notes on the fixes:
   always used USD, could only express whole units, and was bypassed by the
   decimal entry points (`num2words_str("1234.56", "en", "currency")` spelled
   `… point five six`). It is replaced by native formatting for ten language
-  codes with each language's complete upstream code set, covered by 1296
+  codes with each language's complete upstream code set, covered by 5461
   differential comparisons. The `pt_PT` fixtures also pinned two variant
   differences found during this step: long-scale ordinal separators
   (`milésimo milionésimo`) and zero *pence* for GBP.
@@ -204,11 +205,19 @@ Notes on the fixes:
   tests in `num2words-moonbit_wbtest.mbt`.
 - **M4 — three new languages:** Dutch (`nl`), Turkish (`tr`) and Vietnamese
   (`vi`) were added with 6057 cardinal, 190 year, 2737 ordinal, 110
-  `ordinal_num` and 1296 currency comparisons. No implementation defect was
+  `ordinal_num` and 5461 currency comparisons. No implementation defect was
   found in the existing languages during this step; the new-language
   algorithms were iterated against the differential fixtures (notably Dutch
   *duizend* swallowing a group value of 1, and Turkish ordinals over the last
   morpheme).
+- **M5 — complete currency code sets:** the remaining upstream language/code
+  pairs were filled in — `en` 11 → 20, `fr` 4 → 5 (`FRF`), `de` 4 → 5 (`DEM`),
+  `es` 20 → 171 (the complete upstream table) and `ru` 6 → 8 — bringing
+  coverage from 60 to 224 pairs. The Spanish additions replicate upstream
+  verbatim, including its irregular data (`ALL` singular `lek ` keeps a
+  trailing space, `MAD` is `un dírham` but `dos dirhams`, `ZRZ` pairs a
+  `likuta` singular with a `makuta` plural, and `ISK` uses the unrelated
+  `eyrir`/`aurar` pair).
 
 ---
 
@@ -270,5 +279,5 @@ they name.
 ```bash
 pip install num2words==0.5.14
 python tools/gen_fixtures.py   # rewrites diff_fixtures_wbtest.mbt
-moon test                      # replays all 10390 comparisons
+moon test                      # replays all 14555 comparisons
 ```

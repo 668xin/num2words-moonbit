@@ -25,6 +25,7 @@ import sys
 
 try:
     from num2words import num2words
+    from num2words import lang_ES
 except ImportError:
     sys.exit("num2words is not installed: pip install num2words")
 
@@ -111,16 +112,14 @@ CURRENCY_LANGS = {
 CURRENCY_CODES = {
     "en": [
         "EUR", "USD", "GBP", "RUB", "CAD", "AUD", "INR", "SEK", "NOK", "PLN",
-        "MXN",
+        "MXN", "BYN", "EEK", "HUF", "ISK", "LTL", "LVL", "RON", "SAR", "UZS",
     ],
-    "fr": ["EUR", "USD", "GBP", "CNY"],
-    "de": ["EUR", "USD", "GBP", "CNY"],
+    "fr": ["EUR", "USD", "GBP", "CNY", "FRF"],
+    "de": ["EUR", "USD", "GBP", "CNY", "DEM"],
     "it": ["EUR", "USD", "GBP", "CNY"],
-    "es": [
-        "EUR", "USD", "GBP", "RUB", "JPY", "CNY", "CHF", "CAD", "AUD", "BRL",
-        "INR", "KRW", "SEK", "NOK", "PLN", "UAH", "KZT", "TRY", "MXN", "ZAR",
-    ],
-    "ru": ["EUR", "USD", "RUB", "PLN", "UAH", "KZT"],
+    # Spanish: the complete upstream 0.5.14 set (171 codes).
+    "es": sorted(lang_ES.Num2Word_ES.CURRENCY_FORMS.keys()),
+    "ru": ["EUR", "USD", "RUB", "PLN", "UAH", "KZT", "BYN", "UZS"],
     "pt_BR": ["BRL"],
     "pt": ["EUR", "USD", "GBP", "CAD", "AUD"],
     "nl": ["EUR", "GBP", "USD", "CNY"],

@@ -38,10 +38,10 @@ import "668xin/num2words-moonbit" @n2w
 
 `lang` ∈ `{"en","fr","es","de","it","pt","pt_PT","ru","nl","tr","vi"}` (default
 `en`); `to` ∈ `{"cardinal","ordinal","ordinal_num","year","currency"}`
-(default `cardinal`). Currency codes are language-dependent: `en` has 11
-(EUR/USD/GBP/RUB/CAD/AUD/INR/SEK/NOK/PLN/MXN), `fr`/`de`/`it`/`nl` have 4
-(EUR/USD/GBP/CNY), `es` 20, `ru` 6, `pt` only `BRL`, `pt_PT` 5
-(EUR/USD/GBP/CAD/AUD), and `tr` only `TRY`. The empty code `""` selects the
+(default `cardinal`). Currency codes are language-dependent: `en` has 20,
+`fr`/`de` have 5 (EUR/USD/GBP/CNY plus FRF/DEM), `it`/`nl` have 4
+(EUR/USD/GBP/CNY), `es` has the complete upstream set of 171, `ru` 8, `pt` only
+`BRL`, `pt_PT` 5 (EUR/USD/GBP/CAD/AUD), and `tr` only `TRY`. The empty code `""` selects the
 language default (EUR, BRL for `pt`, TRY for `tr`). Vietnamese implements
 cardinal and ordinal only, matching upstream.
 

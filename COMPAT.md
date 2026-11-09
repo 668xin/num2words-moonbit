@@ -3,7 +3,7 @@
 Reference: Python [`num2words`](https://github.com/savoirfairelinux/num2words)
 **0.5.14** (LGPL-2.1). This document maps the two APIs call by call, records the
 supported surface, and lists every known behavioural difference. Output parity
-is machine-checked by **10390 recorded comparisons** (see
+is machine-checked by **14555 recorded comparisons** (see
 [DIFF_REPORT.md](DIFF_REPORT.md)); `moon test` replays them without Python.
 
 ---
@@ -78,19 +78,19 @@ Currency is native for every code; the exact ISO-code coverage differs — see �
 
 | Code | Upstream codes | Implemented here | Missing |
 | --- | --- | --- | --- |
-| `en` | 11: EUR, USD, GBP, RUB, CAD, AUD, INR, SEK, NOK, PLN, MXN | all 11 | — |
-| `fr` | 4: EUR, USD, GBP, CNY | all 4 | — |
-| `de` | 4: EUR, USD, GBP, CNY | all 4 | — |
+| `en` | 20: EUR, USD, GBP, RUB, CAD, AUD, INR, SEK, NOK, PLN, MXN, BYN, EEK, HUF, ISK, LTL, LVL, RON, SAR, UZS | all 20 | — |
+| `fr` | 5: EUR, USD, GBP, CNY, FRF | all 5 | — |
+| `de` | 5: EUR, USD, GBP, CNY, DEM | all 5 | — |
 | `it` | 4: EUR, USD, GBP, CNY | all 4 | — |
-| `es` | 20: EUR, USD, GBP, RUB, JPY, CNY, CHF, CAD, AUD, BRL, INR, KRW, SEK, NOK, PLN, UAH, KZT, TRY, MXN, ZAR | all 20 | — |
-| `ru` | 6: EUR, USD, RUB, PLN, UAH, KZT | all 6 | — |
+| `es` | 171: the complete upstream 0.5.14 table (EUR, USD, GBP, RUB, JPY, CNY, CHF, CAD, AUD, BRL, INR, KRW, SEK, NOK, PLN, UAH, KZT, TRY, MXN, ZAR and 151 more) | all 171 | — |
+| `ru` | 8: EUR, USD, RUB, PLN, UAH, KZT, BYN, UZS | all 8 | — |
 | `pt` | 5: EUR, USD, GBP, CAD, AUD | all 5 | — |
 | `pt_BR` | BRL (upstream `to_currency` takes no code argument) | BRL | — |
 | `nl` | 4: EUR, GBP, USD, CNY | all 4 | — |
 | `tr` | TRY only (upstream `to_currency` takes no code argument) | TRY | — |
 | `vi` | none (upstream has no `to_currency`) | — | n.a. |
 
-Coverage is **60 of 60 upstream language/code pairs**. Unsupported codes (and
+Coverage is **224 of 224 upstream language/code pairs**. Unsupported codes (and
 codes that are valid upstream but not for a given language) return
 `Err("currency code not supported for ...")` (or `""` from the non-`Result`
 entry points), while upstream raises `NotImplementedError` or `TypeError`.
@@ -195,7 +195,7 @@ byte-for-byte (after the normalisations above).
 ## 8. Verification
 
 ```bash
-moon test          # 102 tests, 10390 differential comparisons
+moon test          # 102 tests, 14555 differential comparisons
 moon build         # library + CLI
 ```
 

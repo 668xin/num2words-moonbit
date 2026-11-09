@@ -94,6 +94,29 @@ fn currency_entry_ru(
 }
 
 ///|
+/// Same as `currency_entry` but lets the cent noun pick its own gender
+/// (e.g. Spanish `EGP`: una libra / una piastra).
+fn currency_entry_es(
+  unit_one : String,
+  unit_many : String,
+  cent_one : String,
+  cent_many : String,
+  feminine : Bool,
+  cent_feminine : Bool,
+) -> CurrencyForm {
+  {
+    unit_one,
+    unit_few: unit_many,
+    unit_many,
+    cent_one,
+    cent_few: cent_many,
+    cent_many,
+    feminine,
+    cent_feminine,
+  }
+}
+
+///|
 fn currency_form_en(code : String) -> Result[CurrencyForm, String] {
   match code {
     "EUR" => Ok(currency_entry("euro", "euro", "cent", "cents", false))
@@ -112,6 +135,20 @@ fn currency_form_en(code : String) -> Result[CurrencyForm, String] {
     "NOK" => Ok(currency_entry("krone", "kroner", "øre", "øre", false))
     "PLN" => Ok(currency_entry("zloty", "zlotys", "grosz", "groszy", false))
     "MXN" => Ok(currency_entry("peso", "pesos", "cent", "cents", false))
+    "BYN" => Ok(currency_entry("rouble", "roubles", "kopek", "kopeks", false))
+    "EEK" => Ok(currency_entry("kroon", "kroons", "sent", "senti", false))
+    "HUF" => Ok(currency_entry("forint", "forint", "fillér", "fillér", false))
+    "ISK" => Ok(currency_entry("króna", "krónur", "aur", "aurar", false))
+    "LTL" => Ok(currency_entry("litas", "litas", "cent", "cents", false))
+    "LVL" => Ok(currency_entry("lat", "lats", "santim", "santims", false))
+    "RON" => Ok(currency_entry("leu", "lei", "ban", "bani", false))
+    "SAR" =>
+      Ok(
+        currency_entry(
+          "saudi riyal", "saudi riyals", "halalah", "halalas", false,
+        ),
+      )
+    "UZS" => Ok(currency_entry("sum", "sums", "tiyin", "tiyins", false))
     _ => Err(code)
   }
 }
@@ -123,6 +160,7 @@ fn currency_form_fr(code : String) -> Result[CurrencyForm, String] {
     "USD" => Ok(currency_entry("dollar", "dollars", "cent", "cents", false))
     "GBP" => Ok(currency_entry("livre", "livres", "penny", "pence", false))
     "CNY" => Ok(currency_entry("yuan", "yuans", "fen", "jiaos", false))
+    "FRF" => Ok(currency_entry("franc", "francs", "centime", "centimes", false))
     _ => Err(code)
   }
 }
@@ -134,6 +172,7 @@ fn currency_form_de(code : String) -> Result[CurrencyForm, String] {
     "USD" => Ok(currency_entry("Dollar", "Dollar", "Cent", "Cent", false))
     "GBP" => Ok(currency_entry("Pfund", "Pfund", "Penny", "Pence", false))
     "CNY" => Ok(currency_entry("Yuan", "Yuan", "Jiao", "Fen", false))
+    "DEM" => Ok(currency_entry("Mark", "Mark", "Pfennig", "Pfennig", false))
     _ => Err(code)
   }
 }
@@ -180,6 +219,687 @@ fn currency_form_es(code : String) -> Result[CurrencyForm, String] {
     "TRY" => Ok(currency_entry("lira", "liras", "kuruş", "kuruş", true))
     "MXN" => Ok(currency_entry("peso", "pesos", "centavo", "centavos", false))
     "ZAR" => Ok(currency_entry("rand", "rands", "céntimo", "céntimos", false))
+    "AED" =>
+      Ok(currency_entry_es("dirham", "dirhams", "fils", "fils", false, false))
+    "AFN" =>
+      Ok(currency_entry_es("afghani", "afghanis", "pul", "puls", false, false))
+    "ALL" =>
+      Ok(
+        currency_entry_es("lek ", "leke", "qindarkë", "qindarka", false, false),
+      )
+    "AMD" =>
+      Ok(currency_entry_es("dram", "drams", "luma", "lumas", false, false))
+    "ANG" =>
+      Ok(
+        currency_entry_es(
+          "florín", "florines", "centavo", "centavos", false, false,
+        ),
+      )
+    "AOA" =>
+      Ok(
+        currency_entry_es(
+          "kwanza", "kwanzas", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "ARS" =>
+      Ok(
+        currency_entry_es("peso", "pesos", "centavo", "centavos", false, false),
+      )
+    "AWG" =>
+      Ok(
+        currency_entry_es(
+          "florín", "florines", "centavo", "centavos", false, false,
+        ),
+      )
+    "AZN" =>
+      Ok(currency_entry_es("manat", "manat", "qəpik", "qəpik", false, false))
+    "BBD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "centavo", "centavos", false, false,
+        ),
+      )
+    "BDT" =>
+      Ok(currency_entry_es("taka", "takas", "paisa", "paisas", false, false))
+    "BGN" =>
+      Ok(currency_entry_es("lev", "leva", "stotinka", "stotinki", false, false))
+    "BHD" =>
+      Ok(currency_entry_es("dinar", "dinares", "fils", "fils", false, false))
+    "BIF" =>
+      Ok(
+        currency_entry_es(
+          "franco", "francos", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "BMD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "centavo", "centavos", false, false,
+        ),
+      )
+    "BND" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "centavo", "centavos", false, false,
+        ),
+      )
+    "BOB" =>
+      Ok(
+        currency_entry_es(
+          "boliviano", "bolivianos", "centavo", "centavos", false, false,
+        ),
+      )
+    "BSD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "centavo", "centavos", false, false,
+        ),
+      )
+    "BTN" =>
+      Ok(
+        currency_entry_es(
+          "ngultrum", "ngultrum", "chetrum", "chetrum", false, false,
+        ),
+      )
+    "BWP" =>
+      Ok(currency_entry_es("pula", "pulas", "thebe", "thebes", false, false))
+    "BYN" =>
+      Ok(
+        currency_entry_es("rublo", "rublos", "kópek", "kópeks", false, false),
+      )
+    "BYR" =>
+      Ok(
+        currency_entry_es("rublo", "rublos", "kópek", "kópeks", false, false),
+      )
+    "BZD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "CDF" =>
+      Ok(
+        currency_entry_es(
+          "franco", "francos", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "CLP" =>
+      Ok(
+        currency_entry_es("peso", "pesos", "centavo", "centavos", false, false),
+      )
+    "COP" =>
+      Ok(
+        currency_entry_es("peso", "pesos", "centavo", "centavos", false, false),
+      )
+    "CRC" =>
+      Ok(
+        currency_entry_es(
+          "colón", "colones", "centavo", "centavos", false, false,
+        ),
+      )
+    "CUP" =>
+      Ok(
+        currency_entry_es("peso", "pesos", "centavo", "centavos", false, false),
+      )
+    "CVE" =>
+      Ok(
+        currency_entry_es(
+          "escudo", "escudos", "centavo", "centavos", false, false,
+        ),
+      )
+    "CYP" =>
+      Ok(
+        currency_entry_es(
+          "libra", "libras", "céntimo", "céntimos", true, false,
+        ),
+      )
+    "CZK" =>
+      Ok(
+        currency_entry_es(
+          "corona", "coronas", "haléř", "haléř", true, false,
+        ),
+      )
+    "DJF" =>
+      Ok(
+        currency_entry_es(
+          "franco", "francos", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "DKK" =>
+      Ok(currency_entry_es("corona", "coronas", "øre", "øre", true, false))
+    "DOP" =>
+      Ok(
+        currency_entry_es("peso", "pesos", "centavo", "centavos", false, false),
+      )
+    "DZD" =>
+      Ok(
+        currency_entry_es(
+          "dinar", "dinares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "ECS" =>
+      Ok(
+        currency_entry_es(
+          "sucre", "sucres", "centavo", "centavos", false, false,
+        ),
+      )
+    "EGP" =>
+      Ok(
+        currency_entry_es("libra", "libras", "piastra", "piastras", true, true),
+      )
+    "ERN" =>
+      Ok(
+        currency_entry_es(
+          "nakfa", "nakfas", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "ESP" =>
+      Ok(
+        currency_entry_es(
+          "peseta", "pesetas", "céntimo", "céntimos", true, false,
+        ),
+      )
+    "ETB" =>
+      Ok(
+        currency_entry_es(
+          "birr", "birrs", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "FJD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "centavo", "centavos", false, false,
+        ),
+      )
+    "FKP" =>
+      Ok(
+        currency_entry_es("libra", "libras", "penique", "peniques", true, false),
+      )
+    "FRF" =>
+      Ok(
+        currency_entry_es(
+          "franco", "francos", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "GEL" =>
+      Ok(currency_entry_es("lari", "laris", "tetri", "tetris", false, false))
+    "GHS" =>
+      Ok(currency_entry_es("cedi", "cedis", "pesewa", "pesewas", false, false))
+    "GIP" =>
+      Ok(
+        currency_entry_es("libra", "libras", "penique", "peniques", true, false),
+      )
+    "GMD" =>
+      Ok(
+        currency_entry_es("dalasi", "dalasis", "butut", "bututs", false, false),
+      )
+    "GNF" =>
+      Ok(
+        currency_entry_es(
+          "franco", "francos", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "GTQ" =>
+      Ok(
+        currency_entry_es(
+          "quetzal", "quetzales", "centavo", "centavos", false, false,
+        ),
+      )
+    "GYD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "centavo", "centavos", false, false,
+        ),
+      )
+    "HKD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "centavo", "centavos", false, false,
+        ),
+      )
+    "HNL" =>
+      Ok(
+        currency_entry_es(
+          "lempira", "lempiras", "centavo", "centavos", false, false,
+        ),
+      )
+    "HRK" =>
+      Ok(currency_entry_es("kuna", "kunas", "lipa", "lipas", false, false))
+    "HTG" =>
+      Ok(
+        currency_entry_es(
+          "gourde", "gourdes", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "HUF" =>
+      Ok(
+        currency_entry_es(
+          "florín", "florines", "fillér", "fillér", false, false,
+        ),
+      )
+    "IDR" =>
+      Ok(
+        currency_entry_es(
+          "rupia", "rupias", "céntimo", "céntimos", true, false,
+        ),
+      )
+    "ILS" =>
+      Ok(
+        currency_entry_es(
+          "séquel", "séqueles", "agora", "agoras", false, false,
+        ),
+      )
+    "IQD" =>
+      Ok(currency_entry_es("dinar", "dinares", "fils", "fils", false, false))
+    "IRR" =>
+      Ok(currency_entry_es("rial", "riales", "dinar", "dinares", false, false))
+    "ISK" =>
+      Ok(currency_entry_es("corona", "coronas", "eyrir", "aurar", true, false))
+    "ITL" =>
+      Ok(
+        currency_entry_es("lira", "liras", "céntimo", "céntimos", true, false),
+      )
+    "JMD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "JOD" =>
+      Ok(
+        currency_entry_es(
+          "dinar", "dinares", "piastra", "piastras", false, true,
+        ),
+      )
+    "KES" =>
+      Ok(
+        currency_entry_es(
+          "chelín", "chelines", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "KGS" => Ok(currency_entry_es("som", "som", "tyiyn", "tyiyn", false, false))
+    "KHR" =>
+      Ok(
+        currency_entry_es(
+          "riel", "rieles", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "KMF" =>
+      Ok(
+        currency_entry_es(
+          "franco", "francos", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "KPW" => Ok(currency_entry_es("won", "wones", "chon", "chon", false, false))
+    "KWD" =>
+      Ok(currency_entry_es("dinar", "dinares", "fils", "fils", false, false))
+    "KYD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "LAK" => Ok(currency_entry_es("kip", "kips", "att", "att", false, false))
+    "LBP" =>
+      Ok(
+        currency_entry_es("libra", "libras", "piastra", "piastras", true, true),
+      )
+    "LKR" =>
+      Ok(
+        currency_entry_es(
+          "rupia", "rupias", "céntimo", "céntimos", true, false,
+        ),
+      )
+    "LRD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "LSL" =>
+      Ok(
+        currency_entry_es(
+          "loti", "lotis", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "LTL" =>
+      Ok(
+        currency_entry_es(
+          "lita", "litas", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "LVL" =>
+      Ok(
+        currency_entry_es("lat", "lats", "céntimo", "céntimos", false, false),
+      )
+    "LYD" =>
+      Ok(
+        currency_entry_es(
+          "dinar", "dinares", "dírham", "dírhams", false, false,
+        ),
+      )
+    "MAD" =>
+      Ok(
+        currency_entry_es(
+          "dírham", "dirhams", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "MDL" => Ok(currency_entry_es("leu", "lei", "ban", "bani", false, false))
+    "MGA" =>
+      Ok(
+        currency_entry_es(
+          "ariary", "ariaris", "iraimbilanja", "iraimbilanja", false, false,
+        ),
+      )
+    "MKD" =>
+      Ok(currency_entry_es("denar", "denares", "deni", "denis", false, false))
+    "MMK" => Ok(currency_entry_es("kiat", "kiats", "pya", "pyas", false, false))
+    "MNT" =>
+      Ok(
+        currency_entry_es(
+          "tugrik", "tugriks", "möngö", "möngö", false, false,
+        ),
+      )
+    "MOP" =>
+      Ok(currency_entry_es("pataca", "patacas", "avo", "avos", false, false))
+    "MRO" =>
+      Ok(
+        currency_entry_es(
+          "ouguiya", "ouguiyas", "khoums", "khoums", false, false,
+        ),
+      )
+    "MRU" =>
+      Ok(
+        currency_entry_es(
+          "ouguiya", "ouguiyas", "khoums", "khoums", false, false,
+        ),
+      )
+    "MUR" =>
+      Ok(
+        currency_entry_es(
+          "rupia", "rupias", "céntimo", "céntimos", true, false,
+        ),
+      )
+    "MVR" =>
+      Ok(
+        currency_entry_es("rufiyaa", "rufiyaas", "laari", "laari", false, false),
+      )
+    "MWK" =>
+      Ok(
+        currency_entry_es(
+          "kuacha", "kuachas", "tambala", "tambalas", false, false,
+        ),
+      )
+    "MYR" =>
+      Ok(
+        currency_entry_es(
+          "ringgit", "ringgit", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "MZN" =>
+      Ok(
+        currency_entry_es(
+          "metical", "metical", "centavo", "centavos", false, false,
+        ),
+      )
+    "NAD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "NGN" =>
+      Ok(currency_entry_es("naira", "nairas", "kobo", "kobo", false, false))
+    "NIO" =>
+      Ok(
+        currency_entry_es(
+          "córdoba", "córdobas", "centavo", "centavos", false, false,
+        ),
+      )
+    "NPR" =>
+      Ok(currency_entry_es("rupia", "rupias", "paisa", "paisas", true, false))
+    "NZD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "centavo", "centavos", false, false,
+        ),
+      )
+    "OMR" =>
+      Ok(currency_entry_es("rial", "riales", "baisa", "baisa", false, false))
+    "PAB" =>
+      Ok(
+        currency_entry_es(
+          "balboa", "balboas", "centésimo", "centésimos", false, false,
+        ),
+      )
+    "PEN" =>
+      Ok(
+        currency_entry_es("sol", "soles", "céntimo", "céntimos", false, false),
+      )
+    "PGK" =>
+      Ok(currency_entry_es("kina", "kinas", "toea", "toea", false, false))
+    "PHP" =>
+      Ok(
+        currency_entry_es("peso", "pesos", "centavo", "centavos", false, false),
+      )
+    "PKR" =>
+      Ok(currency_entry_es("rupia", "rupias", "paisa", "paisas", true, false))
+    "PLZ" =>
+      Ok(currency_entry_es("zloty", "zlotys", "grosz", "groszy", false, false))
+    "PYG" =>
+      Ok(
+        currency_entry_es(
+          "guaraní", "guaranís", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "QAR" =>
+      Ok(
+        currency_entry_es("rial", "riales", "dírham", "dírhams", false, false),
+      )
+    "QTQ" =>
+      Ok(
+        currency_entry_es(
+          "quetzal", "quetzales", "centavo", "centavos", false, false,
+        ),
+      )
+    "RON" => Ok(currency_entry_es("leu", "leus", "ban", "bani", false, false))
+    "RSD" =>
+      Ok(currency_entry_es("dinar", "dinares", "para", "para", false, false))
+    "RUR" =>
+      Ok(currency_entry_es("rublo", "rublos", "kopek", "kopeks", false, false))
+    "RWF" =>
+      Ok(
+        currency_entry_es(
+          "franco", "francos", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "SAR" =>
+      Ok(
+        currency_entry_es("riyal", "riales", "halala", "halalas", false, false),
+      )
+    "SBD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "SCR" =>
+      Ok(
+        currency_entry_es(
+          "rupia", "rupias", "céntimo", "céntimos", true, false,
+        ),
+      )
+    "SDG" =>
+      Ok(
+        currency_entry_es("libra", "libras", "piastra", "piastras", true, true),
+      )
+    "SGD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "SHP" =>
+      Ok(
+        currency_entry_es("libra", "libras", "penique", "peniques", true, false),
+      )
+    "SKK" =>
+      Ok(
+        currency_entry_es("corona", "coronas", "halier", "haliers", true, false),
+      )
+    "SLL" =>
+      Ok(
+        currency_entry_es(
+          "leona", "leonas", "céntimo", "céntimos", true, false,
+        ),
+      )
+    "SRD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "SSP" =>
+      Ok(
+        currency_entry_es("libra", "libras", "piastra", "piastras", true, true),
+      )
+    "STD" =>
+      Ok(
+        currency_entry_es(
+          "dobra", "dobras", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "SVC" =>
+      Ok(
+        currency_entry_es(
+          "colón", "colones", "centavo", "centavos", false, false,
+        ),
+      )
+    "SYP" =>
+      Ok(
+        currency_entry_es("libra", "libras", "piastra", "piastras", true, true),
+      )
+    "SZL" =>
+      Ok(
+        currency_entry_es(
+          "lilangeni", "emalangeni", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "THB" =>
+      Ok(currency_entry_es("baht", "bahts", "satang", "satang", false, false))
+    "TJS" =>
+      Ok(
+        currency_entry_es(
+          "somoni", "somonis", "dirame", "dirames", false, false,
+        ),
+      )
+    "TMT" =>
+      Ok(currency_entry_es("manat", "manat", "tenge", "tenge", false, false))
+    "TND" =>
+      Ok(
+        currency_entry_es(
+          "dinar", "dinares", "milésimo", "milésimos", false, false,
+        ),
+      )
+    "TOP" =>
+      Ok(
+        currency_entry_es(
+          "paanga", "paangas", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "TTD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "TWD" =>
+      Ok(
+        currency_entry_es(
+          "nuevo dólar", "nuevos dólares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "TZS" =>
+      Ok(
+        currency_entry_es(
+          "chelín", "chelines", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "UAG" =>
+      Ok(
+        currency_entry_es(
+          "hryvnia", "hryvnias", "kopiyka", "kopiykas", false, false,
+        ),
+      )
+    "UGX" =>
+      Ok(
+        currency_entry_es(
+          "chelín", "chelines", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "UYU" =>
+      Ok(
+        currency_entry_es(
+          "peso", "pesos", "centésimo", "centésimos", false, false,
+        ),
+      )
+    "UZS" => Ok(currency_entry_es("sum", "sum", "tiyin", "tiyin", false, false))
+    "VEF" =>
+      Ok(
+        currency_entry_es(
+          "bolívar fuerte", "bolívares fuertes", "céntimo", "céntimos", false,
+          false,
+        ),
+      )
+    "VES" =>
+      Ok(
+        currency_entry_es(
+          "bolívar", "bolívares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "VND" => Ok(currency_entry_es("dong", "dongs", "xu", "xu", false, false))
+    "VUV" =>
+      Ok(currency_entry_es("vatu", "vatu", "nenhum", "nenhum", false, false))
+    "WST" =>
+      Ok(currency_entry_es("tala", "tala", "centavo", "centavos", false, false))
+    "XAF" =>
+      Ok(
+        currency_entry_es(
+          "franco CFA", "francos CFA", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "XCD" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "XOF" =>
+      Ok(
+        currency_entry_es(
+          "franco CFA", "francos CFA", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "XPF" =>
+      Ok(
+        currency_entry_es(
+          "franco CFP", "francos CFP", "céntimo", "céntimos", false, false,
+        ),
+      )
+    "YER" =>
+      Ok(currency_entry_es("rial", "riales", "fils", "fils", false, false))
+    "YUM" =>
+      Ok(currency_entry_es("dinar", "dinares", "para", "para", false, false))
+    "ZMW" =>
+      Ok(currency_entry_es("kwacha", "kwachas", "ngwee", "ngwee", false, false))
+    "ZRZ" =>
+      Ok(currency_entry_es("zaire", "zaires", "likuta", "makuta", false, false))
+    "ZWL" =>
+      Ok(
+        currency_entry_es(
+          "dólar", "dólares", "céntimo", "céntimos", false, false,
+        ),
+      )
     _ => Err(code)
   }
 }
@@ -230,6 +950,21 @@ fn currency_form_ru(code : String) -> Result[CurrencyForm, String] {
       Ok(
         currency_entry_ru(
           "тенге", "тенге", "тенге", "тиын", "тиына", "тиынов",
+          false, false,
+        ),
+      )
+    "BYN" =>
+      Ok(
+        currency_entry_ru(
+          "белорусский рубль", "белорусских рубля",
+          "белорусских рублей", "копейка", "копейки",
+          "копеек", false, true,
+        ),
+      )
+    "UZS" =>
+      Ok(
+        currency_entry_ru(
+          "сум", "сума", "сумов", "тийин", "тийина", "тийинов",
           false, false,
         ),
       )

@@ -74,14 +74,218 @@ test "en year" {
 }
 
 ///|
-test "en currency" {
+fn currency_ok(amount : String, lang : String, code : String) -> String {
+  match num2words_currency(amount, lang, code) {
+    Ok(words) => words
+    Err(msg) => "ERR: " + msg
+  }
+}
+
+///|
+test "currency: en/fr/de/it align with upstream" {
+  // English: default EUR, invariant "euro", cents always spelled.
   assert_eq(
-    currency_en(BigInt::from_int(1234), BigInt::from_int(0)),
-    "one thousand, two hundred and thirty-four dollars",
+    currency_ok("1234.56", "en", "EUR"),
+    "one thousand, two hundred and thirty-four euro, fifty-six cents",
+  )
+  assert_eq(currency_ok("0", "en", ""), "zero euro, zero cents")
+  assert_eq(currency_ok("1.01", "en", "USD"), "one dollar, one cent")
+  assert_eq(currency_ok("1.01", "en", "GBP"), "one pound sterling, one penny")
+  // French: "et" separator, plural also used for zero.
+  assert_eq(
+    currency_ok("1234.56", "fr", "EUR"),
+    "mille deux cent trente-quatre euros et cinquante-six centimes",
+  )
+  assert_eq(currency_ok("0", "fr", "EUR"), "zéro euros et zéro centimes")
+  // German: capitalised nouns, "ein" instead of "eins".
+  assert_eq(currency_ok("1", "de", "EUR"), "ein Euro und null Cent")
+  assert_eq(currency_ok("101", "de", "EUR"), "einhundertein Euro und null Cent")
+  assert_eq(
+    currency_ok("1234.56", "de", "EUR"),
+    "eintausendzweihundertvierunddreißig Euro und sechsundfünfzig Cent",
+  )
+  // Italian: apocope before the noun, feminine GBP unit.
+  assert_eq(currency_ok("21", "it", "EUR"), "ventun euro e zero centesimi")
+  assert_eq(currency_ok("1", "it", "GBP"), "una sterlina e zero penny")
+  assert_eq(
+    currency_ok("1234.56", "it", "EUR"),
+    "milleduecentotrentaquattro euro e cinquantasei centesimi",
+  )
+}
+
+///|
+test "currency: rounding and signs" {
+  // Exact decimal half-up on the third fractional digit.
+  assert_eq(currency_ok("1.999", "en", "EUR"), "two euro, zero cents")
+  assert_eq(
+    currency_ok("1234.567", "en", "EUR"),
+    "one thousand, two hundred and thirty-four euro, fifty-seven cents",
+  )
+  assert_eq(currency_ok("99.999", "en", "EUR"), "one hundred euro, zero cents")
+  assert_eq(currency_ok("0.005", "en", "EUR"), "zero euro, one cent")
+  // Deliberate difference from upstream's binary-float rounding: exact 1.005
+  // rounds up here, while upstream yields one euro and zero cents.
+  assert_eq(currency_ok("1.005", "en", "EUR"), "one euro, one cent")
+  // The sign is dropped when the rounded amount is exactly zero.
+  assert_eq(currency_ok("-0.001", "en", "EUR"), "zero euro, zero cents")
+  assert_eq(currency_ok("-0.005", "en", "EUR"), "minus zero euro, one cent")
+  assert_eq(currency_ok("-3.5", "en", "EUR"), "minus three euro, fifty cents")
+  // Upstream crashes on negative Italian currency; this project supports it
+  // like Italian ordinals ("meno ...").
+  assert_eq(
+    currency_ok("-3.5", "it", "EUR"),
+    "meno tre euro e cinquanta centesimi",
+  )
+}
+
+///|
+test "currency: Spanish gender agreement" {
+  assert_eq(currency_ok("1.01", "es", "GBP"), "una libra con un penique")
+  assert_eq(
+    currency_ok("21.21", "es", "GBP"),
+    "veintiuna libras con veintiún peniques",
   )
   assert_eq(
-    currency_en(BigInt::from_int(1234), BigInt::from_int(56)),
-    "one thousand, two hundred and thirty-four dollars and fifty-six cents",
+    currency_ok("31", "es", "GBP"),
+    "treinta y una libras con cero peniques",
+  )
+  assert_eq(
+    currency_ok("200", "es", "GBP"),
+    "doscientas libras con cero peniques",
+  )
+  // Upstream keeps "quinientos" masculine, unlike doscientas/trescientas.
+  assert_eq(
+    currency_ok("500", "es", "GBP"),
+    "quinientos libras con cero peniques",
+  )
+  assert_eq(
+    currency_ok("21000", "es", "EUR"),
+    "veintiún mil euros con cero céntimos",
+  )
+  assert_eq(
+    currency_ok("1000001", "es", "GBP"),
+    "un millón una libras con cero peniques",
+  )
+  assert_eq(
+    currency_ok("1234.56", "es", "EUR"),
+    "mil doscientos treinta y cuatro euros con cincuenta y seis céntimos",
+  )
+  // Upstream's irregular CNY cent pair.
+  assert_eq(currency_ok("2.02", "es", "CNY"), "dos yuanes con dos jiaos")
+}
+
+///|
+test "currency: Russian gender and plural forms" {
+  assert_eq(
+    currency_ok("1.01", "ru", "RUB"),
+    "один рубль, одна копейка",
+  )
+  assert_eq(
+    currency_ok("2.02", "ru", "RUB"),
+    "два рубля, две копейки",
+  )
+  assert_eq(
+    currency_ok("5.05", "ru", "RUB"),
+    "пять рублей, пять копеек",
+  )
+  assert_eq(
+    currency_ok("11.11", "ru", "RUB"),
+    "одиннадцать рублей, одиннадцать копеек",
+  )
+  assert_eq(
+    currency_ok("21.21", "ru", "RUB"),
+    "двадцать один рубль, двадцать одна копейка",
+  )
+  assert_eq(
+    currency_ok("22.22", "ru", "RUB"),
+    "двадцать два рубля, двадцать две копейки",
+  )
+  assert_eq(
+    currency_ok("2.02", "ru", "UAH"),
+    "две гривны, две копейки",
+  )
+  assert_eq(
+    currency_ok("2000", "ru", "RUB"),
+    "две тысячи рублей, ноль копеек",
+  )
+  // Upstream applies the feminine form to every group ("одна миллион").
+  assert_eq(
+    currency_ok("1000000", "ru", "UAH"),
+    "одна миллион гривен, ноль копеек",
+  )
+  assert_eq(
+    currency_ok("2000000", "ru", "UAH"),
+    "две миллиона гривен, ноль копеек",
+  )
+  // Upstream's "слотых" typo is normalised to "злотых".
+  assert_eq(
+    currency_ok("2.02", "ru", "PLN"),
+    "два польских злотых, два гроша",
+  )
+  assert_eq(
+    currency_ok("2.02", "ru", "KZT"),
+    "два тенге, два тиына",
+  )
+}
+
+///|
+test "currency: Brazilian Portuguese" {
+  assert_eq(currency_ok("0", "pt", "BRL"), "zero reais")
+  assert_eq(currency_ok("1", "pt", "BRL"), "um real")
+  assert_eq(currency_ok("0.01", "pt", "BRL"), "zero reais e um centavo")
+  assert_eq(
+    currency_ok("1234.56", "pt", "BRL"),
+    "mil duzentos e trinta e quatro reais e cinquenta e seis centavos",
+  )
+  // Zero cents are omitted; exact 10^6 multiples take "de".
+  assert_eq(currency_ok("1000000", "pt", ""), "um milhão de reais")
+  assert_eq(currency_ok("2000000", "pt", "BRL"), "dois milhões de reais")
+  assert_eq(currency_ok("1000001", "pt", "BRL"), "um milhão e um reais")
+  assert_eq(
+    currency_ok("1234567", "pt", "BRL"),
+    "um milhão duzentos e trinta e quatro mil quinhentos e sessenta e sete reais",
+  )
+  assert_eq(currency_ok("1.999", "pt", "BRL"), "dois reais")
+  assert_eq(
+    currency_ok("-3.5", "pt", "BRL"),
+    "menos três reais e cinquenta centavos",
+  )
+}
+
+///|
+test "currency: rejected input" {
+  assert_eq(num2words_currency("abc", "en", "EUR"), Err("invalid number: abc"))
+  assert_eq(
+    num2words_currency("1", "xx", "EUR"),
+    Err("currency not implemented for language: xx"),
+  )
+  assert_eq(
+    num2words_currency("1", "en", "JPY"),
+    Err("currency code not supported for en: JPY"),
+  )
+  assert_eq(
+    num2words_currency("1", "pt", "USD"),
+    Err("currency code not supported for pt: USD"),
+  )
+  // The non-Result entry points turn the error into "".
+  assert_eq(num2words_str("1", "xx", "currency"), "")
+  assert_eq(num2words_str("abc", "en", "currency"), "")
+  // Codes are case-insensitive and "" selects the language default.
+  assert_eq(currency_ok("1", "en", "usd"), "one dollar, zero cents")
+  assert_eq(currency_ok("1", "pt", ""), "um real")
+}
+
+///|
+test "currency: dispatch paths agree" {
+  let want = "one thousand, two hundred and thirty-four euro, fifty-six cents"
+  assert_eq(num2words_str("1234.56", "en", "currency"), want)
+  assert_eq(num2words_float(1234.56, "en", "currency"), want)
+  assert_eq(num2words_str_checked("1234.56", "en", "currency"), Ok(want))
+  // Integers are major units here (upstream's int-as-cents quirk is not
+  // reproduced).
+  assert_eq(
+    num2words_int(1234, "en", "currency"),
+    "one thousand, two hundred and thirty-four euro, zero cents",
   )
 }
 
@@ -461,7 +665,7 @@ test "boundaries" {
   assert_eq(num2words_int(0, "en", "ordinal"), "zeroth")
   assert_eq(num2words_int(0, "en", "ordinal_num"), "0th")
   assert_eq(num2words_int(0, "en", "year"), "zero")
-  assert_eq(num2words_int(0, "en", "currency"), "zero dollars")
+  assert_eq(num2words_int(0, "en", "currency"), "zero euro, zero cents")
   // Upstream raises TypeError for negative ordinals; we return "".
   assert_eq(num2words_int(-1, "en", "ordinal"), "")
   assert_eq(num2words_int(-1, "en", "ordinal_num"), "")

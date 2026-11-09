@@ -12,9 +12,13 @@ code.
 - Ordinal samples per language: **249** (dense `0..200` plus
   hundreds/thousands/scale boundaries; Portuguese drops the `10^18` sample
   that upstream rejects), `ordinal_num`: **11** per language
-- Total comparisons: **5752** (7 × 551 cardinal + 4 × 19 year + 1742 ordinal
-  + 77 ordinal_num)
-- MoonBit test suite: **56 tests, 56 passed, 0 failed**
+- Currency samples: **900** total — **51** each for `en`/`fr`/`de`/`it`
+  (`it` has 45 because upstream rejects its two negative samples), **520** for
+  `es` (26 amounts × 20 codes), **156** for `ru` (26 × 6) and **26** for `pt`
+  (26 × BRL)
+- Total comparisons: **6652** (3857 cardinal + 76 year + 1742 ordinal
+  + 77 ordinal_num + 900 currency)
+- MoonBit test suite: **69 tests, 69 passed, 0 failed**
 
 Run `moon test` from the project root to replay every comparison.
 
@@ -25,7 +29,8 @@ Run `moon test` from the project root to replay every comparison.
 1. `tools/gen_fixtures.py` calls upstream `num2words` for each sample and writes
    the expected strings to `diff_fixtures_wbtest.mbt`.
 2. The generated MoonBit test feeds the same input strings through our public
-   `num2words_str(value, lang, "cardinal" | "year")` entry point and asserts
+   entry points (`num2words_str(value, lang, "cardinal" | "year" | "ordinal"
+   | "ordinal_num")`, and `num2words_currency(amount, lang, code)`) and asserts
    equality.
 3. Fixtures are committed, so CI and reviewers do not need Python: `moon test`
    replays the recorded expectations on every platform.
@@ -45,6 +50,13 @@ Sample set:
 Year samples (`en`, `it`, `pt`, `ru` only): `1000, 1001, 1010, 1100, 1500,
 1900, 1984, 1999, 2000, 2001, 2009, 2010, 2023, 2024, 2100, 2134, 3000, 3001,
 9999`.
+
+Currency samples: `en`/`fr`/`de`/`it` use 17 amounts with `EUR`/`USD`/`GBP`
+(`0, 0.01, 0.5, 1, 2, 21, 28, 81, 101, 1000, 1001, 1234.56, 999.99, 1.999,
+1234.567, -3.5, -1.999`); `es` uses 26 amounts × 20 codes, `ru` 26 × 6 codes
+and `pt` 26 × `BRL`, adding `5, 11, 22, 25, 100, 200, 500, 2000, 21000,
+1000000, 1000001, 2000000`. Amounts are passed to upstream as floats, so its
+type-dependent int-as-cents quirk does not apply.
 
 ---
 
@@ -77,7 +89,17 @@ Year samples (`en`, `it`, `pt`, `ru` only): `1000, 1001, 1010, 1100, 1500,
 | `pt` | 248 | 11 | 259 | upstream `pt_BR`; `10^18` sample skipped (upstream raises) |
 | `ru` | 249 | 11 | 260 | verbatim |
 
-All 5752 comparisons pass under the documented comparison rules in §4.
+| Language | Currency samples | Passed | Comparison |
+| --- | --- | --- | --- |
+| `en` | 51 | 51 | verbatim |
+| `fr` | 51 | 51 | verbatim |
+| `de` | 51 | 51 | verbatim |
+| `it` | 45 | 45 | verbatim (negative amounts excluded, see §4) |
+| `es` | 520 | 520 | verbatim (upstream quirks included, e.g. masculine *quinientos*) |
+| `ru` | 156 | 156 | verbatim; PLN paucal typo normalised (see §4) |
+| `pt` | 26 | 26 | upstream `pt_BR`, commas ignored (see §4) |
+
+All 6652 comparisons pass under the documented comparison rules in §4.
 French, Spanish and German years use this project's pair-reading convention
 instead of the upstream cardinal reading and are therefore not part of the
 differential set (they are documented in the README comparison table).
@@ -104,8 +126,8 @@ its quirks**:
 
 ## 3. Defects found and fixed during this milestone
 
-The differential run exposed real divergences; all but the two documented
-orthographic rules were fixed in the implementation rather than papered over.
+The differential run exposed real divergences; all but the documented rules in
+§4 were fixed in the implementation rather than papered over.
 
 | # | Language | Input | Before | After / upstream |
 | --- | --- | --- | --- | --- |
@@ -137,13 +159,20 @@ Notes on the fixes:
   whole number (`ventitré`, `milletré`) and removed when a morpheme follows
   (`centoventitremila`). Million-scale groups are joined with `e`
   (`un milione e uno`).
+- **Currency (M3c-1/M3c-2):** the previous English-only currency mode always
+  used USD, could only express whole units, and was bypassed by the decimal
+  entry points (`num2words_str("1234.56", "en", "currency")` spelled
+  `… point five six`). It is replaced by native formatting for all seven
+  languages with each language's upstream code set, covered by 900
+  differential comparisons.
 
 ---
 
 ## 4. Deliberate comparison rules
 
-Two upstream behaviours are normalised instead of copied, because our output is
-intentionally different (and, in the Italian case, more regular):
+The upstream behaviours below are normalised or excluded instead of copied,
+because our output is intentionally different (and, in the Italian case, more
+regular):
 
 1. **Italian accents.** Upstream 0.5.14 applies the `tré` accent
    inconsistently: `23 → ventitré` but `123 → centoventitre`. Our rule is
@@ -155,9 +184,22 @@ intentionally different (and, in the Italian case, more regular):
    European `pt`. Upstream `pt_BR` separates scale groups with a comma
    (`mil, duzentos`); Portuguese usage and our output use a plain space, so
    commas are removed before comparing.
+3. **Currency.** Amounts are passed to upstream as floats
+   (`num2words(1234.56, ...)`), because upstream reads a bare Python `int` as
+   *cents* (`1234` → 12.34); this project treats the integer part as the major
+   unit. `pt_BR` accepts no currency code upstream, so only `BRL` is compared
+   (and its commas are stripped as for cardinals). Rounding is exact decimal
+   half-up on the third digit, while upstream rounds through a binary float, so
+   exact `x.xx5` amounts (e.g. `1.005`) are excluded. Italian negative amounts
+   are supported here (`meno …`) but excluded because upstream 0.5.14 raises
+   `AttributeError`. Upstream's Russian PLN paucal typo (`слотых`) is
+   normalised to `злотых`. Everything else — including the Spanish
+   masculine *quinientos* and the Russian feminine *одна миллион* — is
+   compared verbatim.
 
-No other comparison rule is applied: `en`, `fr`, `es`, `de` and `ru` are
-compared byte-for-byte.
+No other comparison rule is applied: cardinal/year/ordinal output for `en`,
+`fr`, `es`, `de` and `ru` is compared byte-for-byte; the currency rules above
+only affect the cases they name.
 
 ---
 
@@ -166,5 +208,5 @@ compared byte-for-byte.
 ```bash
 pip install num2words==0.5.14
 python tools/gen_fixtures.py   # rewrites diff_fixtures_wbtest.mbt
-moon test                      # replays all 5752 comparisons
+moon test                      # replays all 6652 comparisons
 ```

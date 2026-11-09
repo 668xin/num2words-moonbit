@@ -7,6 +7,9 @@
 // `num2words_int` / `num2words_float` convenience wrappers), `lang` is
 // "en" | "fr" | "es" | "de" | "it" | "pt" | "ru", and `to` is "cardinal"
 // (default), "ordinal", "ordinal_num", "year" or "currency".
+//
+// Currency takes a decimal amount string and an ISO-4217 code through
+// `num2words_currency`; the `to = "currency"` dispatch path uses EUR.
 
 // --- input validation -------------------------------------------------------
 //
@@ -216,10 +219,12 @@ fn year_for(l : Lang, value : BigInt) -> String {
 }
 
 ///|
-fn currency_for(l : Lang, value : BigInt) -> String {
-  match l.variant {
-    En => currency_en(value, BigInt::from_int(0))
-    _ => l.cardinal(value)
+/// Currency spelling with the default code (EUR); `""` when the language or
+/// the amount is not supported.
+fn currency_string(amount : String, lang : String) -> String {
+  match num2words_currency(amount, lang, "EUR") {
+    Ok(words) => words
+    Err(_) => ""
   }
 }
 
@@ -237,7 +242,7 @@ pub fn num2words(value : BigInt, lang : String, to : String) -> String {
     "ordinal" => ordinal_for(l, value)
     "ordinal_num" => ordinal_num_for(l, value)
     "year" => year_for(l, value)
-    "currency" => currency_for(l, value)
+    "currency" => currency_string(value.to_string(), lang)
     _ => l.cardinal(value)
   }
 }
@@ -255,9 +260,13 @@ pub fn num2words_int(value : Int, lang : String, to : String) -> String {
 /// Scientific-notation values (very large or very small doubles) are expanded
 /// to a plain decimal first. Values too large for the language's scale table,
 /// and non-finite values (`NaN` / infinity), return `""` instead of aborting.
-pub fn num2words_float(value : Double, lang : String, _to : String) -> String {
-  let l = get_lang(lang)
+/// With `to = "currency"` the amount is rendered with the default code (EUR).
+pub fn num2words_float(value : Double, lang : String, to : String) -> String {
   let s = expand_scientific(value.to_string())
+  if to == "currency" {
+    return currency_string(s, lang)
+  }
+  let l = get_lang(lang)
   if !is_valid_number(s) {
     return ""
   }
@@ -288,6 +297,9 @@ pub fn num2words_float(value : Double, lang : String, _to : String) -> String {
 /// Malformed input returns `""` instead of aborting; use
 /// `num2words_str_checked` when the caller needs to tell the two apart.
 pub fn num2words_str(value : String, lang : String, to : String) -> String {
+  if to == "currency" {
+    return currency_string(value, lang)
+  }
   if !is_valid_number(value) {
     return ""
   }
@@ -316,12 +328,16 @@ pub fn num2words_str(value : String, lang : String, to : String) -> String {
 /// Same as `num2words_str`, but rejects bad input explicitly:
 /// `Ok(words)` on success, `Err(message)` when `value` is either malformed
 /// (`Err("invalid number: ...")`) or larger than the language's scale-word
-/// table (`Err("magnitude out of supported range: ...")`).
+/// table (`Err("magnitude out of supported range: ...")`). Currency mode also
+/// reports unsupported languages through `Err`.
 pub fn num2words_str_checked(
   value : String,
   lang : String,
   to : String,
 ) -> Result[String, String] {
+  if to == "currency" {
+    return num2words_currency(value, lang, "EUR")
+  }
   if !is_valid_number(value) {
     return Err("invalid number: " + value)
   }

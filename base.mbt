@@ -310,34 +310,8 @@ pub fn year_en(n : BigInt) -> String {
 }
 
 // ---------------------------------------------------------------------
-// English currency ($1234.56 -> "one thousand two hundred thirty-four
-// dollars and fifty-six cents")
-// ---------------------------------------------------------------------
-
-///|
-pub fn currency_en(dollars : BigInt, cents : BigInt) -> String {
-  if dollars == BigInt::from_int(0) && cents == BigInt::from_int(0) {
-    return "zero dollars"
-  }
-  let neg = dollars < BigInt::from_int(0) || cents < BigInt::from_int(0)
-  let dollars = if dollars < BigInt::from_int(0) { -dollars } else { dollars }
-  let cents = if cents < BigInt::from_int(0) { -cents } else { cents }
-  let dword = if dollars == BigInt::from_int(1) { "dollar" } else { "dollars" }
-  let mut s = lang_en().cardinal_en(dollars) + " " + dword
-  if cents > BigInt::from_int(0) {
-    let cword = if cents == BigInt::from_int(1) { "cent" } else { "cents" }
-    s = s + " and " + lang_en().cardinal_en(cents) + " " + cword
-  }
-  if neg {
-    "minus " + s
-  } else {
-    s
-  }
-}
-
-// =====================================================================
 // Dispatch
-// =====================================================================
+// ---------------------------------------------------------------------
 
 ///|
 /// True when the magnitude of `n` fits inside the language's scale-word

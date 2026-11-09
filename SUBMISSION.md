@@ -25,12 +25,12 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
   - `num2words_str_checked`：返回 `Result[String, String]`，区分 `invalid number` 与 `magnitude out of supported range`；
   - CLI 打印对应 `error:` 信息。
 - **7 种语言**：英语 `en`（全模式）、法语 `fr`（vigesimal）、西班牙语 `es`（veintiuno、cien/ciento）、德语 `de`（闭合复合词）、意大利语 `it`（省音与连写）、葡萄牙语 `pt`（巴西变体，条件连接词 `e`）、俄语 `ru`（三档复数、`тысяча` 阴性变体 `одна/две`）。
-- **模式分发**：`cardinal` / `ordinal` / `ordinal_num` / `year` / `currency` / 小数。`ordinal` 与 `ordinal_num` **七种语言全部原生实现**并与上游逐条差分对齐（含上游怪癖，如西语 `décimoprimero`、`es`/`pt` 的 0 号序数为空串）；负数序数返回 `""`（上游抛 TypeError），意语除外（`meno terzo`）；**仅 `currency` 仍为英语独享**，其余 6 种语言回退为 `cardinal`（待 M3c 补齐）；`year` 在 `it` / `pt` / `ru` 中为基数读法。
-- **多形态 API**：`num2words`(BigInt) / `num2words_int` / `num2words_float` / `num2words_str` / `num2words_str_checked` / `is_valid_number`。
+- **模式分发**：`cardinal` / `ordinal` / `ordinal_num` / `year` / `currency` / 小数。`ordinal` 与 `ordinal_num` **七种语言全部原生实现**并与上游逐条差分对齐（含上游怪癖，如西语 `décimoprimero`、`es`/`pt` 的 0 号序数为空串）；负数序数返回 `""`（上游抛 TypeError），意语除外（`meno terzo`）；**`currency` 七种语言全部原生实现**（新增带币种代码的 `num2words_currency`，默认 EUR、`pt` 默认 BRL；币种集与上游一致：en/fr/de/it 为 EUR/USD/GBP，es 20 种，ru 6 种，pt 仅 BRL），并处理了西语性数一致、俄语三档复数与性别、巴葡零分省略等规则；`year` 在 `it` / `pt` / `ru` 中为基数读法。
+- **多形态 API**：`num2words`(BigInt) / `num2words_int` / `num2words_float` / `num2words_str` / `num2words_str_checked` / `num2words_currency` / `is_valid_number`。
 - **量级上限守卫**：`Lang::supports` / `Lang::max_power`，越界返回明确错误而非越界访问。
-- **CLI**（`cmd/main`，`--lang` / `--to` / `--help`），可直接演示与按需调用。
-- **56 个 whitebox 测试**（`moon test` 56/56 通过，0 warning 0 error），覆盖：七语言基数、七语言序数 / 序数数字、英文年份 / 金额 / 小数、输入校验的接受与拒绝表、边界值（`-0`、前导零、`1.50`、1e21、1e-7、0 在各模式下）、浮点科学计数法展开与负零小数、量级上限内外、以及 Int/String/Float 三路路径一致性与七语言一致性。
-- **与上游的差分对照测试**：`tools/gen_fixtures.py` 调用上游 num2words 0.5.14 生成 551×7（基数）+ 19×4（年份）+ 249×7（序数）+ 11×7（序数数字）≈ **5752 条**期望值，MoonBit 侧逐条断言；对照发现并修复了英语 `and` 连接与年份读法、西语 `mil millones`、德语 `eintausend`、意大利语重音与连接词、法语 `trois cent mille`、西语序数十位边界等真实缺陷。报告见 `DIFF_REPORT.md`。
+- **CLI**（`cmd/main`，`--lang` / `--to` / `--currency` / `--help`），可直接演示与按需调用。
+- **69 个 whitebox 测试**（`moon test` 69/69 通过，0 warning 0 error），覆盖：七语言基数、七语言序数 / 序数数字、七语言货币（币种集、性别 / 复数、舍入与符号）、英文年份 / 小数、输入校验的接受与拒绝表、边界值（`-0`、前导零、`1.50`、1e21、1e-7、0 在各模式下）、浮点科学计数法展开与负零小数、量级上限内外、以及 Int/String/Float 三路路径一致性与七语言一致性。
+- **与上游的差分对照测试**：`tools/gen_fixtures.py` 调用上游 num2words 0.5.14 生成 551×7（基数）+ 19×4（年份）+ 249×7（序数）+ 11×7（序数数字）+ 51×4（货币 en/fr/de/it，意语 45）+ 520（西语货币）+ 156（俄语货币）+ 26（巴葡货币）≈ **6652 条**期望值，MoonBit 侧逐条断言；对照发现并修复了英语 `and` 连接与年份读法、西语 `mil millones`、德语 `eintausend`、意大利语重音与连接词、法语 `trois cent mille`、西语序数十位边界、以及货币模式绕过小数路径等真实缺陷。报告见 `DIFF_REPORT.md`。
 - **README** 示例覆盖各语言各模式调用、CLI 用法、合法输入语法、错误处理行为与已知限制。
 - **三平台 CI**（ubuntu / macOS / windows）自动运行 `moon test`。
 
@@ -38,8 +38,8 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 
 - 公开仓库 `668xin/num2words-moonbit`，含 `moon.mod` 元数据与全部源码；当前以**公开仓库 / git 依赖**方式引入（见验收边界第 2 条）。
 - 7 种语言的数字读法，在**各语言量级上限以内**输出正确结果；对非法输入与越界输入返回明确错误而非崩溃。
-- 56 个测试与三平台 CI 测试记录，其中含 5752 条与上游 num2words 的差分对照。
-- `DIFF_REPORT.md`：差分测试方法、覆盖范围、逐语言结果与两条明示的对照规则。
+- 69 个测试与三平台 CI 测试记录，其中含 6652 条与上游 num2words 的差分对照。
+- `DIFF_REPORT.md`：差分测试方法、覆盖范围、逐语言结果与明示的对照规则（意语重音、葡语标点、货币舍入与整数语义）。
 - 完整 README + **LGPL-2.1 LICENSE**（与上游一致，许可证正文已与 SPDX / GitHub Licenses API 权威文本校验一致）+ 来源署名。
 - 相对上游的差异化：纯 MoonBit 零运行时依赖、声明式扩展新语言、BigInt 与十进制字符串避免精度损失。
 
@@ -47,11 +47,11 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 
 1. **不承诺「任意大整数」。** 量级词表有限，各语言上限为：`en`/`ru` 10³³、`fr` 10³⁰、`es`/`de` 10²⁴、`it`/`pt` 10²¹；超出范围返回明确错误。
 2. **不承诺已发布到 mooncakes.io。** 当前 `moon add 668xin/num2words-moonbit` 无法解析（`Module not found in registry`）；发布到 mooncakes 列为后续项，需联网与账号操作。
-3. **仅英语提供 `currency`**；其余 6 种语言的 currency 回退为 `cardinal`（`ordinal` / `ordinal_num` 已全语言补齐，见核心功能范围）。
+3. **`currency` 七种语言均已原生支持**，币种集与上游一致：`en`/`fr`/`de`/`it` 为 EUR/USD/GBP，`es` 20 种，`ru` 6 种，`pt` 仅 BRL（默认值分别为 EUR / BRL）；不支持的币种返回 `Err` / `""`。
 4. **不提供反向转换**（`words → number`）。
 5. **不作性能声明**——未发布性能基准。
 6. **葡萄牙语仅巴西变体**（`dezesseis`、短标度 `bilhão`=10⁹），不提供欧洲变体（`dezasseis`、*mil milhões*）。
-7. 小数按**逐位朗读**（`1234.56` → *… point five six*），不做四舍五入。
+7. 小数在 `cardinal` 模式下按**逐位朗读**（`1234.56` → *… point five six*），不做四舍五入；`currency` 模式按第三位小数四舍五入到分。
 
 ## 移植或参考说明
 

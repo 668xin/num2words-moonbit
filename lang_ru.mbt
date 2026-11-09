@@ -149,7 +149,15 @@ fn ru_scale(power : Int, form : Int) -> String {
 }
 
 ///|
-fn Lang::cardinal_ru(self : Lang, n : BigInt) -> String {
+/// Cardinal with a gender override for every group's unit word. Currency mode
+/// uses this when the currency noun is feminine (гривна, копейка): upstream
+/// applies the feminine form to each group, so `1000000` becomes
+/// "одна миллион" (grammatically odd, but that is what upstream emits).
+fn Lang::cardinal_ru_gendered(
+  self : Lang,
+  n : BigInt,
+  feminine_units : Bool,
+) -> String {
   if n == BigInt::from_int(0) {
     return self.zero
   }
@@ -167,7 +175,7 @@ fn Lang::cardinal_ru(self : Lang, n : BigInt) -> String {
       continue
     }
     // "тысяча" is feminine: 1 -> "одна тысяча", 2 -> "две тысячи".
-    let feminine = power == 1
+    let feminine = feminine_units || power == 1
     let mut s = self.triple_ru(t, feminine)
     if power > 0 {
       s = s + " " + ru_scale(power, ru_form(t))
@@ -180,6 +188,11 @@ fn Lang::cardinal_ru(self : Lang, n : BigInt) -> String {
   } else {
     joined
   }
+}
+
+///|
+fn Lang::cardinal_ru(self : Lang, n : BigInt) -> String {
+  self.cardinal_ru_gendered(n, false)
 }
 
 ///|

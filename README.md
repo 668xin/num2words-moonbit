@@ -8,9 +8,10 @@
 `num2words-moonbit` is a from-scratch MoonBit implementation of the classic
 *number → words* library. It spells out integers (of arbitrary size via
 `BigInt`), decimals, ordinals, years and currency amounts in **English,
-French, Spanish, German, Italian, Portuguese (Brazilian and European) and
-Russian**; currency is native for all eight language codes (EUR by default,
-BRL for `pt`).
+French, Spanish, German, Italian, Portuguese (Brazilian and European),
+Russian, Dutch, Turkish and Vietnamese**; currency is native for all ten
+language codes that implement it upstream (EUR by default, BRL for `pt`, TRY
+for `tr`).
 
 This project was built for the **MoonBit September Hackathon 2026**. It ports
 the well-known Python [`num2words`](https://github.com/savoirfairelinux/num2words)
@@ -22,9 +23,9 @@ general-purpose multilingual number-to-words package on
 
 ## Features
 
-- **8 language codes**: English (`en`), French (`fr`), Spanish (`es`), German
+- **11 language codes**: English (`en`), French (`fr`), Spanish (`es`), German
   (`de`), Italian (`it`), Portuguese (`pt` Brazilian, `pt_PT` European), Russian
-  (`ru`).
+  (`ru`), Dutch (`nl`), Turkish (`tr`) and Vietnamese (`vi`).
 - **6 output modes**:
   - `cardinal` — `1234` → *one thousand, two hundred and thirty-four*
   - `ordinal` — `1` → *first*, `21` → *twenty-first*
@@ -37,8 +38,8 @@ general-purpose multilingual number-to-words package on
   scale table).
 - **Zero dependencies** beyond the MoonBit core.
 - A small **command-line tool** for ad-hoc conversions.
-- **Differential-tested against upstream `num2words`**: 7796 recorded
-  comparisons across the 8 language codes — see [DIFF_REPORT.md](DIFF_REPORT.md).
+- **Differential-tested against upstream `num2words`**: 10390 recorded
+  comparisons across the 11 language codes — see [DIFF_REPORT.md](DIFF_REPORT.md).
 
 ---
 
@@ -98,7 +99,7 @@ import "668xin/num2words-moonbit" @n2w
 
 | Function | Signature | Notes |
 | --- | --- | --- |
-| `get_lang` | `(code : String) -> Lang` | `"en"\|"fr"\|"es"\|"de"\|"it"\|"pt"\|"pt_PT"\|"ru"`, default `en` |
+| `get_lang` | `(code : String) -> Lang` | `"en"\|"fr"\|"es"\|"de"\|"it"\|"pt"\|"pt_PT"\|"ru"\|"nl"\|"tr"\|"vi"`, default `en` |
 | `num2words` | `(value : BigInt, lang : String, to : String) -> String` | core entry point |
 | `num2words_int` | `(value : Int, lang : String, to : String) -> String` | convenience |
 | `num2words_float` | `(value : Double, lang : String, to : String) -> String` | decimal literal |
@@ -162,6 +163,9 @@ are **reported, never crashed**:
 | `it`, `pt` | 10²¹ | `10^21` → *un triliardo* / *um sextilhão* |
 | `pt_PT` | 10²⁴ | `10^24` → *um quatrilião* |
 | `ru` | 10³³ | `10^33` → *один дециллион* |
+| `nl` | 10⁶⁰³ | `10^603` → *een zendiljard* |
+| `tr` | 10¹⁸ (values below 10²¹) | `10^18` → *birkentilyon* |
+| `vi` | 10⁵⁷ (values below 10⁶⁰) | `10^18` → *một Quintillion* |
 
 ```mbt
 @n2w.num2words_str_checked("1" + <36 zeros>, "en", "cardinal")
@@ -178,8 +182,11 @@ error: magnitude out of supported range: 1000000000000000000000000000000000000
 
 ### Known limitations
 
-- **8 language codes** (`en`, `fr`, `es`, `de`, `it`, `pt`, `pt_PT`, `ru`).
-  More are planned; see the per-language extension layout above.
+- **11 language codes** (`en`, `fr`, `es`, `de`, `it`, `pt`, `pt_PT`, `ru`,
+  `nl`, `tr`, `vi`). Ten are fully covered across every output mode upstream
+  implements; `vi` covers `cardinal` and `ordinal` because upstream has no
+  `to_year`, `to_ordinal_num` or `to_currency` for Vietnamese. Upstream's other
+  45 language codes are out of scope (see [COMPAT.md](COMPAT.md)).
 - **Magnitudes are bounded** by each language's scale-word table — see
   *Supported magnitude* above. "Arbitrarily large" is **not** claimed.
 - **Published as `0.1.0`** on mooncakes.io; later releases need a version bump
@@ -187,15 +194,25 @@ error: magnitude out of supported range: 1000000000000000000000000000000000000
 - **Portuguese has both variants**: `pt` is Brazilian (`dezesseis`, short scale
   *bilhão* = 10⁹) and `pt_PT` is European (`dezasseis`, long scale *mil milhões*
   = 10⁹, *bilião* = 10¹²).
-- **`ordinal` / `ordinal_num` are native for all eight language codes** and
-  machine-checked against upstream (including its quirks, e.g. Spanish
-  *décimoprimero*, the empty `es`/`pt` ordinal of `0`, and the European
-  Portuguese long-scale *milésimo milionésimo*). Negative values return `""`
-  (upstream raises `TypeError`), except Italian (*meno terzo*).
-- **`currency` is native for all eight language codes with the complete
-  upstream code sets**: `en` 11 codes, `fr`/`de`/`it` 4 each, `es` 20, `ru` 6,
-  `pt` 1 (BRL) and `pt_PT` 5. Codes valid upstream but not for a language
-  return `""` (`Err` from `num2words_str_checked` / `num2words_currency`).
+- **Vietnamese negatives are fixed, not copied**: upstream 0.5.14 reads `-1` as
+  *mười chín* and raises `IndexError` for smaller values; this project spells
+  them properly (*âm bốn mươi hai*).
+- **Turkish currency is a single lira/kuruş pair** upstream (its
+  `to_currency` accepts no ISO code); only `TRY` is exposed here, and an exact
+  zero amount is *bedelsiz*.
+- **`ordinal` / `ordinal_num` are native for all language codes where upstream
+  implements them** and machine-checked against upstream (including its quirks,
+  e.g. Spanish *décimoprimero*, the empty `es`/`pt` ordinal of `0`, the
+  European Portuguese long-scale *milésimo milionésimo* and Turkish's missing
+  *-uncu* on `10^18`). Negative values return `""` (upstream raises
+  `TypeError`), except Italian (*meno terzo*). Vietnamese `ordinal` is the
+  cardinal, exactly as upstream; `ordinal_num` is absent upstream and returns
+  `""` here.
+- **`currency` is native for ten language codes with upstream's complete code
+  sets**: `en` 11 codes, `fr`/`de`/`it` 4 each, `es` 20, `ru` 6, `nl` 4, `pt` 1
+  (BRL), `pt_PT` 5 and `tr` 1 (TRY); Vietnamese has no currency mode upstream.
+  Codes valid upstream but not for a language return `""` (`Err` from
+  `num2words_str_checked` / `num2words_currency`).
 - **Currency amounts are decimal strings** (`num2words_currency`), and the
   integer part is the major unit. Upstream's type-dependent quirk (a bare
   Python `int` is read as *cents*) is deliberately not reproduced.
@@ -230,7 +247,7 @@ moon run cmd/main -- --help
 ```
 
 ```
-num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]
+num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]
 ```
 
 ### Runnable example
@@ -239,7 +256,7 @@ num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru] [--to cardinal|ordinal|ord
 moon run examples
 ```
 
-The `examples/` package exercises every mode, all eight language codes, two
+The `examples/` package exercises every mode, all eleven language codes, two
 currency conversions and the error path.
 
 ---
@@ -248,49 +265,52 @@ currency conversions and the error path.
 
 The reference implementation is the Python
 [`num2words`](https://github.com/savoirfairelinux/num2words) library, version
-**0.5.14** (LGPL-2.1). Cardinal parity for the eight shared language codes, year
-parity for English, Italian, Portuguese (both variants) and Russian, and ordinal
-/ `ordinal_num` / currency parity for all eight are machine-checked by
-**7796 recorded comparisons**; see [DIFF_REPORT.md](DIFF_REPORT.md) for the
+**0.5.14** (LGPL-2.1). Cardinal, year, ordinal, `ordinal_num` and currency
+parity for all eleven language codes are machine-checked by
+**10390 recorded comparisons**; see [DIFF_REPORT.md](DIFF_REPORT.md) for the
 method and results, and [COMPAT.md](COMPAT.md) for a call-by-call mapping,
 currency-code coverage and the known gaps.
 
-Upstream implements all five output modes for each of these eight language
-codes. This project's coverage is:
+Upstream implements all five output modes for ten of these eleven language
+codes; Vietnamese upstream only implements `cardinal` (and `ordinal`, which it
+aliases to the cardinal). This project's coverage is:
 
-| Mode | `en` | `fr` | `es` | `de` | `it` | `pt` | `pt_PT` | `ru` |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `cardinal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `year` | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ |
-| `ordinal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `ordinal_num` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `currency` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Mode | `en` | `fr` | `es` | `de` | `it` | `pt` | `pt_PT` | `ru` | `nl` | `tr` | `vi` |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `cardinal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `year` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | n.a. |
+| `ordinal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `ordinal_num` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | n.a. |
+| `currency` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | n.a. |
 
-Legend: ✅ native and aligned with upstream · ⚠️ native but a different year
-convention.
+Legend: ✅ native and aligned with upstream; n.a. not implemented by upstream
+for that language (the call returns `""` here).
 
 ### Per-language differences
 
 | Language | Upstream | This project | Differences |
 | --- | --- | --- | --- |
 | `en` | `en` | `en` | Cardinal, year, ordinal and `ordinal_num` aligned; currency aligned (11 codes, EUR default) |
-| `fr` | `fr` | `fr` | Years read as digit pairs (`2024` → *vingt vingt-quatre*) instead of upstream's full cardinal (*deux mille vingt-quatre*); ordinal and currency aligned (4 codes) |
-| `es` | `es` | `es` | Long scale aligned (`10⁹` → *mil millones*); years read as pairs (*veinte veinticuatro*); ordinal and currency aligned (20 codes, including the *quinientos* quirk) |
-| `de` | `de` | `de` | `1000` → *eintausend* (aligned); years read as pairs without *-hundert* (*zwanzig vierundzwanzig*); ordinal and currency aligned (4 codes) |
+| `fr` | `fr` | `fr` | Cardinal, year, ordinal and currency aligned (4 codes) |
+| `es` | `es` | `es` | Long scale aligned (`10⁹` → *mil millones*); ordinal and currency aligned (20 codes, including the *quinientos* quirk) |
+| `de` | `de` | `de` | `1000` → *eintausend* (aligned); year uses the upstream *-hundert* form (`1900` → *neunzehnhundert*); ordinal and currency aligned (4 codes) |
 | `it` | `it` | `it` | Accent on *tré* only on the final word (*centoventitremila* vs *centoventitré*); upstream's `…dicotto` typo is not reproduced; ordinal and currency aligned (4 codes), with negative currency supported where upstream crashes |
 | `pt` | `pt_BR` | `pt` (Brazilian) | Matches upstream `pt_BR` vocabulary (*dezesseis*, *bilhão*); scale groups are separated by spaces, upstream `pt_BR` writes a comma (*mil, duzentos*); ordinal and currency aligned (BRL only, zero cents omitted) |
 | `pt_PT` | `pt` (European) | `pt_PT` | European vocabulary (*dezasseis*, *dezanove*); long scale (*mil milhões* = 10⁹, *bilião* = 10¹²); ordinal and currency aligned (EUR/USD/GBP/CAD/AUD; GBP keeps zero *pence*) |
 | `ru` | `ru` | `ru` | Cardinal and ordinal aligned (three plural forms, feminine *одна тысяча*); currency aligned (6 codes, gender + plural forms) |
+| `nl` | `nl` | `nl` | Closed compounds aligned (*eenentwintig*, *duizendtweehonderd…*); year uses *-honderd* (`1900` → *negentien honderd*); ordinal suffix rules and currency aligned (4 codes, nouns invariant) |
+| `tr` | `tr` | `tr` | One-word compounds aligned (*binikiyüzotuzdört*); ordinal replaces only the final morpheme; year is the cardinal; currency is the single lira/kuruş pair (TRY) |
+| `vi` | `vi` | `vi` | Cardinal and ordinal (= cardinal) aligned; negatives are fixed here (upstream returns *mười chín* for `-1` and raises for smaller values); upstream has no year, `ordinal_num` or currency |
 
 ### Other differences
 
-- **Breadth.** Upstream exposes ~55 language codes (including regional
-  variants); this project covers eight language codes, each as one `lang_xx.mbt`
-  file.
-- **Ordinals.** Native for all eight language codes and machine-checked against
-  upstream.
-- **Currency.** Native for all eight language codes with upstream's complete
-  code sets (55 language/code pairs); see [COMPAT.md](COMPAT.md) §4.
+- **Breadth.** Upstream exposes ~56 language codes (including regional
+  variants); this project covers eleven language codes, each as one
+  `lang_xx.mbt` file.
+- **Ordinals.** Native for every language where upstream implements them, and
+  machine-checked against upstream.
+- **Currency.** Native for ten language codes with upstream's complete code
+  sets (60 language/code pairs); see [COMPAT.md](COMPAT.md) §4.
 - **Scale ceilings.** Both sides use a finite scale-word table, but the
   ceilings differ; see [Supported magnitude](#supported-magnitude) for ours.
 - **Input handling.** Upstream raises exceptions on malformed numbers; this
@@ -317,14 +337,17 @@ The library is split into a small core engine and one module per language:
 | `lang_pt.mbt` | Portuguese, Brazilian (*cem*/*cento*, *vinte e um*, *mil e cem*) |
 | `lang_pt_pt.mbt` | Portuguese, European (*dezasseis*, long scale *mil milhões*, *bilião*) |
 | `lang_ru.mbt` | Russian (three plural forms, feminine *одна тысяча*, *две тысячи*) |
-| `lang_ordinal.mbt` | ordinals and `ordinal_num` for the seven non-English language codes |
-| `lang_currency.mbt` | currency tables and formatting (all eight language codes; per-language code sets, gender and plural rules) |
+| `lang_nl.mbt` | Dutch (closed compounds *eenentwintig*; generated *-iljoen*/*-iljard* scale table) |
+| `lang_tr.mbt` | Turkish (single-word compounds; ordinal forms; lira/kuruş currency) |
+| `lang_vi.mbt` | Vietnamese (space-separated groups, *lẻ* before a sub-100 remainder) |
+| `lang_ordinal.mbt` | ordinals and `ordinal_num` for the non-English language codes |
+| `lang_currency.mbt` | currency tables and formatting (ten language codes; per-language code sets, gender and plural rules) |
 | `examples/` | runnable demo (`moon run examples`) |
 | `benchmarks/` | `moon bench` microbenchmarks |
 | `num2words-moonbit.mbt` | public API + per-mode dispatch |
 | `cmd/main/main.mbt` | CLI built on `@env.args()` |
 | `tools/gen_fixtures.py` | regenerates the differential fixtures from upstream `num2words` |
-| `diff_fixtures_wbtest.mbt` | generated fixtures + differential tests (7796 comparisons) |
+| `diff_fixtures_wbtest.mbt` | generated fixtures + differential tests (10390 comparisons) |
 
 Each language is described declaratively by a `Lang` struct (ones, teens, tens,
 hundreds, scale words, conjunctions, negative word, decimal word), and a few
@@ -357,7 +380,7 @@ cross-language comparison. Regenerate them with
 ## Development
 
 ```bash
-moon test          # 76 tests, including 7796 differential comparisons
+moon test          # 102 tests, including 10390 differential comparisons
 moon build         # build the library + CLI
 moon run cmd/main -- 1234 --lang en
 

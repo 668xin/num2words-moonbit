@@ -5,12 +5,13 @@
 //
 // API: `num2words(value, lang, to)` where `value` is a BigInt (or use the
 // `num2words_int` / `num2words_float` convenience wrappers), `lang` is
-// "en" | "fr" | "es" | "de" | "it" | "pt" | "pt_PT" | "ru", and `to` is
-// "cardinal" (default), "ordinal", "ordinal_num", "year" or "currency".
+// "en" | "fr" | "es" | "de" | "it" | "pt" | "pt_PT" | "ru" | "nl" | "tr" | "vi",
+// and `to` is "cardinal" (default), "ordinal", "ordinal_num", "year" or
+// "currency".
 //
 // Currency takes a decimal amount string and an ISO-4217 code through
 // `num2words_currency`; the `to = "currency"` dispatch path uses the language
-// default code (EUR, or BRL for `pt`).
+// default code (EUR, BRL for `pt`, TRY for `tr`).
 
 // --- input validation -------------------------------------------------------
 //
@@ -173,6 +174,9 @@ pub fn get_lang(code : String) -> Lang {
     "pt" => lang_pt()
     "pt_PT" => lang_pt_pt()
     "ru" => lang_ru()
+    "nl" => lang_nl()
+    "tr" => lang_tr()
+    "vi" => lang_vi()
     _ => lang_en()
   }
 }
@@ -190,6 +194,9 @@ fn ordinal_for(l : Lang, value : BigInt) -> String {
     Pt => ordinal_pt(value)
     PtPt => ordinal_pt_pt(value)
     Ru => ordinal_ru(value)
+    Nl => ordinal_nl(value)
+    Tr => ordinal_tr(value)
+    Vi => ordinal_vi(value)
   }
 }
 
@@ -206,6 +213,9 @@ fn ordinal_num_for(l : Lang, value : BigInt) -> String {
     Pt => ordinal_num_pt(value)
     PtPt => ordinal_num_pt(value)
     Ru => ordinal_num_ru(value)
+    Nl => ordinal_num_nl(value)
+    Tr => ordinal_num_tr(value)
+    Vi => ordinal_num_vi(value)
   }
 }
 
@@ -220,14 +230,18 @@ fn year_for(l : Lang, value : BigInt) -> String {
     Pt => year_pt(value)
     PtPt => year_pt_pt(value)
     Ru => year_ru(value)
+    Nl => year_nl(value)
+    Tr => year_tr(value)
+    // Vietnamese has no `to_year` upstream (AttributeError).
+    Vi => ""
   }
 }
 
 ///|
-/// Currency spelling with the default code (EUR); `""` when the language or
-/// the amount is not supported.
+/// Currency spelling with the language default code (EUR, BRL for `pt`, TRY
+/// for `tr`); `""` when the language or the amount is not supported.
 fn currency_string(amount : String, lang : String) -> String {
-  match num2words_currency(amount, lang, "EUR") {
+  match num2words_currency(amount, lang, "") {
     Ok(words) => words
     Err(_) => ""
   }
@@ -341,7 +355,7 @@ pub fn num2words_str_checked(
   to : String,
 ) -> Result[String, String] {
   if to == "currency" {
-    return num2words_currency(value, lang, "EUR")
+    return num2words_currency(value, lang, "")
   }
   if !is_valid_number(value) {
     return Err("invalid number: " + value)

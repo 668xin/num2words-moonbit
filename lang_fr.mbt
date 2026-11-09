@@ -147,27 +147,8 @@ fn Lang::cardinal_fr(self : Lang, n : BigInt) -> String {
 }
 
 ///|
-/// French year reading (e.g. 2024 -> "vingt vingt-quatre").
+/// French years use the plain cardinal reading, matching upstream
+/// ("2024" -> "deux mille vingt-quatre").
 pub fn year_fr(n : BigInt) -> String {
-  if n < BigInt::from_int(1000) || n > BigInt::from_int(9999) {
-    return lang_fr().cardinal_fr(n)
-  }
-  let neg = n < BigInt::from_int(0)
-  let n = if neg { -n } else { n }
-  if n % BigInt::from_int(1000) == BigInt::from_int(0) {
-    return lang_fr().cardinal_fr(n)
-  }
-  let s = n.to_string()
-  let first = BigInt::from_string(s[0:2].to_owned()).to_int()
-  let second = BigInt::from_string(s[2:4].to_owned()).to_int()
-  if second == 0 {
-    return lang_fr().cardinal_fr(n)
-  }
-  let a = lang_fr().cardinal_fr(BigInt::from_int(first))
-  let b = lang_fr().cardinal_fr(BigInt::from_int(second))
-  if neg {
-    "moins " + a + " " + b
-  } else {
-    a + " " + b
-  }
+  lang_fr().cardinal_fr(n)
 }

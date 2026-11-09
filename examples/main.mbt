@@ -16,6 +16,9 @@ fn main {
   println(@lib.num2words_int(1234, "pt", "cardinal"))
   println(@lib.num2words_int(1234, "pt_PT", "cardinal"))
   println(@lib.num2words_int(1234, "ru", "cardinal"))
+  println(@lib.num2words_int(1234, "nl", "cardinal"))
+  println(@lib.num2words_int(1234, "tr", "cardinal"))
+  println(@lib.num2words_int(1234, "vi", "cardinal"))
 
   println("")
   println("== other modes (en) ==")

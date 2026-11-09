@@ -844,3 +844,81 @@ pub fn ordinal_ru(n : BigInt) -> String {
 pub fn ordinal_num_ru(n : BigInt) -> String {
   n.to_string()
 }
+
+// --- Dutch ------------------------------------------------------------------
+//
+// Upstream takes the cardinal and rewrites one trailing morpheme (first match
+// in insertion order), then appends "e": 1 -> "eerste", 8 -> "achtste",
+// 20 -> "twintigste", 100 -> "honderdste", 1000000 -> "een miljoenste".
+// ordinal_num: "<n>e".
+
+///|
+fn nl_ord_stem(word : String) -> String {
+  let rules : Array[(String, String)] = [
+    ("nul", "nuld"),
+    ("één", "eerst"),
+    ("twee", "tweed"),
+    ("drie", "derd"),
+    ("vier", "vierd"),
+    ("vijf", "vijfd"),
+    ("zes", "zesd"),
+    ("zeven", "zevend"),
+    ("acht", "achtst"),
+    ("negen", "negend"),
+    ("tien", "tiend"),
+    ("elf", "elfd"),
+    ("twaalf", "twaalfd"),
+    ("ig", "igst"),
+    ("erd", "erdst"),
+    ("end", "endst"),
+    ("joen", "joenst"),
+    ("rd", "rdst"),
+  ]
+  for i = 0; i < rules.length(); i = i + 1 {
+    let (suffix, replacement) = rules[i]
+    if ends_with(word, suffix) {
+      return word[0:word.length() - suffix.length()].to_owned() + replacement
+    }
+  }
+  word
+}
+
+///|
+pub fn ordinal_nl(n : BigInt) -> String {
+  if n < BigInt::from_int(0) {
+    return ""
+  }
+  nl_ord_stem(lang_nl().cardinal_nl(n)) + "e"
+}
+
+///|
+pub fn ordinal_num_nl(n : BigInt) -> String {
+  if n < BigInt::from_int(0) {
+    ""
+  } else {
+    n.to_string() + "e"
+  }
+}
+
+// --- Turkish ----------------------------------------------------------------
+//
+// Handled in lang_tr.mbt (only the last morpheme of the number is ordinalised).
+
+// --- Vietnamese -------------------------------------------------------------
+//
+// Upstream aliases `to_ordinal` to `to_cardinal` and provides neither
+// `to_ordinal_num` nor `to_year`; the ordinal is therefore the cardinal.
+
+///|
+pub fn ordinal_vi(n : BigInt) -> String {
+  if n < BigInt::from_int(0) {
+    ""
+  } else {
+    lang_vi().cardinal_vi(n)
+  }
+}
+
+///|
+pub fn ordinal_num_vi(_n : BigInt) -> String {
+  ""
+}

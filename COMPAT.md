@@ -3,7 +3,7 @@
 Reference: Python [`num2words`](https://github.com/savoirfairelinux/num2words)
 **0.5.14** (LGPL-2.1). This document maps the two APIs call by call, records the
 supported surface, and lists every known behavioural difference. Output parity
-is machine-checked by **7796 recorded comparisons** (see
+is machine-checked by **10390 recorded comparisons** (see
 [DIFF_REPORT.md](DIFF_REPORT.md)); `moon test` replays them without Python.
 
 ---
@@ -26,9 +26,9 @@ Notes:
 * Upstream's legacy `ordinal=True` flag is not provided; use `to="ordinal"`.
 * `num2words_currency` returns `Result[String, String]`; the other entry points
   return `String` (and `num2words_str_checked` returns `Result`).
-* `num2words_currency("...", lang, "")` uses the language default: **EUR**, or
-  **BRL** for `pt`. `num2words(..., "currency")` does the same with the integer
-  value treated as major units.
+* `num2words_currency("...", lang, "")` uses the language default: **EUR**,
+  **BRL** for `pt` or **TRY** for `tr`. `num2words(..., "currency")` does the
+  same with the integer value treated as major units.
 
 ---
 
@@ -36,12 +36,13 @@ Notes:
 
 | Upstream | This library | Notes |
 | --- | --- | --- |
-| `en`, `fr`, `es`, `de`, `it`, `ru` | same | full coverage of the modes below |
+| `en`, `fr`, `es`, `de`, `it`, `ru`, `nl`, `tr` | same | full coverage of the modes below |
 | `pt_BR` | `pt` | Brazilian Portuguese |
 | `pt` (European) | `pt_PT` | European Portuguese, **not** our `pt` |
-| other 48 codes | — | not implemented |
+| `vi` | `vi` | cardinal and ordinal only (upstream has no year / `ordinal_num` / currency) |
+| other 45 codes | — | not implemented |
 
-Upstream exposes **56 language codes**; this project implements **8**. Unknown
+Upstream exposes **56 language codes**; this project implements **11**. Unknown
 codes fall back to English here, while upstream raises `NotImplementedError`.
 
 ---
@@ -51,18 +52,23 @@ codes fall back to English here, while upstream raises `NotImplementedError`.
 | Code | `cardinal` | `year` | `ordinal` | `ordinal_num` | `currency` |
 | --- | --- | --- | --- | --- | --- |
 | `en` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fr` | ✅ | ⚠️ | ✅ | ✅ | ✅ |
-| `es` | ✅ | ⚠️ | ✅ | ✅ | ✅ |
-| `de` | ✅ | ⚠️ | ✅ | ✅ | ✅ |
+| `fr` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `es` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `de` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `it` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `pt` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `pt_PT` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `ru` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `nl` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `tr` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `vi` | ✅ | n.a. | ✅ | n.a. | n.a. |
 
-✅ native and aligned · ⚠️ native but a different year convention: `fr`, `es`
-and `de` read years as digit pairs (`2024` → *vingt vingt-quatre*, *veinte
-veinticuatro*, *zwanzig vierundzwanzig*) instead of the upstream cardinal
-reading. All other modes follow upstream.
+✅ native and aligned; n.a. not implemented upstream (the call returns `""`
+here). `year` follows upstream for every code, including the German
+*-hundert* form (`1900` → *neunzehnhundert*, `2100` →
+*einundzwanzighundert*) and the Dutch *-honderd* form (`1900` →
+*negentien honderd*); Turkish years are plain cardinals and Vietnamese has no
+year mode.
 
 Currency is native for every code; the exact ISO-code coverage differs — see §4.
 
@@ -80,11 +86,20 @@ Currency is native for every code; the exact ISO-code coverage differs — see �
 | `ru` | 6: EUR, USD, RUB, PLN, UAH, KZT | all 6 | — |
 | `pt` | 5: EUR, USD, GBP, CAD, AUD | all 5 | — |
 | `pt_BR` | BRL (upstream `to_currency` takes no code argument) | BRL | — |
+| `nl` | 4: EUR, GBP, USD, CNY | all 4 | — |
+| `tr` | TRY only (upstream `to_currency` takes no code argument) | TRY | — |
+| `vi` | none (upstream has no `to_currency`) | — | n.a. |
 
-Coverage is **55 of 55 upstream language/code pairs**. Unsupported codes (and
+Coverage is **60 of 60 upstream language/code pairs**. Unsupported codes (and
 codes that are valid upstream but not for a given language) return
 `Err("currency code not supported for ...")` (or `""` from the non-`Result`
-entry points), while upstream raises `NotImplementedError`.
+entry points), while upstream raises `NotImplementedError` or `TypeError`.
+
+Dutch keeps every currency noun invariant (`twee euro`, `twee cent`,
+`twee penny`) because upstream's `pluralize` always returns the singular.
+Turkish writes one word with no separator and omits the kuruş part when it is
+zero (`onikiliraotuzdörtkuruş`, `birlira`); an exact zero amount is
+`bedelsiz`.
 
 ---
 
@@ -104,12 +119,16 @@ Measured on 0.5.14 (values above the ceiling raise in Python, return `""` /
 | `pt_BR` | 10^17 (10^18 → `OverflowError`) | 10^21 (our `pt`) |
 | `pt_PT` | 10^26 | 10^24 |
 | `ru` | 10^32 (10^33 → `KeyError`) | 10^33 |
+| `nl` | 10^603 | 10^603 |
+| `tr` | 10^20 (10^21 → `OverflowError`) | 10^18 scale word, values below 10^21 |
+| `vi` | 10^59 in principle, but float formatting breaks above 10^18 | 10^57 scale word, values below 10^60 |
 
 Ceilings differ in both directions: this project is more conservative for
-`en`/`fr`/`es`/`de`/`it`/`pt_PT`, but accepts larger values than upstream for
-`pt_BR` and `ru`. Values past the ceiling return `""` (`Err("magnitude out of
-supported range: ...")` from `num2words_str_checked`); upstream raises
-`OverflowError`, `KeyError` or `IndexError`.
+`en`/`fr`/`es`/`de`/`it`/`pt_PT`/`tr`, but accepts larger values than upstream
+for `pt_BR` and `ru`. Values past the ceiling return `""`
+(`Err("magnitude out of supported range: ...")` from
+`num2words_str_checked`); upstream raises `OverflowError`, `KeyError` or
+`IndexError`.
 
 ---
 
@@ -126,6 +145,8 @@ supported range: ...")` from `num2words_str_checked`); upstream raises
 | out-of-range | may raise | `""` or `Err("magnitude out of supported range: ...")` |
 | negative ordinal | `TypeError` | `""` (Italian: `meno ...`) |
 | unsupported currency code | `NotImplementedError` | `Err(...)` / `""` |
+| mode absent upstream (`vi` year / `ordinal_num` / currency) | `AttributeError` | `""` / `Err(...)` |
+| negative cardinal (`vi`) | broken (`-1` → *mười chín*, smaller values raise) | `"âm ..."` |
 | return type | `str` (or `int` for `it`/`ru` `ordinal_num`) | `String` / `Result[String, String]` |
 
 ---
@@ -149,21 +170,32 @@ These are deliberate and recorded in [DIFF_REPORT.md](DIFF_REPORT.md) §4.
    this project returns `meno ...`.
 6. **Russian PLN.** Upstream's paucal form contains the typo `слотых`; this
    project writes `злотых` (normalised in the fixtures).
-7. **Year reading for `fr`/`es`/`de`** — see §3.
-8. **Unknown language / mode / out-of-range** return a value instead of raising
+7. **Unknown language / mode / out-of-range** return a value instead of raising
    — see §6.
+8. **Vietnamese negatives.** Upstream 0.5.14 reads `-1` as *mười chín* and
+   raises `IndexError` for smaller negatives; this project spells them
+   (`âm bốn mươi hai`). Vietnamese `year`, `ordinal_num` and `currency` do not
+   exist upstream and return `""` / `Err` here.
+9. **Turkish currency.** Upstream has one hard-coded lira/kuruş pair, treats any
+   amount below one lira as `bedelsiz`, and truncates the cents through a binary
+   float. This project exposes only `TRY`, uses the same zero amount
+   (`bedelsiz`) and otherwise applies the documented exact-decimal rounding.
+10. **Decimals.** Fractional digits are spelled one by one here
+    (`12.34` → *… virgül üç dört* / *… phẩy ba bốn* in `tr`/`vi`), while
+    upstream reads the last two decimal digits as a number (*otuz dört*,
+    *ba mươi bốn*). Decimal comparisons are therefore not part of the
+    differential fixtures.
 
-Everything else — cardinals for all eight codes, years for `en`/`it`/`pt`/
-`pt_PT`/`ru`, ordinals and `ordinal_num` for all eight, and currency for the
-codes listed in §4 — matches upstream byte-for-byte (after the normalisations
-above).
+Everything else — cardinals, years, ordinals and `ordinal_num` for the codes
+that implement them, and currency for the codes listed in §4 — matches upstream
+byte-for-byte (after the normalisations above).
 
 ---
 
 ## 8. Verification
 
 ```bash
-moon test          # 76 tests, 7796 differential comparisons
+moon test          # 102 tests, 10390 differential comparisons
 moon build         # library + CLI
 ```
 
@@ -179,7 +211,7 @@ python tools/gen_fixtures.py
 
 ## 9. Not implemented / roadmap
 
-* The other 48 upstream language codes.
+* The other 45 upstream language codes.
 * Reverse conversion (`words → number`).
 * Performance benchmarks (no performance claims are made).
 * Publication to mooncakes.io.

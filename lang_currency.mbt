@@ -1,4 +1,4 @@
-// lang_currency.mbt — native currency mode for all seven languages.
+// lang_currency.mbt — native currency mode for all supported languages.
 //
 // Amount semantics: the amount is a decimal *string* and the integer part is
 // the major unit (12.34 = twelve euros and thirty-four cents). Upstream
@@ -266,6 +266,30 @@ fn currency_form_pt_pt(code : String) -> Result[CurrencyForm, String] {
 }
 
 ///|
+/// Dutch currency forms. Upstream's `pluralize` always returns the singular
+/// form, so both the unit and the cent noun are invariant ("twee euro",
+/// "twee cent", "twee penny").
+fn currency_form_nl(code : String) -> Result[CurrencyForm, String] {
+  match code {
+    "EUR" => Ok(currency_entry("euro", "euro", "cent", "cent", false))
+    "GBP" => Ok(currency_entry("pond", "pond", "penny", "penny", false))
+    "USD" => Ok(currency_entry("dollar", "dollar", "cent", "cent", false))
+    "CNY" => Ok(currency_entry("yuan", "yuan", "jiao", "jiao", false))
+    _ => Err(code)
+  }
+}
+
+///|
+/// Turkish has a single hard-coded currency pair upstream (`to_currency`
+/// accepts no code and always uses lira/kuruş), so only TRY is exposed.
+fn currency_form_tr(code : String) -> Result[CurrencyForm, String] {
+  match code {
+    "TRY" => Ok(currency_entry("lira", "lira", "kuruş", "kuruş", false))
+    _ => Err(code)
+  }
+}
+
+///|
 fn currency_supported_lang(lang : String) -> Bool {
   lang == "en" ||
   lang == "fr" ||
@@ -274,13 +298,17 @@ fn currency_supported_lang(lang : String) -> Bool {
   lang == "es" ||
   lang == "pt" ||
   lang == "pt_PT" ||
-  lang == "ru"
+  lang == "ru" ||
+  lang == "nl" ||
+  lang == "tr"
 }
 
 ///|
 fn currency_default_code(lang : String) -> String {
   if lang == "pt" {
     "BRL"
+  } else if lang == "tr" {
+    "TRY"
   } else {
     "EUR"
   }
@@ -297,6 +325,8 @@ fn currency_form(lang : String, code : String) -> Result[CurrencyForm, String] {
     "pt" => currency_form_pt(code)
     "pt_PT" => currency_form_pt_pt(code)
     "ru" => currency_form_ru(code)
+    "nl" => currency_form_nl(code)
+    "tr" => currency_form_tr(code)
     _ => Err(code)
   }
 }
@@ -467,6 +497,7 @@ fn currency_join(
     "it" => left + " " + unit + " e " + right + " " + cent
     "es" => left + " " + unit + " con " + right + " " + cent
     "ru" => left + " " + unit + ", " + right + " " + cent
+    "nl" => left + " " + unit + ", " + right + " " + cent
     _ => ""
   }
 }
@@ -516,6 +547,23 @@ pub fn num2words_currency(
           )
           let left = currency_num(lang, units, form.feminine)
           let right = currency_num(lang, cents, form.cent_feminine)
+          let nonzero = units > BigInt::from_int(0) ||
+            cents > BigInt::from_int(0)
+          // Turkish writes one word, drops the kuruş part when it is zero, and
+          // says "bedelsiz" for an exact zero amount (upstream's behaviour).
+          if lang == "tr" {
+            if !nonzero {
+              return Ok("bedelsiz")
+            }
+            let mut phrase = left + unit
+            if cents > BigInt::from_int(0) {
+              phrase = phrase + right + cent
+            }
+            if neg {
+              return Ok("eksi" + phrase)
+            }
+            return Ok(phrase)
+          }
           // pt/pt_PT normally omit zero cents, but European Portuguese GBP
           // always spells them ("um libra e zero pence").
           let show_zero_cents = if lang == "pt" {
@@ -543,8 +591,6 @@ pub fn num2words_currency(
             currency_join(lang, left, unit, right, cent)
           }
           // Upstream omits the sign when the rounded amount is exactly zero.
-          let nonzero = units > BigInt::from_int(0) ||
-            cents > BigInt::from_int(0)
           if neg && nonzero {
             Ok(l.negative + " " + core)
           } else {

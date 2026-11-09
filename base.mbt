@@ -21,6 +21,9 @@ pub enum Variant {
   Pt
   PtPt
   Ru
+  Nl
+  Tr
+  Vi
 }
 
 ///|
@@ -346,5 +349,8 @@ pub fn Lang::cardinal(self : Lang, n : BigInt) -> String {
     Pt => self.cardinal_pt(n)
     PtPt => self.cardinal_pt_pt(n)
     Ru => self.cardinal_ru(n)
+    Nl => self.cardinal_nl(n)
+    Tr => self.cardinal_tr(n)
+    Vi => self.cardinal_vi(n)
   }
 }

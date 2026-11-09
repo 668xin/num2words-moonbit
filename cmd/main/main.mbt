@@ -1,7 +1,7 @@
 // num2words — command line tool.
 // Converts a number (integer or decimal, optionally very large) into words.
 //
-//   num2words <value> [--lang en|fr|es|de|it|pt|ru]
+//   num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi]
 //                     [--to cardinal|ordinal|ordinal_num|year|currency]
 //                     [--currency EUR|USD|GBP]
 //
@@ -23,15 +23,15 @@ fn usage() -> Unit {
   println("")
   println("Usage:")
   println(
-    "  num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]",
+    "  num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]",
   )
   println("")
   println(
-    "Languages: en (English), fr (French), es (Spanish), de (German), it (Italian), pt (Portuguese, Brazil), pt_PT (Portuguese, Europe), ru (Russian)",
+    "Languages: en (English), fr (French), es (Spanish), de (German), it (Italian), pt (Portuguese, Brazil), pt_PT (Portuguese, Europe), ru (Russian), nl (Dutch), tr (Turkish), vi (Vietnamese)",
   )
   println("Modes    : cardinal (default), ordinal, ordinal_num, year, currency")
   println(
-    "Currency : ISO code, default EUR (BRL for pt); en/fr/de/it EUR/USD/GBP, es 20 codes, ru 6, pt_PT EUR/USD/GBP/CAD/AUD",
+    "Currency : ISO code, default EUR (BRL for pt, TRY for tr); en/fr/de/it EUR/USD/GBP, es 20 codes, ru 6, nl 4, pt_PT EUR/USD/GBP/CAD/AUD",
   )
   println("")
   println("Examples:")

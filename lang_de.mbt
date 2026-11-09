@@ -145,27 +145,24 @@ fn Lang::cardinal_de(self : Lang, n : BigInt) -> String {
 }
 
 ///|
-/// German year reading (e.g. 2024 -> "zwanzig vierundzwanzig").
+/// German years follow upstream: below 1100 and whenever the hundreds part is
+/// a multiple of ten (1000, 2000, 3000, 10000, ...) the cardinal is used;
+/// otherwise the last two digits are split off and the first part is followed
+/// by "hundert" ("1900" -> "neunzehnhundert", "2100" ->
+/// "einundzwanzighundert").
 pub fn year_de(n : BigInt) -> String {
-  if n < BigInt::from_int(1000) || n > BigInt::from_int(9999) {
-    return lang_de().cardinal_de(n)
+  let l = lang_de()
+  if n < BigInt::from_int(0) || n < BigInt::from_int(1100) {
+    return l.cardinal_de(n)
   }
-  let neg = n < BigInt::from_int(0)
-  let n = if neg { -n } else { n }
-  if n % BigInt::from_int(1000) == BigInt::from_int(0) {
-    return lang_de().cardinal_de(n)
+  let high = n / BigInt::from_int(100)
+  let low = n % BigInt::from_int(100)
+  if high % BigInt::from_int(10) == BigInt::from_int(0) {
+    return l.cardinal_de(n)
   }
-  let s = n.to_string()
-  let first = BigInt::from_string(s[0:2].to_owned()).to_int()
-  let second = BigInt::from_string(s[2:4].to_owned()).to_int()
-  if second == 0 {
-    return lang_de().cardinal_de(n)
+  let mut s = l.cardinal_de(high) + "hundert"
+  if low > BigInt::from_int(0) {
+    s = s + l.cardinal_de(low)
   }
-  let a = lang_de().cardinal_de(BigInt::from_int(first))
-  let b = lang_de().cardinal_de(BigInt::from_int(second))
-  if neg {
-    "minus " + a + " " + b
-  } else {
-    a + " " + b
-  }
+  s
 }

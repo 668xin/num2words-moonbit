@@ -385,7 +385,8 @@ test "fr cardinal" {
 
 ///|
 test "fr year" {
-  assert_eq(year_fr(BigInt::from_int(2024)), "vingt vingt-quatre")
+  assert_eq(year_fr(BigInt::from_int(2024)), "deux mille vingt-quatre")
+  assert_eq(year_fr(BigInt::from_int(1900)), "mille neuf cents")
 }
 
 ///|
@@ -415,7 +416,8 @@ test "es cardinal" {
 
 ///|
 test "es year" {
-  assert_eq(year_es(BigInt::from_int(2024)), "veinte veinticuatro")
+  assert_eq(year_es(BigInt::from_int(2024)), "dos mil veinticuatro")
+  assert_eq(year_es(BigInt::from_int(1900)), "mil novecientos")
 }
 
 ///|
@@ -437,7 +439,10 @@ test "de cardinal" {
 
 ///|
 test "de year" {
-  assert_eq(year_de(BigInt::from_int(2024)), "zwanzig vierundzwanzig")
+  assert_eq(year_de(BigInt::from_int(2024)), "zweitausendvierundzwanzig")
+  assert_eq(year_de(BigInt::from_int(1900)), "neunzehnhundert")
+  assert_eq(year_de(BigInt::from_int(2100)), "einundzwanzighundert")
+  assert_eq(year_de(BigInt::from_int(1000)), "eintausend")
 }
 
 ///|
@@ -758,7 +763,9 @@ test "path consistency: string and int agree" {
 
 ///|
 test "path consistency: string and int agree in every language" {
-  let langs = ["en", "fr", "es", "de", "it", "pt", "ru"]
+  let langs = [
+    "en", "fr", "es", "de", "it", "pt", "pt_PT", "ru", "nl", "tr", "vi",
+  ]
   let samples = [0, 21, 100, 1234, 1000000]
   for li = 0; li < langs.length(); li = li + 1 {
     for si = 0; si < samples.length(); si = si + 1 {
@@ -844,4 +851,197 @@ test "float scientific notation, negative zero and decimal magnitude guard" {
   assert_eq(num2words_str("-0.5", "en", "cardinal"), "minus zero point five")
   // Out-of-range integer part in a decimal string -> "" (no " point ..." leak).
   assert_eq(num2words_str("1" + zeros(36) + ".5", "en", "cardinal"), "")
+}
+
+// --- Dutch ------------------------------------------------------------------
+
+///|
+test "nl cardinal" {
+  assert_eq(num2words_int(0, "nl", "cardinal"), "nul")
+  assert_eq(num2words_int(1, "nl", "cardinal"), "één")
+  assert_eq(num2words_int(16, "nl", "cardinal"), "zestien")
+  // tens and units are reversed and glued: 21 -> eenentwintig, 22 -> tweeëntwintig
+  assert_eq(num2words_int(21, "nl", "cardinal"), "eenentwintig")
+  assert_eq(num2words_int(22, "nl", "cardinal"), "tweeëntwintig")
+  assert_eq(num2words_int(100, "nl", "cardinal"), "honderd")
+  assert_eq(num2words_int(101, "nl", "cardinal"), "honderdéén")
+  assert_eq(num2words_int(1000, "nl", "cardinal"), "duizend")
+  assert_eq(num2words_int(1001, "nl", "cardinal"), "duizendéén")
+  assert_eq(num2words_int(1100, "nl", "cardinal"), "duizendhonderd")
+  assert_eq(
+    num2words_int(1234, "nl", "cardinal"),
+    "duizendtweehonderdvierendertig",
+  )
+  // Spaces appear only around million-and-above scale words.
+  assert_eq(num2words_int(1000000, "nl", "cardinal"), "een miljoen")
+  assert_eq(num2words_int(1000001, "nl", "cardinal"), "een miljoen één")
+  assert_eq(num2words_int(1001000, "nl", "cardinal"), "een miljoen duizend")
+  assert_eq(
+    num2words_int(123456789, "nl", "cardinal"),
+    "honderddrieëntwintig miljoen vierhonderdzesenvijftigduizendzevenhonderdnegenentachtig",
+  )
+  assert_eq(num2words_int(-42, "nl", "cardinal"), "min tweeënveertig")
+  assert_eq(
+    num2words(BigInt::from_string("1000000000000000"), "nl", "cardinal"),
+    "een biljard",
+  )
+}
+
+///|
+test "nl year" {
+  assert_eq(num2words_int(2024, "nl", "year"), "tweeduizendvierentwintig")
+  assert_eq(num2words_int(1900, "nl", "year"), "negentien honderd")
+  assert_eq(num2words_int(1100, "nl", "year"), "elf honderd")
+  assert_eq(num2words_int(1001, "nl", "year"), "duizendéén")
+  assert_eq(num2words_int(100, "nl", "year"), "één honderd")
+  assert_eq(num2words_int(-44, "nl", "year"), "min één honderd zesenvijftig")
+}
+
+///|
+test "nl ordinal and ordinal_num" {
+  assert_eq(num2words_int(0, "nl", "ordinal"), "nulde")
+  assert_eq(num2words_int(1, "nl", "ordinal"), "eerste")
+  assert_eq(num2words_int(2, "nl", "ordinal"), "tweede")
+  assert_eq(num2words_int(3, "nl", "ordinal"), "derde")
+  assert_eq(num2words_int(8, "nl", "ordinal"), "achtste")
+  assert_eq(num2words_int(20, "nl", "ordinal"), "twintigste")
+  assert_eq(num2words_int(21, "nl", "ordinal"), "eenentwintigste")
+  assert_eq(num2words_int(100, "nl", "ordinal"), "honderdste")
+  assert_eq(num2words_int(101, "nl", "ordinal"), "honderdeerste")
+  assert_eq(num2words_int(1000, "nl", "ordinal"), "duizendste")
+  assert_eq(num2words_int(1000000, "nl", "ordinal"), "een miljoenste")
+  assert_eq(num2words_int(21, "nl", "ordinal_num"), "21e")
+  assert_eq(num2words_int(-1, "nl", "ordinal"), "")
+}
+
+///|
+test "nl currency and magnitude" {
+  assert_eq(currency_ok("1.01", "nl", "EUR"), "één euro, één cent")
+  assert_eq(currency_ok("2.02", "nl", "USD"), "twee dollar, twee cent")
+  // Dutch keeps every noun singular, even after a plural numeral.
+  assert_eq(currency_ok("2.02", "nl", "GBP"), "twee pond, twee penny")
+  assert_eq(currency_ok("12.34", "nl", "CNY"), "twaalf yuan, vierendertig jiao")
+  assert_eq(currency_ok("0", "nl", ""), "nul euro, nul cent")
+  assert_eq(currency_ok("12.34", "nl", ""), "twaalf euro, vierendertig cent")
+  assert_eq(lang_nl().max_power(), 201)
+  assert_eq(num2words_str("1" + zeros(603), "nl", "cardinal"), "een zendiljard")
+  assert_eq(num2words_str("1" + zeros(606), "nl", "cardinal"), "")
+}
+
+// --- Turkish ----------------------------------------------------------------
+
+///|
+test "tr cardinal" {
+  assert_eq(num2words_int(0, "tr", "cardinal"), "sıfır")
+  assert_eq(num2words_int(21, "tr", "cardinal"), "yirmibir")
+  assert_eq(num2words_int(100, "tr", "cardinal"), "yüz")
+  assert_eq(num2words_int(101, "tr", "cardinal"), "yüzbir")
+  // A lone thousands group drops "bir"; one million keeps it.
+  assert_eq(num2words_int(1000, "tr", "cardinal"), "bin")
+  assert_eq(num2words_int(1001, "tr", "cardinal"), "binbir")
+  assert_eq(num2words_int(1100, "tr", "cardinal"), "binyüz")
+  assert_eq(num2words_int(1234, "tr", "cardinal"), "binikiyüzotuzdört")
+  assert_eq(num2words_int(1000000, "tr", "cardinal"), "birmilyon")
+  assert_eq(num2words_int(1001000, "tr", "cardinal"), "birmilyonbin")
+  assert_eq(
+    num2words_int(123456789, "tr", "cardinal"),
+    "yüzyirmiüçmilyondörtyüzellialtıbinyediyüzseksendokuz",
+  )
+  assert_eq(num2words_int(-42, "tr", "cardinal"), "eksikırkiki")
+}
+
+///|
+test "tr ordinal and ordinal_num" {
+  assert_eq(num2words_int(0, "tr", "ordinal"), "sıfırıncı")
+  assert_eq(num2words_int(1, "tr", "ordinal"), "birinci")
+  assert_eq(num2words_int(3, "tr", "ordinal"), "üçüncü")
+  assert_eq(num2words_int(10, "tr", "ordinal"), "onuncu")
+  assert_eq(num2words_int(23, "tr", "ordinal"), "yirmiüçüncü")
+  assert_eq(num2words_int(100, "tr", "ordinal"), "yüzüncü")
+  assert_eq(num2words_int(200, "tr", "ordinal"), "ikiyüzüncü")
+  assert_eq(num2words_int(1000, "tr", "ordinal"), "bininci")
+  assert_eq(num2words_int(1001, "tr", "ordinal"), "binbirinci")
+  assert_eq(num2words_int(2000, "tr", "ordinal"), "ikibininci")
+  assert_eq(num2words_int(1000000, "tr", "ordinal"), "birmilyonuncu")
+  // Upstream's 10^18 ordinal entry lacks the "-uncu" suffix.
+  assert_eq(
+    num2words(BigInt::from_string("1000000000000000000"), "tr", "ordinal"),
+    "birkentilyon",
+  )
+  assert_eq(num2words_int(1, "tr", "ordinal_num"), "1inci")
+  assert_eq(num2words_int(3, "tr", "ordinal_num"), "3üncü")
+  assert_eq(num2words_int(100, "tr", "ordinal_num"), "100üncü")
+  assert_eq(num2words_int(-1, "tr", "ordinal"), "")
+}
+
+///|
+test "tr year and currency" {
+  // No year-specific reading: a year is a cardinal.
+  assert_eq(num2words_int(2024, "tr", "year"), "ikibinyirmidört")
+  assert_eq(num2words_int(1900, "tr", "year"), "bindokuzyüz")
+  assert_eq(currency_ok("0", "tr", ""), "bedelsiz")
+  assert_eq(currency_ok("1", "tr", ""), "birlira")
+  assert_eq(currency_ok("12.34", "tr", "TRY"), "onikiliraotuzdörtkuruş")
+  assert_eq(currency_ok("1.5", "tr", "TRY"), "birliraellikuruş")
+  assert_eq(currency_ok("-3.5", "tr", "TRY"), "eksiüçliraellikuruş")
+  assert_eq(
+    num2words_currency("1", "tr", "USD"),
+    Err("currency code not supported for tr: USD"),
+  )
+}
+
+// --- Vietnamese -------------------------------------------------------------
+
+///|
+test "vi cardinal" {
+  assert_eq(num2words_int(0, "vi", "cardinal"), "không")
+  assert_eq(num2words_int(21, "vi", "cardinal"), "hai mươi mốt")
+  assert_eq(num2words_int(25, "vi", "cardinal"), "hai mươi lăm")
+  assert_eq(num2words_int(105, "vi", "cardinal"), "một trăm lẻ năm")
+  assert_eq(num2words_int(1001, "vi", "cardinal"), "một nghìn lẻ một")
+  assert_eq(num2words_int(1010, "vi", "cardinal"), "một nghìn lẻ mười")
+  assert_eq(num2words_int(1100, "vi", "cardinal"), "một nghìn một trăm")
+  assert_eq(
+    num2words_int(1234, "vi", "cardinal"),
+    "một nghìn hai trăm ba mươi bốn",
+  )
+  assert_eq(
+    num2words_int(123456789, "vi", "cardinal"),
+    "một trăm hai mươi ba triệu bốn trăm năm mươi sáu nghìn bảy trăm tám mươi chín",
+  )
+  assert_eq(
+    num2words(BigInt::from_string("1000000000000"), "vi", "cardinal"),
+    "một nghìn tỷ",
+  )
+  assert_eq(
+    num2words(BigInt::from_string("1000000000000000000"), "vi", "cardinal"),
+    "một Quintillion",
+  )
+  // Upstream's negative handling is broken; this port spells it properly.
+  assert_eq(num2words_int(-42, "vi", "cardinal"), "âm bốn mươi hai")
+  assert_eq(num2words_str("1" + zeros(59), "vi", "cardinal").length() > 0, true)
+  assert_eq(num2words_str("1" + zeros(60), "vi", "cardinal"), "")
+}
+
+///|
+test "vi ordinal aliases cardinal; year/ordinal_num/currency are absent" {
+  assert_eq(num2words_int(21, "vi", "ordinal"), "hai mươi mốt")
+  assert_eq(num2words_int(105, "vi", "ordinal"), "một trăm lẻ năm")
+  assert_eq(num2words_int(21, "vi", "ordinal_num"), "")
+  assert_eq(num2words_int(2024, "vi", "year"), "")
+  assert_eq(
+    num2words_currency("1", "vi", "EUR"),
+    Err("currency not implemented for language: vi"),
+  )
+}
+
+// --- default currency codes -------------------------------------------------
+
+///|
+test "currency: language defaults" {
+  // The to="currency" dispatch used to force EUR, which lost pt's BRL default.
+  assert_eq(num2words_str("1", "pt", "currency"), "um real")
+  assert_eq(num2words_str("1", "nl", "currency"), "één euro, nul cent")
+  assert_eq(num2words_str("1", "tr", "currency"), "birlira")
+  assert_eq(num2words_str_checked("1", "tr", "currency"), Ok("birlira"))
 }

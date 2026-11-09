@@ -103,6 +103,10 @@ to upstream as floats, so its type-dependent int-as-cents quirk does not apply.
 | `pt` | 26 | 26 | upstream `pt_BR`, commas ignored (see §4) |
 | `pt_PT` | 130 | 130 | upstream `pt`, commas ignored; GBP zero *pence* (see §4) |
 
+For `en`/`fr`/`de`/`it` these fixtures cover the implemented EUR/USD/GBP
+subset; the remaining upstream codes are listed in
+[COMPAT.md](COMPAT.md) §4.
+
 All 7611 comparisons pass under the documented comparison rules in §4.
 French, Spanish and German years use this project's pair-reading convention
 instead of the upstream cardinal reading and are therefore not part of the

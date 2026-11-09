@@ -192,10 +192,10 @@ error: magnitude out of supported range: 1000000000000000000000000000000000000
   Portuguese long-scale *milésimo milionésimo*). Negative values return `""`
   (upstream raises `TypeError`), except Italian (*meno terzo*).
 - **`currency` is native for all eight language codes**, following upstream's
-  code sets: `en`/`fr`/`de`/`it` take `EUR`/`USD`/`GBP`, `es` takes 20 codes,
-  `ru` takes 6, `pt` accepts only `BRL` (its default), and `pt_PT` takes
-  `EUR`/`USD`/`GBP`/`CAD`/`AUD` (EUR default). Other codes return `""` (`Err`
-  from `num2words_str_checked` / `num2words_currency`).
+  code sets where implemented: `es` (20 codes), `ru` (6), `pt` (BRL only) and
+  `pt_PT` (5) are complete; `en`/`fr`/`de`/`it` cover `EUR`/`USD`/`GBP`, a
+  subset of their upstream sets (see [COMPAT.md](COMPAT.md) §4). Other codes
+  return `""` (`Err` from `num2words_str_checked` / `num2words_currency`).
 - **Currency amounts are decimal strings** (`num2words_currency`), and the
   integer part is the major unit. Upstream's type-dependent quirk (a bare
   Python `int` is read as *cents*) is deliberately not reproduced.
@@ -243,7 +243,8 @@ The reference implementation is the Python
 parity for English, Italian, Portuguese (both variants) and Russian, and ordinal
 / `ordinal_num` / currency parity for all eight are machine-checked by
 **7611 recorded comparisons**; see [DIFF_REPORT.md](DIFF_REPORT.md) for the
-method and results.
+method and results, and [COMPAT.md](COMPAT.md) for a call-by-call mapping,
+currency-code coverage and the known gaps.
 
 Upstream implements all five output modes for each of these eight language
 codes. This project's coverage is:
@@ -279,8 +280,9 @@ convention.
   file.
 - **Ordinals.** Native for all eight language codes and machine-checked against
   upstream.
-- **Currency.** Native for all eight language codes. The supported code sets
-  follow upstream, and `pt` accepts only BRL (zero cents are omitted there).
+- **Currency.** Native for all eight language codes. `es`/`ru`/`pt`/`pt_PT`
+  match upstream's code sets; `en`/`fr`/`de`/`it` cover EUR/USD/GBP. The
+  remaining codes are listed in [COMPAT.md](COMPAT.md) §4.
 - **Scale ceilings.** Both sides use a finite scale-word table, but the
   ceilings differ; see [Supported magnitude](#supported-magnitude) for ours.
 - **Input handling.** Upstream raises exceptions on malformed numbers; this

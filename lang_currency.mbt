@@ -464,9 +464,9 @@ fn currency_join(
 /// Spell a currency amount. `code` is an ISO-4217 code (case-insensitive) or
 /// `""` for the language default (EUR, or BRL for `pt`).
 ///
-/// Supported language / code sets follow upstream num2words: `en`/`fr`/`de`/
-/// `it` take EUR/USD/GBP, `es` takes 20 codes, `ru` takes 6, `pt` only
-/// accepts BRL, and `pt_PT` takes EUR/USD/GBP/CAD/AUD.
+/// Supported code sets match upstream for `es`/`ru`/`pt`/`pt_PT`; the other
+/// four currently cover EUR/USD/GBP, a subset of upstream's 11/4/4/4 codes
+/// (see COMPAT.md).
 ///
 /// Returns `Err` for malformed amounts, unsupported languages or codes, and
 /// amounts past the language's scale table.

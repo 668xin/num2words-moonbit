@@ -25,7 +25,7 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
   - `num2words_str_checked`：返回 `Result[String, String]`，区分 `invalid number` 与 `magnitude out of supported range`；
   - CLI 打印对应 `error:` 信息。
 - **8 个语言代码**：英语 `en`（全模式）、法语 `fr`（vigesimal）、西班牙语 `es`（veintiuno、cien/ciento）、德语 `de`（闭合复合词）、意大利语 `it`（省音与连写）、葡萄牙语 `pt`（巴西变体，短标度 `bilhão`=10⁹）与 `pt_PT`（欧洲变体，长标度 `mil milhões`=10⁹、`bilião`=10¹²）、俄语 `ru`（三档复数、`тысяча` 阴性变体 `одна/две`）。
-- **模式分发**：`cardinal` / `ordinal` / `ordinal_num` / `year` / `currency` / 小数。`ordinal` 与 `ordinal_num` **八种语言代码全部原生实现**并与上游逐条差分对齐（含上游怪癖，如西语 `décimoprimero`、`es`/`pt` 的 0 号序数为空串、欧葡长标度 `milésimo milionésimo`）；负数序数返回 `""`（上游抛 TypeError），意语除外（`meno terzo`）；**`currency` 八种语言代码全部原生实现**（新增带币种代码的 `num2words_currency`，默认 EUR、`pt` 默认 BRL；币种集与上游一致：en/fr/de/it 为 EUR/USD/GBP，es 20 种，ru 6 种，pt 仅 BRL，pt_PT 为 EUR/USD/GBP/CAD/AUD），并处理了西语性数一致、俄语三档复数与性别、葡语零分省略（欧葡 GBP 保留零分）等规则；`year` 在 `it` / `pt` / `pt_PT` / `ru` 中为基数读法。
+- **模式分发**：`cardinal` / `ordinal` / `ordinal_num` / `year` / `currency` / 小数。`ordinal` 与 `ordinal_num` **八种语言代码全部原生实现**并与上游逐条差分对齐（含上游怪癖，如西语 `décimoprimero`、`es`/`pt` 的 0 号序数为空串、欧葡长标度 `milésimo milionésimo`）；负数序数返回 `""`（上游抛 TypeError），意语除外（`meno terzo`）；**`currency` 八种语言代码全部原生实现**（新增带币种代码的 `num2words_currency`，默认 EUR、`pt` 默认 BRL；`es` 20 种、`ru` 6 种、`pt` 仅 BRL、`pt_PT` 5 种与上游完整一致，en/fr/de/it 实现 EUR/USD/GBP 常用子集，见 `COMPAT.md`），并处理了西语性数一致、俄语三档复数与性别、葡语零分省略（欧葡 GBP 保留零分）等规则；`year` 在 `it` / `pt` / `pt_PT` / `ru` 中为基数读法。
 - **多形态 API**：`num2words`(BigInt) / `num2words_int` / `num2words_float` / `num2words_str` / `num2words_str_checked` / `num2words_currency` / `is_valid_number`。
 - **量级上限守卫**：`Lang::supports` / `Lang::max_power`，越界返回明确错误而非越界访问。
 - **CLI**（`cmd/main`，`--lang` / `--to` / `--currency` / `--help`），可直接演示与按需调用。
@@ -40,6 +40,7 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 - 8 个语言代码的数字读法，在**各语言量级上限以内**输出正确结果；对非法输入与越界输入返回明确错误而非崩溃。
 - 75 个测试与三平台 CI 测试记录，其中含 7611 条与上游 num2words 的差分对照。
 - `DIFF_REPORT.md`：差分测试方法、覆盖范围、逐语言结果与明示的对照规则（意语重音、葡语标点、货币舍入与整数语义）。
+- `COMPAT.md`：与上游的逐调用 API 映射、语言 / 币种覆盖矩阵、量级上限与已知差异清单。
 - 完整 README + **LGPL-2.1 LICENSE**（与上游一致，许可证正文已与 SPDX / GitHub Licenses API 权威文本校验一致）+ 来源署名。
 - 相对上游的差异化：纯 MoonBit 零运行时依赖、声明式扩展新语言、BigInt 与十进制字符串避免精度损失。
 
@@ -47,7 +48,7 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 
 1. **不承诺「任意大整数」。** 量级词表有限，各语言上限为：`en`/`ru` 10³³、`fr` 10³⁰、`es`/`de`/`pt_PT` 10²⁴、`it`/`pt` 10²¹；超出范围返回明确错误。
 2. **不承诺已发布到 mooncakes.io。** 当前 `moon add 668xin/num2words-moonbit` 无法解析（`Module not found in registry`）；发布到 mooncakes 列为后续项，需联网与账号操作。
-3. **`currency` 八种语言代码均已原生支持**，币种集与上游一致：`en`/`fr`/`de`/`it` 为 EUR/USD/GBP，`es` 20 种，`ru` 6 种，`pt` 仅 BRL，`pt_PT` 为 EUR/USD/GBP/CAD/AUD（默认值分别为 EUR / BRL）；不支持的币种返回 `Err` / `""`。
+3. **`currency` 八种语言代码均已原生实现**：`es` 20 种、`ru` 6 种、`pt` 仅 BRL、`pt_PT` 5 种与上游完整一致；`en`/`fr`/`de`/`it` 目前实现 EUR/USD/GBP 常用子集（上游完整集分别为 11/4/4/4 种，缺口见 `COMPAT.md` §4）。不支持的币种返回 `Err` / `""`。
 4. **不提供反向转换**（`words → number`）。
 5. **不作性能声明**——未发布性能基准。
 6. **葡萄牙语提供巴西与欧洲两个变体**：`pt` 为 `dezesseis`、短标度 `bilhão`=10⁹；`pt_PT` 为 `dezasseis`、长标度 `mil milhões`=10⁹ / `bilião`=10¹²，两者的序数、currency 币种集与零分规则差异均已按上游对齐。

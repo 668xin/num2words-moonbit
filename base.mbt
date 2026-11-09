@@ -189,21 +189,18 @@ fn Lang::cardinal_en(self : Lang, n : BigInt) -> String {
 
 ///|
 pub fn ordinal_en(n : BigInt) -> String {
+  if n < BigInt::from_int(0) {
+    // Upstream raises TypeError for negative ordinals.
+    return ""
+  }
   if n == BigInt::from_int(0) {
     return "zeroth"
   }
-  let neg = n < BigInt::from_int(0)
-  let n = if neg { -n } else { n }
   let card = lang_en().cardinal_en(n)
   let words = split_to_array(card, " ")
   let last_idx = words.length() - 1
   words[last_idx] = ordinalize(words[last_idx])
-  let joined = join_parts(words, " ")
-  if neg {
-    "minus " + joined
-  } else {
-    joined
-  }
+  join_parts(words, " ")
 }
 
 ///|
@@ -253,8 +250,10 @@ fn ordinalize_simple(w : String) -> String {
 ///|
 /// Ordinal number with numeric suffix: 1 -> "1st", 2 -> "2nd", 12 -> "12th".
 pub fn ordinal_num_en(n : BigInt) -> String {
-  let neg = n < BigInt::from_int(0)
-  let n = if neg { -n } else { n }
+  if n < BigInt::from_int(0) {
+    // Upstream raises TypeError for negative ordinal_num.
+    return ""
+  }
   let s = n.to_string()
   let last = if s.length() >= 2 {
     s[s.length() - 2:s.length()].to_owned()
@@ -272,11 +271,7 @@ pub fn ordinal_num_en(n : BigInt) -> String {
     }
   }
   let base = n.to_string() + suffix
-  if neg {
-    "minus " + base
-  } else {
-    base
-  }
+  base
 }
 
 // ---------------------------------------------------------------------

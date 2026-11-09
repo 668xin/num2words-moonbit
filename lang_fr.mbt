@@ -125,6 +125,11 @@ fn Lang::cardinal_fr(self : Lang, n : BigInt) -> String {
       } else if t == 1 {
         s = "un " + self.thousands[power]
       } else {
+        // Upstream drops the plural "s" of "cents"/"vingts" before "mille"
+        // ("trois cent mille"), but keeps it before "millions" and up.
+        if power == 1 && (ends_with(s, "cents") || ends_with(s, "vingts")) {
+          s = drop_last_char(s)
+        }
         s = s + " " + self.thousands[power]
         if triple > BigInt::from_int(1) && power >= 2 {
           s = s + "s"

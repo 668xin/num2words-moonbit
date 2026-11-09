@@ -173,18 +173,32 @@ pub fn get_lang(code : String) -> Lang {
 }
 
 ///|
+/// Upstream raises TypeError for negative ordinals in every language except
+/// Italian ("meno ..."); our string API returns "" for those instead.
 fn ordinal_for(l : Lang, value : BigInt) -> String {
   match l.variant {
     En => ordinal_en(value)
-    _ => l.cardinal(value)
+    Fr => ordinal_fr(value)
+    Es => ordinal_es(value)
+    De => ordinal_de(value)
+    It => ordinal_it(value)
+    Pt => ordinal_pt(value)
+    Ru => ordinal_ru(value)
   }
 }
 
 ///|
+/// ordinal_num formats: en "21st", fr "21me"/"1er", es/pt "21º", de "21.",
+/// it/ru plain "21" (upstream falls through to str(value)).
 fn ordinal_num_for(l : Lang, value : BigInt) -> String {
   match l.variant {
     En => ordinal_num_en(value)
-    _ => l.cardinal(value) + "."
+    Fr => ordinal_num_fr(value)
+    Es => ordinal_num_es(value)
+    De => ordinal_num_de(value)
+    It => ordinal_num_it(value)
+    Pt => ordinal_num_pt(value)
+    Ru => ordinal_num_ru(value)
   }
 }
 

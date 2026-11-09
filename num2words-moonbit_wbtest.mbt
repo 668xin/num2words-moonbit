@@ -462,7 +462,11 @@ test "boundaries" {
   assert_eq(num2words_int(0, "en", "ordinal_num"), "0th")
   assert_eq(num2words_int(0, "en", "year"), "zero")
   assert_eq(num2words_int(0, "en", "currency"), "zero dollars")
-  assert_eq(num2words_int(-1, "en", "ordinal"), "minus first")
+  // Upstream raises TypeError for negative ordinals; we return "".
+  assert_eq(num2words_int(-1, "en", "ordinal"), "")
+  assert_eq(num2words_int(-1, "en", "ordinal_num"), "")
+  // Italian is the one language upstream supports for negative ordinals.
+  assert_eq(num2words_int(-3, "it", "ordinal"), "meno terzo")
 }
 
 // --- M1: path consistency ---------------------------------------------------

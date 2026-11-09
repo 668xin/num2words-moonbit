@@ -9,8 +9,12 @@ code.
 - Upstream languages used: `en`, `fr`, `es`, `de`, `it`, `pt_BR`, `ru`
 - Cardinal samples per language: **551** (`0..500` plus 51 multi-scale / signed values)
 - Year samples: **19** each for `en`, `it`, `pt`, `ru`
-- Total comparisons: **3933** (7 × 551 cardinal + 4 × 19 year)
-- MoonBit test suite: **41 tests, 41 passed, 0 failed**
+- Ordinal samples per language: **249** (dense `0..200` plus
+  hundreds/thousands/scale boundaries; Portuguese drops the `10^18` sample
+  that upstream rejects), `ordinal_num`: **11** per language
+- Total comparisons: **5752** (7 × 551 cardinal + 4 × 19 year + 1742 ordinal
+  + 77 ordinal_num)
+- MoonBit test suite: **56 tests, 56 passed, 0 failed**
 
 Run `moon test` from the project root to replay every comparison.
 
@@ -63,10 +67,38 @@ Year samples (`en`, `it`, `pt`, `ru` only): `1000, 1001, 1010, 1100, 1500,
 | `pt` | 19 | 19 | upstream `pt_BR`, commas ignored |
 | `ru` | 19 | 19 | verbatim |
 
-All 3933 comparisons pass under the two documented comparison rules in §4.
+| Language | Ordinal samples | `ordinal_num` | Passed | Comparison |
+| --- | --- | --- | --- | --- |
+| `en` | 249 | 11 | 260 | verbatim |
+| `fr` | 249 | 11 | 260 | verbatim |
+| `es` | 249 | 11 | 260 | verbatim (incl. upstream quirks, see §4) |
+| `de` | 249 | 11 | 260 | verbatim |
+| `it` | 249 | 11 | 260 | accents ignored; `dicottesimo` typo normalised |
+| `pt` | 248 | 11 | 259 | upstream `pt_BR`; `10^18` sample skipped (upstream raises) |
+| `ru` | 249 | 11 | 260 | verbatim |
+
+All 5752 comparisons pass under the documented comparison rules in §4.
 French, Spanish and German years use this project's pair-reading convention
 instead of the upstream cardinal reading and are therefore not part of the
 differential set (they are documented in the README comparison table).
+
+### Ordinal comparison rules
+
+Ordinals are compared verbatim, replicating upstream behaviour **including
+its quirks**:
+
+* `es`: `0` → `""` (empty string); 11/12 concatenate without a space
+  (`décimoprimero`); `>= 10^18` falls back to the cardinal.
+* `pt`: `0` → `""`; digits at position >= 18 have no separator table
+  upstream (it would raise), so our output is `""` there too.
+* `it`: upstream 0.5.14 spells 118/218/... as `centodicottesimo` (typo);
+  normalised to `diciottesimo` like the cardinal `dicotto` case. Accents
+  are ignored as for cardinals. Negatives are supported (`meno terzo`).
+* `en`/`fr`/`es`/`de`/`pt`/`ru`: negative ordinals return `""` (upstream
+  raises `TypeError`); `ordinal_num` for `it`/`ru` is the plain number
+  (upstream returns the int itself).
+* `fr` cardinal fix found by ordinal comparison: `cents`/`vingts` drop the
+  plural `s` before `mille` (`trois cent mille`, `quatre-vingt mille`).
 
 ---
 
@@ -134,5 +166,5 @@ compared byte-for-byte.
 ```bash
 pip install num2words==0.5.14
 python tools/gen_fixtures.py   # rewrites diff_fixtures_wbtest.mbt
-moon test                      # replays all 3933 comparisons
+moon test                      # replays all 5752 comparisons
 ```

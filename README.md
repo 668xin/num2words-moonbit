@@ -44,7 +44,8 @@ general-purpose multilingual number-to-words package on
 
 ## Install
 
-Add it to your `moon.mod` (requires the MoonBit toolchain ≥ 0.1.20260921):
+Add it to your `moon.mod` (requires the MoonBit toolchain ≥ 0.1.20260921).
+Version **0.1.0** is published on mooncakes.io:
 
 ```bash
 moon add 668xin/num2words-moonbit
@@ -181,8 +182,8 @@ error: magnitude out of supported range: 1000000000000000000000000000000000000
   More are planned; see the per-language extension layout above.
 - **Magnitudes are bounded** by each language's scale-word table — see
   *Supported magnitude* above. "Arbitrarily large" is **not** claimed.
-- **Not yet published to mooncakes.io**, so `moon add 668xin/num2words-moonbit`
-  does not resolve yet; use the public repository as a git dependency.
+- **Published as `0.1.0`** on mooncakes.io; later releases need a version bump
+  and a new `moon publish`.
 - **Portuguese has both variants**: `pt` is Brazilian (`dezesseis`, short scale
   *bilhão* = 10⁹) and `pt_PT` is European (`dezasseis`, long scale *mil milhões*
   = 10⁹, *bilião* = 10¹²).

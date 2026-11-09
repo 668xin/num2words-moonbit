@@ -9,6 +9,10 @@ ISO code set (EUR by default, BRL for `pt`).
 
 ## Quick start
 
+```bash
+moon add 668xin/num2words-moonbit
+```
+
 ```mbt nocheck
 import "668xin/num2words-moonbit" @n2w
 

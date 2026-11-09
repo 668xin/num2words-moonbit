@@ -37,7 +37,7 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 
 ## 预期验收产物
 
-- 公开仓库 `668xin/num2words-moonbit`，含 `moon.mod` 元数据与全部源码；当前以**公开仓库 / git 依赖**方式引入（见验收边界第 2 条）。
+- 公开仓库 `668xin/num2words-moonbit`，含 `moon.mod` 元数据与全部源码；已发布到 mooncakes.io（`668xin/num2words-moonbit@0.1.0`，`moon add 668xin/num2words-moonbit` 可用）。
 - 8 个语言代码的数字读法，在**各语言量级上限以内**输出正确结果；对非法输入与越界输入返回明确错误而非崩溃。
 - 76 个测试与三平台 CI 测试记录，其中含 7796 条与上游 num2words 的差分对照。
 - `DIFF_REPORT.md`：差分测试方法、覆盖范围、逐语言结果与明示的对照规则（意语重音、葡语标点、货币舍入与整数语义）。
@@ -49,7 +49,7 @@ num2words-moonbit 将 Python 生态成熟的 num2words 核心能力移植到 Moo
 ## 验收边界（明确不做 / 当前限制）
 
 1. **不承诺「任意大整数」。** 量级词表有限，各语言上限为：`en`/`ru` 10³³、`fr` 10³⁰、`es`/`de`/`pt_PT` 10²⁴、`it`/`pt` 10²¹；超出范围返回明确错误。
-2. **不承诺已发布到 mooncakes.io。** 当前 `moon add 668xin/num2words-moonbit` 无法解析（`Module not found in registry`）；发布到 mooncakes 列为后续项，需联网与账号操作。
+2. **发布版本与后续更新**：当前已发布 `0.1.0`；后续改动需要提升版本号并重新 `moon publish`。
 3. **`currency` 八种语言代码均已原生实现，覆盖上游全部 55 个语言/币种对**：en 11 种、fr/de/it 各 4 种、es 20 种、ru 6 种、pt 1 种（BRL）、pt_PT 5 种；不适用于该语言的币种返回 `Err` / `""`。
 4. **不提供反向转换**（`words → number`）。
 5. **性能数据仅为本机微基准**（AMD Ryzen 5 5600H / Windows 11 / native release），不作为跨平台或跨语言性能承诺。

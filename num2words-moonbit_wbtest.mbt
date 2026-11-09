@@ -253,6 +253,54 @@ test "currency: Brazilian Portuguese" {
 }
 
 ///|
+test "pt_PT: long scale, teens and currency" {
+  // European vocabulary.
+  assert_eq(num2words_int(16, "pt_PT", "cardinal"), "dezasseis")
+  assert_eq(num2words_int(17, "pt_PT", "cardinal"), "dezassete")
+  assert_eq(num2words_int(19, "pt_PT", "cardinal"), "dezanove")
+  // Long scale: 10^9 is "mil milhões", 10^12 is "bilião".
+  assert_eq(num2words_int(1000000000, "pt_PT", "cardinal"), "mil milhões")
+  assert_eq(num2words_int(2000000000, "pt_PT", "cardinal"), "dois mil milhões")
+  assert_eq(num2words_str("1000000000000", "pt_PT", "cardinal"), "um bilião")
+  assert_eq(
+    num2words_str("1000000000000000", "pt_PT", "cardinal"),
+    "mil biliões",
+  )
+  assert_eq(
+    num2words_str("1000000000000000000000000", "pt_PT", "cardinal"),
+    "um quatrilião",
+  )
+  assert_eq(num2words_int(1000001, "pt_PT", "cardinal"), "um milhão e um")
+  assert_eq(
+    num2words_int(1234567, "pt_PT", "cardinal"),
+    "um milhão duzentos e trinta e quatro mil quinhentos e sessenta e sete",
+  )
+  // The scale table stops at 10^24 (upstream raises OverflowError at 10^27).
+  assert_eq(
+    num2words_str("1000000000000000000000000000", "pt_PT", "cardinal"),
+    "",
+  )
+  // Year and ordinals are shared with the Brazilian variant.
+  assert_eq(num2words_int(2024, "pt_PT", "year"), "dois mil e vinte e quatro")
+  assert_eq(num2words_int(21, "pt_PT", "ordinal"), "vigésimo primeiro")
+  assert_eq(num2words_int(21, "pt_PT", "ordinal_num"), "21º")
+  // Currency: EUR default, "cêntimo(s)", zero cents omitted.
+  assert_eq(currency_ok("1.01", "pt_PT", "EUR"), "um euro e um cêntimo")
+  assert_eq(currency_ok("2.02", "pt_PT", "GBP"), "dois libras e dois pence")
+  assert_eq(
+    currency_ok("1234.56", "pt_PT", "EUR"),
+    "mil duzentos e trinta e quatro euros e cinquenta e seis cêntimos",
+  )
+  assert_eq(currency_ok("1000000", "pt_PT", ""), "um milhão de euros")
+  assert_eq(currency_ok("1000001", "pt_PT", "EUR"), "um milhão e um euros")
+  assert_eq(currency_ok("0", "pt_PT", "EUR"), "zero euros")
+  assert_eq(
+    num2words_currency("1", "pt_PT", "BRL"),
+    Err("currency code not supported for pt_PT: BRL"),
+  )
+}
+
+///|
 test "currency: rejected input" {
   assert_eq(num2words_currency("abc", "en", "EUR"), Err("invalid number: abc"))
   assert_eq(

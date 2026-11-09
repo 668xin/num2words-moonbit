@@ -426,10 +426,11 @@ fn pt_thousand_separator(idx : Int) -> String {
 }
 
 ///|
-pub fn ordinal_pt(n : BigInt) -> String {
-  if n < BigInt::from_int(0) {
-    return ""
-  }
+/// Shared Portuguese ordinal walker. `separator_at` supplies the scale word at
+/// positions 3, 6, 9, ...: the Brazilian variant uses "bilionésimo" at 10^9,
+/// while European Portuguese composes long-scale forms such as
+/// "milésimo milionésimo".
+fn pt_ordinal_with(n : BigInt, separator_at : (Int) -> String) -> String {
   let digits = n.to_string()
   let result : Array[String] = []
   let mut separator = ""
@@ -438,11 +439,12 @@ pub fn ordinal_pt(n : BigInt) -> String {
   while i >= 0 {
     let d = digits[i].to_int() - 48
     if idx > 0 && idx % 3 == 0 {
-      if idx > 15 {
+      let sep = separator_at(idx)
+      if sep == "" {
         // Upstream would raise KeyError; treat as unsupported.
         return ""
       }
-      separator = pt_thousand_separator(idx)
+      separator = sep
     }
     if d != 0 && separator != "" {
       result.push(separator)
@@ -467,6 +469,15 @@ pub fn ordinal_pt(n : BigInt) -> String {
     out = out[9:out.length()].to_owned()
   }
   out
+}
+
+///|
+pub fn ordinal_pt(n : BigInt) -> String {
+  if n < BigInt::from_int(0) {
+    ""
+  } else {
+    pt_ordinal_with(n, pt_thousand_separator)
+  }
 }
 
 ///|

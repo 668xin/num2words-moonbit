@@ -1,10 +1,11 @@
 # 668xin/num2words-moonbit
 
 Convert numbers into words in pure MoonBit — a port of the Python `num2words`
-library. Supports English, French, Spanish, German, Italian, Portuguese and
-Russian across cardinal, ordinal, ordinal_num, year and currency modes, with
-`BigInt` for large integers. Currency is native for all seven languages with
-each language's upstream ISO code set (EUR by default, BRL for `pt`).
+library. Supports English, French, Spanish, German, Italian, Portuguese
+(Brazilian `pt` and European `pt_PT`) and Russian across cardinal, ordinal,
+ordinal_num, year and currency modes, with `BigInt` for large integers.
+Currency is native for all eight language codes with each language's upstream
+ISO code set (EUR by default, BRL for `pt`).
 
 ## Quick start
 
@@ -27,11 +28,12 @@ import "668xin/num2words-moonbit" @n2w
 - `num2words_str(value : String, lang : String, to : String) -> String`
 - `num2words_currency(amount : String, lang : String, code : String) -> Result[String, String]`
 
-`lang` ∈ `{"en","fr","es","de","it","pt","ru"}` (default `en`); `to` ∈
+`lang` ∈ `{"en","fr","es","de","it","pt","pt_PT","ru"}` (default `en`); `to` ∈
 `{"cardinal","ordinal","ordinal_num","year","currency"}` (default `cardinal`).
 Currency codes are language-dependent: `en`/`fr`/`de`/`it` take `EUR`/`USD`/
-`GBP`, `es` takes 20 codes, `ru` takes 6, and `pt` accepts only `BRL`. The
-empty code `""` selects the language default (EUR, or BRL for `pt`).
+`GBP`, `es` takes 20 codes, `ru` takes 6, `pt` accepts only `BRL`, and `pt_PT`
+takes `EUR`/`USD`/`GBP`/`CAD`/`AUD`. The empty code `""` selects the language
+default (EUR, or BRL for `pt`).
 
 ## License
 

@@ -237,6 +237,24 @@ fn currency_form_pt(code : String) -> Result[CurrencyForm, String] {
 }
 
 ///|
+/// European Portuguese supports EUR/USD/GBP/CAD/AUD, always in "cêntimo(s)".
+/// Upstream uses the masculine article with "libra" ("um libra") and the
+/// singular "péni" (plural "pence"); both are preserved.
+fn currency_form_pt_pt(code : String) -> Result[CurrencyForm, String] {
+  match code {
+    "EUR" => Ok(currency_entry("euro", "euros", "cêntimo", "cêntimos", false))
+    "USD" =>
+      Ok(currency_entry("dólar", "dólares", "cêntimo", "cêntimos", false))
+    "GBP" => Ok(currency_entry("libra", "libras", "péni", "pence", false))
+    "CAD" =>
+      Ok(currency_entry("dólar", "dólares", "cêntimo", "cêntimos", false))
+    "AUD" =>
+      Ok(currency_entry("dólar", "dólares", "cêntimo", "cêntimos", false))
+    _ => Err(code)
+  }
+}
+
+///|
 fn currency_supported_lang(lang : String) -> Bool {
   lang == "en" ||
   lang == "fr" ||
@@ -244,6 +262,7 @@ fn currency_supported_lang(lang : String) -> Bool {
   lang == "it" ||
   lang == "es" ||
   lang == "pt" ||
+  lang == "pt_PT" ||
   lang == "ru"
 }
 
@@ -265,6 +284,7 @@ fn currency_form(lang : String, code : String) -> Result[CurrencyForm, String] {
     "it" => currency_form_it(code)
     "es" => currency_form_es(code)
     "pt" => currency_form_pt(code)
+    "pt_PT" => currency_form_pt_pt(code)
     "ru" => currency_form_ru(code)
     _ => Err(code)
   }
@@ -445,8 +465,8 @@ fn currency_join(
 /// `""` for the language default (EUR, or BRL for `pt`).
 ///
 /// Supported language / code sets follow upstream num2words: `en`/`fr`/`de`/
-/// `it` take EUR/USD/GBP, `es` takes 20 codes, `ru` takes 6, and `pt` only
-/// accepts BRL.
+/// `it` take EUR/USD/GBP, `es` takes 20 codes, `ru` takes 6, `pt` only
+/// accepts BRL, and `pt_PT` takes EUR/USD/GBP/CAD/AUD.
 ///
 /// Returns `Err` for malformed amounts, unsupported languages or codes, and
 /// amounts past the language's scale table.
@@ -487,8 +507,17 @@ pub fn num2words_currency(
           )
           let left = currency_num(lang, units, form.feminine)
           let right = currency_num(lang, cents, form.cent_feminine)
-          let core = if lang == "pt" {
-            // pt_BR omits zero cents and uses "de" for exact 10^6 multiples.
+          // pt/pt_PT normally omit zero cents, but European Portuguese GBP
+          // always spells them ("um libra e zero pence").
+          let show_zero_cents = if lang == "pt" {
+            false
+          } else if lang == "pt_PT" {
+            resolved == "GBP"
+          } else {
+            true
+          }
+          let core = if lang == "pt" || lang == "pt_PT" {
+            // pt/pt_PT omit zero cents and use "de" for exact 10^6 multiples.
             let million = BigInt::from_int(1000000)
             let exact_million = units >= million &&
               units % million == BigInt::from_int(0)
@@ -497,7 +526,7 @@ pub fn num2words_currency(
             } else {
               left + " " + unit
             }
-            if cents > BigInt::from_int(0) {
+            if cents > BigInt::from_int(0) || show_zero_cents {
               phrase = phrase + " e " + right + " " + cent
             }
             phrase

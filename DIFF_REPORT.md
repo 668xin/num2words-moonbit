@@ -6,19 +6,19 @@ library (LGPL-2.1). Only upstream **output strings** are used, never its source
 code.
 
 - Upstream version: **num2words 0.5.14**
-- Upstream languages used: `en`, `fr`, `es`, `de`, `it`, `pt_BR`, `ru`
+- Upstream languages used: `en`, `fr`, `es`, `de`, `it`, `pt_BR`, `pt`, `ru`
 - Cardinal samples per language: **551** (`0..500` plus 51 multi-scale / signed values)
-- Year samples: **19** each for `en`, `it`, `pt`, `ru`
+- Year samples: **19** each for `en`, `it`, `pt`, `pt_PT`, `ru`
 - Ordinal samples per language: **249** (dense `0..200` plus
   hundreds/thousands/scale boundaries; Portuguese drops the `10^18` sample
   that upstream rejects), `ordinal_num`: **11** per language
-- Currency samples: **900** total — **51** each for `en`/`fr`/`de`/`it`
+- Currency samples: **1030** total — **51** each for `en`/`fr`/`de`/`it`
   (`it` has 45 because upstream rejects its two negative samples), **520** for
-  `es` (26 amounts × 20 codes), **156** for `ru` (26 × 6) and **26** for `pt`
-  (26 × BRL)
-- Total comparisons: **6652** (3857 cardinal + 76 year + 1742 ordinal
-  + 77 ordinal_num + 900 currency)
-- MoonBit test suite: **69 tests, 69 passed, 0 failed**
+  `es` (26 amounts × 20 codes), **156** for `ru` (26 × 6), **26** for `pt`
+  (26 × BRL) and **130** for `pt_PT` (26 × 5)
+- Total comparisons: **7611** (4408 cardinal + 95 year + 1990 ordinal
+  + 88 ordinal_num + 1030 currency)
+- MoonBit test suite: **75 tests, 75 passed, 0 failed**
 
 Run `moon test` from the project root to replay every comparison.
 
@@ -47,16 +47,16 @@ Sample set:
 | Large | `100000, 100001, 123000, 123456, 999999, 1000000, 1000001, 1000021, 1000100, 1001000, 1100000, 1234567, 2000000, 5000000, 10^9, 2×10^9, 10^12` |
 | Signed | `-1, -42, -1000, -123456` |
 
-Year samples (`en`, `it`, `pt`, `ru` only): `1000, 1001, 1010, 1100, 1500,
-1900, 1984, 1999, 2000, 2001, 2009, 2010, 2023, 2024, 2100, 2134, 3000, 3001,
-9999`.
+Year samples (`en`, `it`, `pt`, `pt_PT`, `ru` only): `1000, 1001, 1010, 1100,
+1500, 1900, 1984, 1999, 2000, 2001, 2009, 2010, 2023, 2024, 2100, 2134, 3000,
+3001, 9999`.
 
 Currency samples: `en`/`fr`/`de`/`it` use 17 amounts with `EUR`/`USD`/`GBP`
 (`0, 0.01, 0.5, 1, 2, 21, 28, 81, 101, 1000, 1001, 1234.56, 999.99, 1.999,
-1234.567, -3.5, -1.999`); `es` uses 26 amounts × 20 codes, `ru` 26 × 6 codes
-and `pt` 26 × `BRL`, adding `5, 11, 22, 25, 100, 200, 500, 2000, 21000,
-1000000, 1000001, 2000000`. Amounts are passed to upstream as floats, so its
-type-dependent int-as-cents quirk does not apply.
+1234.567, -3.5, -1.999`); `es` uses 26 amounts × 20 codes, `ru` 26 × 6, `pt`
+26 × `BRL` and `pt_PT` 26 × `EUR`/`USD`/`GBP`/`CAD`/`AUD`, adding `5, 11, 22,
+25, 100, 200, 500, 2000, 21000, 1000000, 1000001, 2000000`. Amounts are passed
+to upstream as floats, so its type-dependent int-as-cents quirk does not apply.
 
 ---
 
@@ -70,6 +70,7 @@ type-dependent int-as-cents quirk does not apply.
 | `de` | 551 | 551 | verbatim |
 | `it` | 551 | 551 | accents ignored (see §4) |
 | `pt` | 551 | 551 | upstream `pt_BR`, commas ignored (see §4) |
+| `pt_PT` | 551 | 551 | upstream `pt`, commas ignored (see §4) |
 | `ru` | 551 | 551 | verbatim |
 
 | Language | Year samples | Passed | Comparison |
@@ -77,6 +78,7 @@ type-dependent int-as-cents quirk does not apply.
 | `en` | 19 | 19 | verbatim |
 | `it` | 19 | 19 | accents ignored |
 | `pt` | 19 | 19 | upstream `pt_BR`, commas ignored |
+| `pt_PT` | 19 | 19 | upstream `pt`, commas ignored |
 | `ru` | 19 | 19 | verbatim |
 
 | Language | Ordinal samples | `ordinal_num` | Passed | Comparison |
@@ -87,6 +89,7 @@ type-dependent int-as-cents quirk does not apply.
 | `de` | 249 | 11 | 260 | verbatim |
 | `it` | 249 | 11 | 260 | accents ignored; `dicottesimo` typo normalised |
 | `pt` | 248 | 11 | 259 | upstream `pt_BR`; `10^18` sample skipped (upstream raises) |
+| `pt_PT` | 248 | 11 | 259 | upstream `pt`; long-scale separators; `10^18` skipped |
 | `ru` | 249 | 11 | 260 | verbatim |
 
 | Language | Currency samples | Passed | Comparison |
@@ -98,8 +101,9 @@ type-dependent int-as-cents quirk does not apply.
 | `es` | 520 | 520 | verbatim (upstream quirks included, e.g. masculine *quinientos*) |
 | `ru` | 156 | 156 | verbatim; PLN paucal typo normalised (see §4) |
 | `pt` | 26 | 26 | upstream `pt_BR`, commas ignored (see §4) |
+| `pt_PT` | 130 | 130 | upstream `pt`, commas ignored; GBP zero *pence* (see §4) |
 
-All 6652 comparisons pass under the documented comparison rules in §4.
+All 7611 comparisons pass under the documented comparison rules in §4.
 French, Spanish and German years use this project's pair-reading convention
 instead of the upstream cardinal reading and are therefore not part of the
 differential set (they are documented in the README comparison table).
@@ -113,12 +117,15 @@ its quirks**:
   (`décimoprimero`); `>= 10^18` falls back to the cardinal.
 * `pt`: `0` → `""`; digits at position >= 18 have no separator table
   upstream (it would raise), so our output is `""` there too.
+* `pt_PT`: same walker as `pt`, but long-scale separators: 10^9 →
+  `milésimo milionésimo`, 10^12 → `bilionésimo`, 10^15 →
+  `milésimo bilionésimo`; `>= 10^18` is unsupported.
 * `it`: upstream 0.5.14 spells 118/218/... as `centodicottesimo` (typo);
   normalised to `diciottesimo` like the cardinal `dicotto` case. Accents
   are ignored as for cardinals. Negatives are supported (`meno terzo`).
-* `en`/`fr`/`es`/`de`/`pt`/`ru`: negative ordinals return `""` (upstream
-  raises `TypeError`); `ordinal_num` for `it`/`ru` is the plain number
-  (upstream returns the int itself).
+* `en`/`fr`/`es`/`de`/`pt`/`pt_PT`/`ru`: negative ordinals return `""`
+  (upstream raises `TypeError`); `ordinal_num` for `it`/`ru` is the plain
+  number (upstream returns the int itself).
 * `fr` cardinal fix found by ordinal comparison: `cents`/`vingts` drop the
   plural `s` before `mille` (`trois cent mille`, `quatre-vingt mille`).
 
@@ -159,12 +166,14 @@ Notes on the fixes:
   whole number (`ventitré`, `milletré`) and removed when a morpheme follows
   (`centoventitremila`). Million-scale groups are joined with `e`
   (`un milione e uno`).
-- **Currency (M3c-1/M3c-2):** the previous English-only currency mode always
-  used USD, could only express whole units, and was bypassed by the decimal
-  entry points (`num2words_str("1234.56", "en", "currency")` spelled
-  `… point five six`). It is replaced by native formatting for all seven
-  languages with each language's upstream code set, covered by 900
-  differential comparisons.
+- **Currency (M3c-1/M3c-2/M3d):** the previous English-only currency mode
+  always used USD, could only express whole units, and was bypassed by the
+  decimal entry points (`num2words_str("1234.56", "en", "currency")` spelled
+  `… point five six`). It is replaced by native formatting for all eight
+  language codes with each language's upstream code set, covered by 1030
+  differential comparisons. The `pt_PT` fixtures also pinned two variant
+  differences found during this step: long-scale ordinal separators
+  (`milésimo milionésimo`) and zero *pence* for GBP.
 
 ---
 
@@ -179,11 +188,14 @@ regular):
    orthographically consistent: the accent survives only on the final word.
    Comparisons therefore strip the accent (`é → e`). Upstream also spells
    `118/218/318/418` as `…dicotto`; that typo is normalised to `diciotto`.
-2. **Portuguese.** Our implementation is the **Brazilian variant**, so fixtures
-   are generated with upstream `pt_BR` (`dezesseis`, `bilhão` = 10⁹), not the
-   European `pt`. Upstream `pt_BR` separates scale groups with a comma
-   (`mil, duzentos`); Portuguese usage and our output use a plain space, so
-   commas are removed before comparing.
+2. **Portuguese.** Our implementation has both variants: `pt` is the
+   **Brazilian** one and `pt_PT` the **European** one. Fixtures are generated
+   with upstream `pt_BR` for `pt` (`dezesseis`, `bilhão` = 10⁹) and upstream
+   `pt` for `pt_PT` (`dezasseis`, `mil milhões` = 10⁹, `bilião` = 10¹²).
+   Upstream `pt_BR` separates scale groups with a comma (`mil, duzentos`);
+   Portuguese usage and our output use a plain space, so commas are removed
+   before comparing. `pt_PT` ordinal long-scale separators and GBP zero
+   *pence* are compared verbatim.
 3. **Currency.** Amounts are passed to upstream as floats
    (`num2words(1234.56, ...)`), because upstream reads a bare Python `int` as
    *cents* (`1234` → 12.34); this project treats the integer part as the major
@@ -208,5 +220,5 @@ only affect the cases they name.
 ```bash
 pip install num2words==0.5.14
 python tools/gen_fixtures.py   # rewrites diff_fixtures_wbtest.mbt
-moon test                      # replays all 6652 comparisons
+moon test                      # replays all 7611 comparisons
 ```

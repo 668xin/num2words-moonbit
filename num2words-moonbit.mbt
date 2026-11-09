@@ -5,11 +5,12 @@
 //
 // API: `num2words(value, lang, to)` where `value` is a BigInt (or use the
 // `num2words_int` / `num2words_float` convenience wrappers), `lang` is
-// "en" | "fr" | "es" | "de" | "it" | "pt" | "ru", and `to` is "cardinal"
-// (default), "ordinal", "ordinal_num", "year" or "currency".
+// "en" | "fr" | "es" | "de" | "it" | "pt" | "pt_PT" | "ru", and `to` is
+// "cardinal" (default), "ordinal", "ordinal_num", "year" or "currency".
 //
 // Currency takes a decimal amount string and an ISO-4217 code through
-// `num2words_currency`; the `to = "currency"` dispatch path uses EUR.
+// `num2words_currency`; the `to = "currency"` dispatch path uses the language
+// default code (EUR, or BRL for `pt`).
 
 // --- input validation -------------------------------------------------------
 //
@@ -170,6 +171,7 @@ pub fn get_lang(code : String) -> Lang {
     "de" => lang_de()
     "it" => lang_it()
     "pt" => lang_pt()
+    "pt_PT" => lang_pt_pt()
     "ru" => lang_ru()
     _ => lang_en()
   }
@@ -186,6 +188,7 @@ fn ordinal_for(l : Lang, value : BigInt) -> String {
     De => ordinal_de(value)
     It => ordinal_it(value)
     Pt => ordinal_pt(value)
+    PtPt => ordinal_pt_pt(value)
     Ru => ordinal_ru(value)
   }
 }
@@ -201,6 +204,7 @@ fn ordinal_num_for(l : Lang, value : BigInt) -> String {
     De => ordinal_num_de(value)
     It => ordinal_num_it(value)
     Pt => ordinal_num_pt(value)
+    PtPt => ordinal_num_pt(value)
     Ru => ordinal_num_ru(value)
   }
 }
@@ -214,6 +218,7 @@ fn year_for(l : Lang, value : BigInt) -> String {
     De => year_de(value)
     It => year_it(value)
     Pt => year_pt(value)
+    PtPt => year_pt_pt(value)
     Ru => year_ru(value)
   }
 }

@@ -23,15 +23,15 @@ fn usage() -> Unit {
   println("")
   println("Usage:")
   println(
-    "  num2words <value> [--lang en|fr|es|de|it|pt|ru] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency EUR|USD|GBP]",
+    "  num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]",
   )
   println("")
   println(
-    "Languages: en (English), fr (French), es (Spanish), de (German), it (Italian), pt (Portuguese), ru (Russian)",
+    "Languages: en (English), fr (French), es (Spanish), de (German), it (Italian), pt (Portuguese, Brazil), pt_PT (Portuguese, Europe), ru (Russian)",
   )
   println("Modes    : cardinal (default), ordinal, ordinal_num, year, currency")
   println(
-    "Currency : ISO code, default EUR (BRL for pt); en/fr/de/it take EUR/USD/GBP, es/ru take their upstream sets",
+    "Currency : ISO code, default EUR (BRL for pt); en/fr/de/it EUR/USD/GBP, es 20 codes, ru 6, pt_PT EUR/USD/GBP/CAD/AUD",
   )
   println("")
   println("Examples:")

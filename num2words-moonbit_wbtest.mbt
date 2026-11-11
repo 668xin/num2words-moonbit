@@ -802,7 +802,8 @@ test "path consistency: string and int agree" {
 ///|
 test "path consistency: string and int agree in every language" {
   let langs = [
-    "en", "fr", "es", "de", "it", "pt", "pt_PT", "ru", "nl", "tr", "vi",
+    "en", "fr", "es", "de", "it", "pt", "pt_PT", "ru", "nl", "tr", "vi", "zh", "zh_TW",
+    "ja", "ko", "sv", "no", "da", "id", "pl",
   ]
   let samples = [0, 21, 100, 1234, 1000000]
   for li = 0; li < langs.length(); li = li + 1 {
@@ -1084,4 +1085,422 @@ test "currency: language defaults" {
   assert_eq(num2words_str("1", "nl", "currency"), "één euro, nul cent")
   assert_eq(num2words_str("1", "tr", "currency"), "birlira")
   assert_eq(num2words_str_checked("1", "tr", "currency"), Ok("birlira"))
+  // CJK defaults: plain 元 for Chinese (upstream master's "XXX"), yen/won.
+  assert_eq(num2words_str("1", "zh", "currency"), "一元")
+  assert_eq(num2words_str("1", "zh_TW", "currency"), "一元")
+  assert_eq(num2words_str("1", "ja", "currency"), "一円")
+  assert_eq(num2words_str("1", "ko", "currency"), "일원")
+}
+
+// --- Chinese ----------------------------------------------------------------
+// The grammar advances by 10^4, speaks one 零 for a gap below 1000 and drops
+// the 一 of a leading 一十. Upstream 0.5.14 has no Chinese module; these
+// expectations follow upstream master's lang_ZH.py (see COMPAT.md §3).
+
+///|
+test "zh cardinal" {
+  assert_eq(num2words_int(0, "zh", "cardinal"), "零")
+  assert_eq(num2words_int(9, "zh", "cardinal"), "九")
+  assert_eq(num2words_int(10, "zh", "cardinal"), "十")
+  assert_eq(num2words_int(11, "zh", "cardinal"), "十一")
+  assert_eq(num2words_int(19, "zh", "cardinal"), "十九")
+  assert_eq(num2words_int(20, "zh", "cardinal"), "二十")
+  assert_eq(num2words_int(101, "zh", "cardinal"), "一百零一")
+  assert_eq(num2words_int(110, "zh", "cardinal"), "一百一十")
+  assert_eq(num2words_int(1001, "zh", "cardinal"), "一千零一")
+  assert_eq(num2words_int(1010, "zh", "cardinal"), "一千零一十")
+  assert_eq(num2words_int(1100, "zh", "cardinal"), "一千一百")
+  assert_eq(num2words_int(10000, "zh", "cardinal"), "一万")
+  assert_eq(num2words_int(10001, "zh", "cardinal"), "一万零一")
+  assert_eq(num2words_int(10010, "zh", "cardinal"), "一万零一十")
+  assert_eq(num2words_int(10100, "zh", "cardinal"), "一万零一百")
+  assert_eq(num2words_int(11000, "zh", "cardinal"), "一万一千")
+  assert_eq(num2words_int(100000, "zh", "cardinal"), "十万")
+  assert_eq(num2words_int(1000000, "zh", "cardinal"), "一百万")
+  assert_eq(
+    num2words_int(12345678, "zh", "cardinal"),
+    "一千二百三十四万五千六百七十八",
+  )
+  assert_eq(num2words_int(100000000, "zh", "cardinal"), "一亿")
+  assert_eq(num2words_str("1000000000000", "zh", "cardinal"), "一兆")
+  assert_eq(num2words_int(-42, "zh", "cardinal"), "负四十二")
+  // 10^72 is the last scale word (不可说); 10^76 is past the table.
+  assert_eq(num2words_str("1" + zeros(72), "zh", "cardinal"), "一不可说")
+  assert_eq(num2words_str("1" + zeros(76), "zh", "cardinal"), "")
+  assert_eq(lang_zh().max_power(), 18)
+}
+
+///|
+test "zh_TW cardinal uses traditional characters" {
+  assert_eq(num2words_int(1234, "zh_TW", "cardinal"), "一千二百三十四")
+  assert_eq(num2words_int(10000, "zh_TW", "cardinal"), "一萬")
+  assert_eq(num2words_int(100000000, "zh_TW", "cardinal"), "一億")
+  assert_eq(num2words_int(-1, "zh_TW", "cardinal"), "負一")
+  assert_eq(num2words_str("1" + zeros(72), "zh_TW", "cardinal"), "一不可說")
+}
+
+///|
+test "zh ordinal, ordinal_num and year" {
+  assert_eq(num2words_int(0, "zh", "ordinal"), "第零")
+  assert_eq(num2words_int(10, "zh", "ordinal"), "第十")
+  assert_eq(num2words_int(101, "zh", "ordinal"), "第一百零一")
+  assert_eq(num2words_int(1234, "zh", "ordinal"), "第一千二百三十四")
+  assert_eq(num2words_int(1234, "zh", "ordinal_num"), "第1234")
+  assert_eq(num2words_int(-1, "zh", "ordinal"), "")
+  assert_eq(num2words_int(-1, "zh", "ordinal_num"), "")
+  assert_eq(num2words_int(2024, "zh", "year"), "二零二四年")
+  assert_eq(num2words_int(0, "zh", "year"), "零年")
+  assert_eq(num2words_int(-44, "zh", "year"), "公元前四四年")
+}
+
+///|
+test "zh float and currency" {
+  assert_eq(
+    num2words_str("1234.56", "zh", "cardinal"),
+    "一千二百三十四点五六",
+  )
+  assert_eq(num2words_str("-0.5", "zh", "cardinal"), "负零点五")
+  assert_eq(
+    num2words_currency("1234.56", "zh", ""),
+    Ok("一千二百三十四元五角六分"),
+  )
+  assert_eq(
+    num2words_currency("1234.56", "zh", "CNY"),
+    Ok("人民币一千二百三十四元五角六分"),
+  )
+  assert_eq(num2words_currency("0.05", "zh", "XXX"), Ok("零元零五分"))
+  assert_eq(num2words_currency("0.5", "zh", "USD"), Ok("美元零元五角"))
+  assert_eq(
+    num2words_currency("-3.5", "zh", "USD"),
+    Ok("美元负三元五角"),
+  )
+  assert_eq(
+    num2words_currency("1", "zh", "ABC"),
+    Err("currency code not supported for zh: ABC"),
+  )
+  assert_eq(
+    num2words_currency("1234.56", "zh_TW", "CNY"),
+    Ok("人民幣一千二百三十四元五角六分"),
+  )
+}
+
+// --- Japanese ---------------------------------------------------------------
+
+///|
+test "ja cardinal" {
+  assert_eq(num2words_int(0, "ja", "cardinal"), "零")
+  assert_eq(num2words_int(10, "ja", "cardinal"), "十")
+  assert_eq(num2words_int(11, "ja", "cardinal"), "十一")
+  assert_eq(num2words_int(100, "ja", "cardinal"), "百")
+  assert_eq(num2words_int(101, "ja", "cardinal"), "百一")
+  assert_eq(num2words_int(110, "ja", "cardinal"), "百十")
+  assert_eq(num2words_int(1000, "ja", "cardinal"), "千")
+  assert_eq(num2words_int(1001, "ja", "cardinal"), "千一")
+  assert_eq(num2words_int(1010, "ja", "cardinal"), "千十")
+  assert_eq(num2words_int(1100, "ja", "cardinal"), "千百")
+  assert_eq(num2words_int(10000, "ja", "cardinal"), "一万")
+  assert_eq(num2words_int(10001, "ja", "cardinal"), "一万一")
+  assert_eq(
+    num2words_int(12345, "ja", "cardinal"),
+    "一万二千三百四十五",
+  )
+  assert_eq(num2words_int(100000, "ja", "cardinal"), "十万")
+  assert_eq(num2words_int(100000000, "ja", "cardinal"), "一億")
+  assert_eq(num2words_str("1000000000000", "ja", "cardinal"), "一兆")
+  assert_eq(num2words_int(-42, "ja", "cardinal"), "マイナス四十二")
+  assert_eq(num2words_str("1" + zeros(48), "ja", "cardinal"), "一極")
+  assert_eq(num2words_str("1" + zeros(52), "ja", "cardinal"), "")
+  assert_eq(lang_ja().max_power(), 12)
+}
+
+///|
+test "ja ordinal and era year" {
+  assert_eq(num2words_int(21, "ja", "ordinal"), "二十一番目")
+  assert_eq(num2words_int(0, "ja", "ordinal"), "零番目")
+  assert_eq(num2words_int(21, "ja", "ordinal_num"), "21番目")
+  assert_eq(num2words_int(-1, "ja", "ordinal"), "")
+  assert_eq(num2words_int(-1, "ja", "ordinal_num"), "")
+  assert_eq(num2words_int(645, "ja", "year"), "大化元年")
+  assert_eq(num2words_int(749, "ja", "year"), "天平勝宝元年")
+  assert_eq(num2words_int(2019, "ja", "year"), "令和元年")
+  assert_eq(num2words_int(2024, "ja", "year"), "令和六年")
+  // Before the first era upstream raises; this API returns "".
+  assert_eq(num2words_int(644, "ja", "year"), "")
+  assert_eq(num2words_int(-1, "ja", "year"), "")
+}
+
+///|
+test "ja float and currency" {
+  assert_eq(
+    num2words_str("1234.56", "ja", "cardinal"),
+    "千二百三十四点五六",
+  )
+  assert_eq(num2words_str("-0.5", "ja", "cardinal"), "マイナス零点五")
+  assert_eq(num2words_currency("1000", "ja", "JPY"), Ok("千円"))
+  assert_eq(num2words_currency("-3", "ja", "JPY"), Ok("マイナス三円"))
+  assert_eq(
+    num2words_currency("1234.56", "ja", "JPY"),
+    Err("decimals not supported for JPY"),
+  )
+  assert_eq(
+    num2words_currency("1", "ja", "USD"),
+    Err("currency code not supported for ja: USD"),
+  )
+}
+
+// --- Korean -----------------------------------------------------------------
+
+///|
+test "ko cardinal" {
+  assert_eq(num2words_int(0, "ko", "cardinal"), "영")
+  assert_eq(num2words_int(10, "ko", "cardinal"), "십")
+  assert_eq(num2words_int(21, "ko", "cardinal"), "이십일")
+  assert_eq(num2words_int(100, "ko", "cardinal"), "백")
+  assert_eq(num2words_int(101, "ko", "cardinal"), "백일")
+  assert_eq(num2words_int(1000, "ko", "cardinal"), "천")
+  assert_eq(num2words_int(1100, "ko", "cardinal"), "천백")
+  assert_eq(num2words_int(10000, "ko", "cardinal"), "만")
+  assert_eq(num2words_int(10001, "ko", "cardinal"), "만 일")
+  assert_eq(num2words_int(10010, "ko", "cardinal"), "만 십")
+  assert_eq(num2words_int(12345, "ko", "cardinal"), "만 이천삼백사십오")
+  assert_eq(
+    num2words_int(12345678, "ko", "cardinal"),
+    "천이백삼십사만 오천육백칠십팔",
+  )
+  assert_eq(num2words_int(100000000, "ko", "cardinal"), "일억")
+  assert_eq(num2words_int(100000001, "ko", "cardinal"), "일억 일")
+  assert_eq(num2words_int(-42, "ko", "cardinal"), "마이너스 사십이")
+  assert_eq(num2words_str("1" + zeros(68), "ko", "cardinal"), "일무량대수")
+  assert_eq(num2words_str("1" + zeros(72), "ko", "cardinal"), "")
+  assert_eq(lang_ko().max_power(), 17)
+}
+
+///|
+test "ko ordinal and year" {
+  assert_eq(num2words_int(1, "ko", "ordinal"), "첫 번째")
+  assert_eq(num2words_int(2, "ko", "ordinal"), "두 번째")
+  assert_eq(num2words_int(11, "ko", "ordinal"), "열한 번째")
+  assert_eq(num2words_int(20, "ko", "ordinal"), "스물 번째")
+  assert_eq(num2words_int(21, "ko", "ordinal"), "스물한 번째")
+  assert_eq(num2words_int(101, "ko", "ordinal"), "백 한 번째")
+  assert_eq(
+    num2words_int(123456, "ko", "ordinal"),
+    "십이만 삼천사백 쉰여섯 번째",
+  )
+  // Upstream raises KeyError for these; the string API returns "".
+  assert_eq(num2words_int(0, "ko", "ordinal"), "")
+  assert_eq(num2words_int(100, "ko", "ordinal"), "")
+  assert_eq(num2words_int(1000, "ko", "ordinal"), "")
+  assert_eq(num2words_int(10000, "ko", "ordinal"), "")
+  assert_eq(num2words_int(21, "ko", "ordinal_num"), "21 번째")
+  assert_eq(num2words_int(-1, "ko", "ordinal"), "")
+  assert_eq(num2words_int(-1, "ko", "ordinal_num"), "")
+  assert_eq(num2words_int(2024, "ko", "year"), "이천이십사년")
+  assert_eq(num2words_int(700, "ko", "year"), "칠백년")
+  assert_eq(num2words_int(-44, "ko", "year"), "기원전 사십사년")
+}
+
+///|
+test "ko float and currency" {
+  assert_eq(
+    num2words_str("1234.56", "ko", "cardinal"),
+    "천이백삼십사 점 오 육",
+  )
+  assert_eq(num2words_str("-0.5", "ko", "cardinal"), "마이너스 영 점 오")
+  assert_eq(num2words_currency("1000", "ko", "KRW"), Ok("천원"))
+  assert_eq(num2words_currency("1", "ko", "USD"), Ok("일달러 영센트"))
+  assert_eq(
+    num2words_currency("1234.56", "ko", "USD"),
+    Ok("천이백삼십사달러 오십육센트"),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "ko", "USD"),
+    Ok("마이너스 삼달러 오십센트"),
+  )
+  assert_eq(
+    num2words_currency("1234.56", "ko", "KRW"),
+    Err("decimals not supported for KRW"),
+  )
+  assert_eq(
+    num2words_currency("1", "ko", "EUR"),
+    Err("currency code not supported for ko: EUR"),
+  )
+}
+
+// --- Swedish ----------------------------------------------------------------
+
+///|
+test "sv cardinal and ordinal" {
+  assert_eq(num2words_int(0, "sv", "cardinal"), "noll")
+  assert_eq(num2words_int(21, "sv", "cardinal"), "tjugoett")
+  assert_eq(num2words_int(100, "sv", "cardinal"), "etthundra")
+  assert_eq(num2words_int(1001, "sv", "cardinal"), "etttusenett")
+  assert_eq(num2words_int(1000000, "sv", "cardinal"), "en miljon")
+  assert_eq(
+    num2words_int(1234, "sv", "cardinal"),
+    "etttusen tvåhundratrettiofyra",
+  )
+  assert_eq(num2words_int(-42, "sv", "cardinal"), "minus förtiotvå")
+  assert_eq(
+    num2words_str("1000000000000000000", "sv", "cardinal"),
+    "en triljon",
+  )
+  assert_eq(num2words_int(1, "sv", "ordinal"), "första")
+  assert_eq(num2words_int(21, "sv", "ordinal"), "tjugoförsta")
+  assert_eq(num2words_int(100, "sv", "ordinal"), "etthundrade")
+  // Upstream leaves these three modes unimplemented.
+  assert_eq(num2words_int(21, "sv", "ordinal_num"), "")
+  assert_eq(num2words_int(2024, "sv", "year"), "")
+  assert_eq(
+    num2words_currency("1", "sv", "SEK"),
+    Err("currency not implemented for language: sv"),
+  )
+}
+
+// --- Norwegian --------------------------------------------------------------
+
+///|
+test "no cardinal, ordinal and year" {
+  assert_eq(num2words_int(100, "no", "cardinal"), "en hundre")
+  assert_eq(num2words_int(101, "no", "cardinal"), "en hundre og en")
+  assert_eq(
+    num2words_int(1234, "no", "cardinal"),
+    "en tusen to hundre og trettifire",
+  )
+  assert_eq(num2words_int(1000000, "no", "cardinal"), "en million")
+  assert_eq(num2words_int(21, "no", "ordinal"), "tjueførste")
+  // Upstream has no "tretten" entry in ords_pl, so 13 -> "trettførste".
+  assert_eq(num2words_int(13, "no", "ordinal"), "trettførste")
+  assert_eq(num2words_int(21, "no", "ordinal_num"), "21.")
+  assert_eq(num2words_int(1900, "no", "year"), "nitten hundre")
+  assert_eq(num2words_int(2024, "no", "year"), "to tusen og tjuefire")
+}
+
+///|
+test "no currency" {
+  assert_eq(num2words_currency("1", "no", ""), Ok("en krone"))
+  assert_eq(num2words_currency("2", "no", "NOK"), Ok("to kroner"))
+  assert_eq(num2words_currency("0", "no", "NOK"), Ok("null kroner"))
+  assert_eq(
+    num2words_currency("1234.56", "no", "NOK"),
+    Ok("en tusen to hundre og trettifire kroner og femtiseks øre"),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "no", "NOK"),
+    Ok("minus tre kroner og femti øre"),
+  )
+  assert_eq(
+    num2words_currency("1", "no", "EUR"),
+    Err("currency code not supported for no: EUR"),
+  )
+}
+
+// --- Danish -----------------------------------------------------------------
+
+///|
+test "da cardinal, ordinal and year" {
+  assert_eq(num2words_int(21, "da", "cardinal"), "enogtyve")
+  assert_eq(num2words_int(1001, "da", "cardinal"), "ettusinde og et")
+  assert_eq(num2words_int(1000000, "da", "cardinal"), "en millioner")
+  assert_eq(
+    num2words_int(1234, "da", "cardinal"),
+    "ettusinde og tohundrede og fireogtredive",
+  )
+  assert_eq(num2words_int(-42, "da", "cardinal"), "minus toogfyrre")
+  assert_eq(num2words_int(2, "da", "ordinal"), "anden")
+  assert_eq(num2words_int(100, "da", "ordinal"), "ethundredete")
+  assert_eq(num2words_int(2, "da", "ordinal_num"), "2en")
+  assert_eq(num2words_int(3, "da", "ordinal_num"), "3ende")
+  assert_eq(num2words_int(1900, "da", "year"), "nitten hundrede")
+  assert_eq(num2words_int(2024, "da", "year"), "totusinde og fireogtyve")
+}
+
+///|
+test "da currency follows float2tuple quirks" {
+  // 0.5 is (0, 5) upstream, not fifty øre; zero is empty; 101 slices to
+  // "en undrede og et kr".
+  assert_eq(num2words_currency("0", "da", "DKK"), Ok(""))
+  assert_eq(num2words_currency("1", "da", ""), Ok("en kr"))
+  assert_eq(num2words_currency("0.5", "da", "DKK"), Ok("fem øre"))
+  assert_eq(num2words_currency("101", "da", "DKK"), Ok("en undrede og et kr"))
+  assert_eq(
+    num2words_currency("1234.56", "da", "DKK"),
+    Ok("ettusinde og tohundrede og fireogtredive kr og seksoghalvtreds øre"),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "da", "DKK"),
+    Ok("minus tre kr og fem øre"),
+  )
+  assert_eq(
+    num2words_currency("1", "da", "EUR"),
+    Err("currency code not supported for da: EUR"),
+  )
+}
+
+// --- Indonesian -------------------------------------------------------------
+
+///|
+test "id cardinal, ordinal, year and currency" {
+  assert_eq(num2words_int(11, "id", "cardinal"), "sebelas")
+  assert_eq(num2words_int(100, "id", "cardinal"), "seratus")
+  assert_eq(num2words_int(1000, "id", "cardinal"), "seribu")
+  assert_eq(
+    num2words_int(1234, "id", "cardinal"),
+    "seribu dua ratus tiga puluh empat",
+  )
+  assert_eq(num2words_int(-42, "id", "cardinal"), "min empat puluh dua")
+  assert_eq(num2words_int(1, "id", "ordinal"), "pertama")
+  assert_eq(num2words_int(2, "id", "ordinal"), "kedua")
+  assert_eq(num2words_int(21, "id", "ordinal"), "kedua puluh satu")
+  assert_eq(num2words_int(21, "id", "ordinal_num"), "ke-21")
+  assert_eq(num2words_int(2024, "id", "year"), "dua ribu dua puluh empat")
+  assert_eq(num2words_currency("1", "id", ""), Ok("satu koma nol rupiah"))
+  assert_eq(
+    num2words_currency("1234.56", "id", "IDR"),
+    Ok("seribu dua ratus tiga puluh empat koma lima enam rupiah"),
+  )
+  assert_eq(num2words_currency("0.5", "id", "IDR"), Ok("nol koma lima rupiah"))
+  assert_eq(
+    num2words_currency("0.05", "id", "IDR"),
+    Ok("nol koma nol lima rupiah"),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "id", "IDR"),
+    Ok("min tiga koma lima rupiah"),
+  )
+  assert_eq(
+    num2words_currency("1", "id", "EUR"),
+    Err("currency code not supported for id: EUR"),
+  )
+}
+
+// --- Polish -----------------------------------------------------------------
+
+///|
+test "pl cardinal, ordinal and year" {
+  assert_eq(num2words_int(21, "pl", "cardinal"), "dwadzieścia jeden")
+  assert_eq(num2words_int(10000, "pl", "cardinal"), "dziesięć tysięcy")
+  assert_eq(num2words_int(1000000, "pl", "cardinal"), "milion")
+  assert_eq(
+    num2words_int(1234567, "pl", "cardinal"),
+    "milion dwieście trzydzieści cztery tysiące pięćset sześćdziesiąt siedem",
+  )
+  // Upstream raises for negative input; this port spells it cleanly.
+  assert_eq(num2words_int(-42, "pl", "cardinal"), "minus czterdzieści dwa")
+  assert_eq(num2words_int(1, "pl", "ordinal"), "pierwszy")
+  assert_eq(num2words_int(21, "pl", "ordinal"), "dwudziesty pierwszy")
+  assert_eq(num2words_int(100, "pl", "ordinal"), "setny")
+  assert_eq(
+    num2words_int(1234, "pl", "ordinal"),
+    "tysiąc dwieście trzydziesty czwarty",
+  )
+  assert_eq(num2words_int(1234, "pl", "ordinal_num"), "1234")
+  assert_eq(
+    num2words_int(2024, "pl", "year"),
+    "dwa tysiące dwadzieścia cztery",
+  )
+  assert_eq(
+    num2words_currency("1", "pl", "PLN"),
+    Err("currency not implemented for language: pl"),
+  )
 }

@@ -19,15 +19,70 @@ Notes
   0.5.14 also spells 118/218/... as ``centodicotto`` instead of
   ``centodiciotto``; that typo is normalised away (see ``DIFF_REPORT.md``).
 * Everything else is compared verbatim.
+* Chinese has no module in the 0.5.14 release: `zh` (Simplified) and `zh_TW`
+  (Traditional) are compared against the `lang_ZH.py` vendored in
+  ``tools/upstream_lang_ZH_master.py`` (upstream master). The Simplified
+  fixture is produced by character-mapping the Traditional output.
 """
 
+import os
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
     from num2words import num2words
     from num2words import lang_ES
+    from upstream_lang_ZH_master import Num2Word_ZH
 except ImportError:
     sys.exit("num2words is not installed: pip install num2words")
+
+ZH_MASTER = Num2Word_ZH()
+
+# Traditional -> Simplified for the characters used by lang_ZH (digits and
+# place words are identical, so only the scale/currency characters matter).
+ZH_TO_SIMPLIFIED = str.maketrans({
+    "萬": "万", "億": "亿", "負": "负", "點": "点", "溝": "沟", "澗": "涧",
+    "載": "载", "極": "极", "恆": "恒", "議": "议", "無": "无", "說": "说",
+    "幣": "币", "門": "门", "馬": "马", "來": "来", "亞": "亚", "歐": "欧",
+    "鎊": "镑", "紐": "纽", "蘭": "兰", "韓": "韩", "銖": "铢", "臺": "台",
+    "灣": "湾", "穣": "穰",
+})
+
+
+def zh_out(text: str, ours: str) -> str:
+    return text if ours == "zh_TW" else text.translate(ZH_TO_SIMPLIFIED)
+
+
+def expected(ours: str, upstream: str, n: int, to: str) -> str:
+    """Expected upstream output for one language/mode/value."""
+    if ours in ("zh", "zh_TW"):
+        if to == "cardinal":
+            raw = ZH_MASTER.to_cardinal(n)
+        elif to == "year":
+            raw = ZH_MASTER.to_year(n)
+        elif to == "ordinal":
+            raw = ZH_MASTER.to_ordinal(n)
+        elif to == "ordinal_num":
+            raw = ZH_MASTER.to_ordinal_num(n)
+        else:
+            raise ValueError(to)
+        return zh_out(raw, ours)
+    return num2words(n, lang=upstream, to=to)
+
+
+def expected_currency(
+    ours: str, upstream: str, amount: str, code: str
+) -> str:
+    if ours in ("zh", "zh_TW"):
+        return zh_out(
+            ZH_MASTER.to_currency(float(amount), currency=code), ours
+        )
+    if upstream in ("pt_BR", "tr", "da", "id"):
+        return num2words(float(amount), lang=upstream, to="currency")
+    return num2words(
+        float(amount), lang=upstream, to="currency", currency=code
+    )
 
 # Upstream language code -> our language code.
 LANGS = {
@@ -42,6 +97,16 @@ LANGS = {
     "nl": "nl",
     "tr": "tr",
     "vi": "vi",
+    "ja": "ja",
+    "ko": "ko",
+    "sv": "sv",
+    "no": "no",
+    "da": "da",
+    "id": "id",
+    "pl": "pl",
+    # No 0.5.14 module: generated through the vendored upstream master module.
+    "zh": "zh",
+    "zh_TW": "zh_TW",
 }
 
 SAMPLES = list(range(0, 501)) + [
@@ -69,6 +134,14 @@ YEAR_LANGS = {
     "ru": "ru",
     "nl": "nl",
     "tr": "tr",
+    "ja": "ja",
+    "ko": "ko",
+    "no": "no",
+    "da": "da",
+    "id": "id",
+    "pl": "pl",
+    "zh": "zh",
+    "zh_TW": "zh_TW",
 }
 
 YEAR_SAMPLES = [
@@ -81,7 +154,15 @@ YEAR_SAMPLES = [
 # and Dutch upstream emit mangled output for negative years (e.g. -1 ->
 # "minuseinshundertneunundneunzig"), so they are excluded here and covered by
 # a handwritten whitebox test that pins the clean "minus/min" form.
-YEAR_BC_LANGS = {"en": "en", "pt_BR": "pt", "pt": "pt_PT"}
+YEAR_BC_LANGS = {
+    "en": "en",
+    "pt_BR": "pt",
+    "pt": "pt_PT",
+    "ko": "ko",
+    "id": "id",
+    "zh": "zh",
+    "zh_TW": "zh_TW",
+}
 YEAR_BC_SAMPLES = [-1, -44, -156, -1000, -1900, -2001]
 
 # Ordinal samples: dense through 200, then selected hundreds/thousands and
@@ -116,6 +197,13 @@ CURRENCY_LANGS = {
     "pt": "pt_PT",
     "nl": "nl",
     "tr": "tr",
+    "ja": "ja",
+    "ko": "ko",
+    "no": "no",
+    "da": "da",
+    "id": "id",
+    "zh": "zh",
+    "zh_TW": "zh_TW",
 }
 CURRENCY_CODES = {
     "en": [
@@ -132,6 +220,14 @@ CURRENCY_CODES = {
     "pt": ["EUR", "USD", "GBP", "CAD", "AUD"],
     "nl": ["EUR", "GBP", "USD", "CNY"],
     "tr": ["TRY"],
+    "ja": ["JPY"],
+    "ko": ["KRW", "USD", "JPY"],
+    "no": ["NOK"],
+    "da": ["DKK"],
+    "id": ["IDR"],
+    # Chinese: every code upstream master's lang_ZH implements (incl. XXX).
+    "zh": sorted(ZH_MASTER.CURRENCY_FORMS.keys()),
+    "zh_TW": sorted(ZH_MASTER.CURRENCY_FORMS.keys()),
 }
 CURRENCY_SAMPLES_BASIC = [
     "0", "0.01", "0.5", "1", "2", "21", "28", "81", "101", "1000", "1001",
@@ -159,6 +255,34 @@ CURRENCY_SAMPLES = {
         "0", "1", "2", "21", "28", "81", "101", "1000", "1001",
         "12.34", "1234.56", "1.5", "-3.5",
     ],
+    # Japanese rejects any fractional amount; negative integers are fine.
+    "ja": ["0", "1", "2", "21", "101", "1000", "-3"],
+    # Korean KRW/JPY reject cents (those combinations are skipped by the
+    # generator); USD always spells the cent part, even when it is zero.
+    "ko": [
+        "0", "1", "2", "5", "11", "21", "101", "1000",
+        "1234.56", "0.5", "-3.5",
+    ],
+    "zh": [
+        "0", "0.01", "0.05", "0.5", "1", "3", "21", "101", "1000",
+        "1234.56", "-3.5", "-0.5",
+    ],
+    "zh_TW": [
+        "0", "0.01", "0.05", "0.5", "1", "3", "21", "101", "1000",
+        "1234.56", "-3.5", "-0.5",
+    ],
+    "no": [
+        "0", "0.01", "0.5", "1", "2", "21", "101", "1000",
+        "1234.56", "-3.5", "-0.5",
+    ],
+    "da": [
+        "0", "0.01", "0.5", "1", "2", "21", "101", "1000",
+        "1234.56", "-3.5",
+    ],
+    "id": [
+        "0", "0.01", "0.5", "1", "2", "21", "101", "1000",
+        "1234.56", "-3.5",
+    ],
 }
 
 OUT = "diff_fixtures_wbtest.mbt"
@@ -175,18 +299,23 @@ HEADER = '''// Generated by tools/gen_fixtures.py — do not edit by hand.
 //     inside compounds, our output follows standard orthography; upstream's
 //     `dicotto` typo for 118/218/... is normalised to `diciotto`;
 //   * pt: compared against upstream `pt_BR`, ignoring commas — upstream
-//     separates scale groups with a comma, ours follows Portuguese usage.
+//     separates scale groups with a comma, ours follows Portuguese usage;
+//   * zh: compared against upstream master's lang_ZH.py (0.5.14 has no
+//     Chinese); `zh` is the Simplified variant of the same grammar and is
+//     produced by character mapping, `zh_TW` is Traditional verbatim.
 //
 // Year mode is additionally compared for all languages that implement it
-// upstream (en/fr/es/de/it/pt/pt_PT/ru/nl/tr; Vietnamese has no `to_year`).
-// Currency mode is compared for every language with the complete code set
-// each upstream language implements (en: 20 codes; fr/de: 5; it/nl: 4;
-// es: 171; ru: 8; pt: BRL only; pt_PT: 5; tr: TRY only). Upstream int inputs
-// are avoided (they are read as cents), Turkish amounts must be free of
-// float truncation, and Italian negative amounts are skipped (upstream raises
-// AttributeError). Exact `x.xx5` amounts are excluded because this project
-// rounds the exact decimal, upstream rounds a float. Upstream's Russian PLN
-// typo "слотых" is normalised to "злотых"; pt commas are stripped.
+// upstream (en/fr/es/de/it/pt/pt_PT/ru/nl/tr/ja/ko/zh; Vietnamese has no
+// `to_year`). Currency mode is compared for every language with the complete
+// code set each upstream language implements (en: 20 codes; fr/de: 5;
+// it/nl: 4; es: 171; ru: 8; pt: BRL only; pt_PT: 5; tr: TRY only; ja: JPY;
+// ko: KRW/USD/JPY; zh/zh_TW: the 17 master codes incl. XXX). Upstream int
+// inputs are avoided (they are read as cents), Turkish amounts must be free of
+// float truncation, Japanese amounts must be integral, Korean KRW/JPY amounts
+// must be free of cents, and Italian negative amounts are skipped (upstream
+// raises AttributeError). Exact `x.xx5` amounts are excluded because this
+// project rounds the exact decimal, upstream rounds a float. Upstream's
+// Russian PLN typo "слотых" is normalised to "злотых"; pt commas are stripped.
 
 '''
 
@@ -215,10 +344,17 @@ def main() -> None:
         # Upstream's Vietnamese negative handling is broken (-1 -> "mười chín",
         # smaller values raise IndexError); this project spells "âm ...".
         samples = SAMPLES if ours != "vi" else [n for n in SAMPLES if n >= 0]
-        entries = [
-            (str(n), normalize(ours, num2words(n, lang=upstream)))
-            for n in samples
-        ]
+        entries = []
+        for n in samples:
+            try:
+                want = normalize(
+                    ours, expected(ours, upstream, n, "cardinal")
+                )
+            except Exception:
+                # Polish upstream raises on negative input; this port fixes it
+                # and documents the deviation (see DIFF_REPORT.md).
+                continue
+            entries.append((str(n), want))
         counts[ours] = len(entries)
         blocks.append("///|\nlet diff_%s : Array[(String, String)] = [\n" % ours)
         for value, want in entries:
@@ -252,10 +388,14 @@ def main() -> None:
         samples = YEAR_SAMPLES + (
             YEAR_BC_SAMPLES if ours in YEAR_BC_LANGS.values() else []
         )
-        entries = [
-            (str(y), normalize(ours, num2words(y, lang=upstream, to="year")))
-            for y in samples
-        ]
+        entries = []
+        for y in samples:
+            try:
+                want = normalize(ours, expected(ours, upstream, y, "year"))
+            except Exception:
+                # Japanese rejects years before 645 (era calendar).
+                continue
+            entries.append((str(y), want))
         year_counts[ours] = len(entries)
         blocks.append("///|\nlet diff_year_%s : Array[(String, String)] = [\n" % ours)
         for value, want in entries:
@@ -279,7 +419,7 @@ def main() -> None:
         ord_entries = []
         for n in ORD_SAMPLES:
             try:
-                want = normalize(ours, num2words(n, lang=upstream, to="ordinal"))
+                want = normalize(ours, expected(ours, upstream, n, "ordinal"))
             except Exception:
                 continue
             ord_entries.append((str(n), want))
@@ -287,7 +427,9 @@ def main() -> None:
         for n in ORDNUM_SAMPLES:
             try:
                 # it/ru ordinal_num returns the int itself upstream; str() it.
-                want = normalize(ours, str(num2words(n, lang=upstream, to="ordinal_num")))
+                want = normalize(
+                    ours, str(expected(ours, upstream, n, "ordinal_num"))
+                )
             except Exception:
                 continue
             ordnum_entries.append((str(n), want))
@@ -328,16 +470,9 @@ def main() -> None:
         for code in CURRENCY_CODES[upstream]:
             for amount in CURRENCY_SAMPLES[upstream]:
                 try:
-                    # pt_BR's and tr's to_currency take no currency code.
-                    if upstream in ("pt_BR", "tr"):
-                        raw = num2words(
-                            float(amount), lang=upstream, to="currency"
-                        )
-                    else:
-                        raw = num2words(
-                            float(amount), lang=upstream, to="currency", currency=code
-                        )
-                    want = normalize(ours, raw)
+                    want = normalize(
+                        ours, expected_currency(ours, upstream, amount, code)
+                    )
                 except Exception:
                     continue
                 entries.append((amount, code, want))

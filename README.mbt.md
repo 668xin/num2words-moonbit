@@ -1,18 +1,25 @@
 # 668xin/num2words-moonbit
 
 Convert numbers into words in pure MoonBit — a port of the Python `num2words`
-library. Supports English, French, Spanish, German, Italian, Portuguese
-(Brazilian `pt` and European `pt_PT`), Russian, Dutch, Turkish and Vietnamese
-across cardinal, ordinal, ordinal_num, year and currency modes, with `BigInt`
-for large integers. Currency is native for the ten language codes that
-implement it upstream, each with its upstream ISO code set (EUR by default,
-BRL for `pt`, TRY for `tr`).
+library. Supports 20 language codes: English, French, Spanish, German, Italian,
+Portuguese (Brazilian `pt` and European `pt_PT`), Russian, Dutch, Turkish,
+Vietnamese, Simplified/Traditional Chinese, Japanese, Korean, Swedish,
+Norwegian, Danish, Indonesian and Polish, across cardinal, ordinal,
+ordinal_num, year and currency modes where upstream implements them, with
+`BigInt` for large integers. Currency is native for 17 of them, each with its
+upstream ISO code set (EUR by default, BRL for `pt`, TRY for `tr`, 元/`XXX`
+for `zh`, JPY for `ja`, KRW for `ko`, NOK for `no`, DKK for `da`, IDR for
+`id`).
 
 ## Quick start
 
 ```bash
 moon add 668xin/num2words-moonbit
 ```
+
+> The published `0.1.0` predates this rework (seven language codes); the
+> 20-language, 265-currency-pair version in the repository is pending release
+> as `0.1.1`.
 
 ```mbt nocheck
 import "668xin/num2words-moonbit" @n2w
@@ -36,14 +43,15 @@ import "668xin/num2words-moonbit" @n2w
 - `num2words_str(value : String, lang : String, to : String) -> String`
 - `num2words_currency(amount : String, lang : String, code : String) -> Result[String, String]`
 
-`lang` ∈ `{"en","fr","es","de","it","pt","pt_PT","ru","nl","tr","vi"}` (default
-`en`); `to` ∈ `{"cardinal","ordinal","ordinal_num","year","currency"}`
+`lang` ∈ `{"en","fr","es","de","it","pt","pt_PT","ru","nl","tr","vi","zh","zh_TW","ja","ko","sv","no","da","id","pl"}`
+(default `en`); `to` ∈ `{"cardinal","ordinal","ordinal_num","year","currency"}`
 (default `cardinal`). Currency codes are language-dependent: `en` has 20,
-`fr`/`de` have 5 (EUR/USD/GBP/CNY plus FRF/DEM), `it`/`nl` have 4
-(EUR/USD/GBP/CNY), `es` has the complete upstream set of 171, `ru` 8, `pt` only
-`BRL`, `pt_PT` 5 (EUR/USD/GBP/CAD/AUD), and `tr` only `TRY`. The empty code `""` selects the
-language default (EUR, BRL for `pt`, TRY for `tr`). Vietnamese implements
-cardinal and ordinal only, matching upstream.
+`fr`/`de` 5 each, `it`/`nl` 4 each, `es` 171, `ru` 8, `pt` only `BRL`,
+`pt_PT` 5, `tr` only `TRY`, `ja` only `JPY`, `ko` 3 (KRW/USD/JPY), `no` only
+`NOK`, `da` only `DKK`, `id` only `IDR`, and `zh`/`zh_TW` 17 (including `XXX`
+for plain 元). The empty code `""` selects the language default. Vietnamese and
+Swedish implement cardinal/ordinal only and Polish has no currency mode,
+matching upstream.
 
 ## License
 

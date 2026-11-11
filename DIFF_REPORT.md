@@ -5,27 +5,33 @@ against the upstream Python [`num2words`](https://github.com/savoirfairelinux/nu
 library (LGPL-2.1). Only upstream **output strings** are used, never its source
 code.
 
-- Upstream version: **num2words 0.5.14**
+- Upstream version: **num2words 0.5.14** (Chinese: upstream master `lang_ZH.py`,
+  vendored in `tools/upstream_lang_ZH_master.py`, because 0.5.14 has no Chinese)
 - Upstream languages used: `en`, `fr`, `es`, `de`, `it`, `pt_BR`, `pt`, `ru`,
-  `nl`, `tr`, `vi`
+  `nl`, `tr`, `vi`, `ja`, `ko`, `sv`, `no`, `da`, `id`, `pl`, plus
+  `lang_ZH` (master) for `zh`/`zh_TW`
 - Cardinal samples per language: **551** (`0..500` plus 50 multi-scale / signed
-  values); Vietnamese uses **547** (negative samples excluded — upstream's
-  negative handling is broken)
-- Year samples: **25** each for the ten language codes that implement `to_year`,
-  plus **6 negative years** for `en`/`pt`/`pt_PT` (**31** each) — Vietnamese has
-  no `to_year`
+  values); Vietnamese and Polish use **547** (negative samples excluded —
+  upstream's negative handling is broken)
+- Year samples: **25** each for most language codes that implement `to_year`,
+  plus **6 negative years** for `en`/`pt`/`pt_PT`/`ko`/`id`/`zh`/`zh_TW`
+  (**31** each); Japanese uses **24** (years before 645 are rejected upstream);
+  Vietnamese and Swedish have no `to_year`
 - Ordinal samples per language: **249** (dense `0..200` plus
-  hundreds/thousands/scale boundaries; Portuguese drops the `10^18` sample
-  that upstream rejects), `ordinal_num`: **11** per language (Vietnamese
-  upstream has no `ordinal_num`)
-- Currency samples: **5461** total — **340** for `en` (20 codes × 17 amounts),
+  hundreds/thousands/scale boundaries; Portuguese drops the `10^18` sample that
+  upstream rejects, Korean drops its `KeyError` cases, Polish drops 0 and its
+  `IndexError` cases), `ordinal_num`: **11** per language (Vietnamese and
+  Swedish upstream have no `ordinal_num`)
+- Currency samples: **5934** total — **340** for `en` (20 codes × 17 amounts),
   **85** each for `fr`/`de` (5 × 17), **68** for `nl` (4 × 17), **60** for `it`
   (4 × 17 minus its 8 rejected negative samples), **4446** for `es` (171 × 26),
-  **208** for `ru` (8 × 26), **26** for `pt`, **130** for `pt_PT` (26 × 5) and
-  **13** for `tr` (clean amounts only, see §4)
-- Total comparisons: **14633** (6057 cardinal + 268 year + 2737 ordinal
-  + 110 ordinal_num + 5461 currency)
-- MoonBit test suite: **102 tests, 102 passed, 0 failed**
+  **208** for `ru` (8 × 26), **26** for `pt`, **130** for `pt_PT` (26 × 5),
+  **13** for `tr` (clean amounts only, see §4), **7** for `ja`, **27** for `ko`,
+  **11** for `no`, **10** each for `da`/`id` and **204** each for `zh`/`zh_TW`
+  (17 codes × 12 amounts)
+- Total comparisons: **22573** (11012 cardinal + 491 year + 4938 ordinal
+  + 198 ordinal_num + 5934 currency)
+- MoonBit test suite: **161 tests, 161 passed, 0 failed**
 
 Run `moon test` from the project root to replay every comparison.
 
@@ -54,15 +60,17 @@ Sample set:
 | Large | `100000, 100001, 123000, 123456, 999999, 1000000, 1000001, 1000021, 1000100, 1001000, 1100000, 1234567, 2000000, 5000000, 10^9, 2×10^9, 10^12` |
 | Signed | `-1, -42, -1000, -123456` |
 
-Year samples (all ten codes that implement it upstream): `101, 999, 1000, 1001,
+Year samples (every code that implements it upstream): `101, 999, 1000, 1001,
 1010, 1100, 1104, 1500, 1900, 1904, 1984, 1999, 2000, 2001, 2004, 2009, 2010,
 2023, 2024, 2100, 2134, 3000, 3001, 9999, 12345`, plus the negative years
-`-1, -44, -156, -1000, -1900, -2001` for `en`/`pt`/`pt_PT` (§4 rule 7 explains
-why `de`/`nl` are excluded). German uses upstream's *-hundert* form for
-1100–9999 (`1900` → *neunzehnhundert*, `101` → *einshunderteins*), Dutch its
-*-honderd* form (`1900` → *negentien honderd*); Turkish years are plain
-cardinals, English uses the `oh-` form for a low part below ten and `BC` for
-negative years.
+`-1, -44, -156, -1000, -1900, -2001` for `en`/`pt`/`pt_PT`/`ko`/`id`/`zh`/
+`zh_TW` (§4 rule 7 explains why `de`/`nl` are excluded). German uses upstream's
+*-hundert* form for 1100–9999 (`1900` → *neunzehnhundert*, `101` →
+*einshunderteins*), Dutch its *-honderd* form (`1900` → *negentien honderd*),
+Japanese its era calendar (`2024` → *令和六年*), Chinese reads the year digit by
+digit (*二零二四年*); Turkish, Indonesian and Polish years are plain cardinals,
+English uses the `oh-` form for a low part below ten and `BC` for negative
+years.
 
 Currency samples: `en` uses its 20 codes, `fr`/`de` their 5 and `it`/`nl`
 their 4 codes with the 17 amounts `0, 0.01, 0.5, 1, 2, 21, 28, 81, 101, 1000,
@@ -70,8 +78,10 @@ their 4 codes with the 17 amounts `0, 0.01, 0.5, 1, 2, 21, 28, 81, 101, 1000,
 its complete upstream set of 171 codes, `ru` 26 × 8, `pt` 26 × `BRL` and
 `pt_PT` 26 × 5, adding `5, 11, 22, 25, 100, 200, 500, 2000, 21000, 1000000,
 1000001, 2000000`. `tr` uses 13 amounts that are
-free of upstream's float truncation. Amounts are passed to upstream as floats,
-so its type-dependent int-as-cents quirk does not apply.
+free of upstream's float truncation, `ja` 7 integral amounts, `ko` 27
+KRW/USD/JPY samples, `no` 11, `da`/`id` 10 each and `zh`/`zh_TW` 12 amounts ×
+17 master codes. Amounts are passed to upstream as floats, so its
+type-dependent int-as-cents quirk does not apply.
 
 ---
 
@@ -90,6 +100,15 @@ so its type-dependent int-as-cents quirk does not apply.
 | `nl` | 551 | 551 | verbatim |
 | `tr` | 551 | 551 | verbatim |
 | `vi` | 547 | 547 | verbatim (negative samples excluded, see §4) |
+| `ja` | 551 | 551 | verbatim |
+| `ko` | 551 | 551 | verbatim |
+| `sv` | 551 | 551 | verbatim |
+| `no` | 551 | 551 | verbatim |
+| `da` | 551 | 551 | verbatim |
+| `id` | 551 | 551 | verbatim |
+| `pl` | 547 | 547 | verbatim (negative samples excluded, see §4) |
+| `zh` | 551 | 551 | upstream master `lang_ZH`, Simplified characters (see §4) |
+| `zh_TW` | 551 | 551 | upstream master `lang_ZH`, verbatim |
 
 | Language | Year samples | Passed | Comparison |
 | --- | --- | --- | --- |
@@ -103,6 +122,14 @@ so its type-dependent int-as-cents quirk does not apply.
 | `ru` | 25 | 25 | verbatim |
 | `nl` | 25 | 25 | verbatim (*-honderd* form; negatives excluded, see §4) |
 | `tr` | 25 | 25 | verbatim (cardinal) |
+| `ja` | 24 | 24 | era calendar (`2024` → *令和六年*); years before 645 skipped |
+| `ko` | 31 | 31 | verbatim (including *기원전* for negative years) |
+| `no` | 25 | 25 | verbatim (*-hundre* split) |
+| `da` | 25 | 25 | verbatim (*-hundrede* split) |
+| `id` | 31 | 31 | cardinal (including `min` for negative years) |
+| `pl` | 25 | 25 | cardinal |
+| `zh` | 31 | 31 | digit by digit, *公元前* for negative years |
+| `zh_TW` | 31 | 31 | digit by digit, *公元前* for negative years |
 
 | Language | Ordinal samples | `ordinal_num` | Passed | Comparison |
 | --- | --- | --- | --- | --- |
@@ -117,6 +144,15 @@ so its type-dependent int-as-cents quirk does not apply.
 | `nl` | 249 | 11 | 260 | verbatim |
 | `tr` | 249 | 11 | 260 | verbatim (10^18 keeps *kentilyon*) |
 | `vi` | 249 | 0 | 249 | verbatim (ordinal = cardinal; no `ordinal_num` upstream) |
+| `ja` | 249 | 11 | 260 | verbatim (`…番目`) |
+| `ko` | 214 | 11 | 225 | native counters; upstream `KeyError` cases skipped |
+| `sv` | 249 | 0 | 249 | verbatim (no `ordinal_num` upstream) |
+| `no` | 249 | 11 | 260 | verbatim (`N.` ordinal numbers) |
+| `da` | 249 | 11 | 260 | verbatim (`N.te` / `N.en` / `N.ende`) |
+| `id` | 249 | 11 | 260 | verbatim (`ke…` / `ke-N`) |
+| `pl` | 244 | 11 | 255 | verbatim; 0 and upstream `IndexError` cases skipped |
+| `zh` | 249 | 11 | 260 | verbatim (第… / 第N) |
+| `zh_TW` | 249 | 11 | 260 | verbatim (第…萬 / 第N) |
 
 | Language | Currency samples | Passed | Comparison |
 | --- | --- | --- | --- |
@@ -130,8 +166,15 @@ so its type-dependent int-as-cents quirk does not apply.
 | `pt_PT` | 130 | 130 | upstream `pt`, commas ignored; GBP zero *pence* (see §4) |
 | `nl` | 68 | 68 | verbatim (4 codes; invariant nouns) |
 | `tr` | 13 | 13 | verbatim (TRY only; clean amounts, see §4) |
+| `ja` | 7 | 7 | verbatim (JPY only; integral amounts) |
+| `ko` | 27 | 27 | verbatim (KRW/USD/JPY; KRW/JPY cents rejected) |
+| `no` | 11 | 11 | verbatim (NOK; zero øre omitted) |
+| `da` | 10 | 10 | verbatim (DKK; `float2tuple` quirks, see §4) |
+| `id` | 10 | 10 | verbatim (IDR; `koma` rendering, see §4) |
+| `zh` | 204 | 204 | upstream master, Simplified characters (see §4) |
+| `zh_TW` | 204 | 204 | upstream master, verbatim (元/角/分) |
 
-All 14633 comparisons pass under the documented comparison rules in §4.
+All **22573** comparisons pass under the documented comparison rules in §4.
 
 ### Ordinal comparison rules
 
@@ -175,6 +218,10 @@ The differential run exposed real divergences; all but the documented rules in
 | 10 | `it` | `1234567` | `un milione duecento…` | `un milione e duecento…` |
 | 11 | `en` (year) | `2001` | `twenty one` | `two thousand and one` |
 | 12 | `en` (year) | `1001`, `3009` | `ten one`, `thirty nine` | `one thousand and one`, `three thousand and nine` |
+| 13 | `zh` | `-123456` | `负十二万…` | `负一十二万…` (upstream strips `一十` only without a sign prefix) |
+| 14 | `zh_TW` (ordinal) | `10000` | `第一万` | `第一萬` (traditional tables used for ordinals) |
+| 15 | `ko` (ordinal) | `123456` | `삼천사백쉰여섯` | `삼천사백 쉰여섯` (upstream joins the `백` fragments with `백 `) |
+| 16 | `da` (currency) | `0.5` | `halvtreds øre` | `fem øre` (upstream splits the raw float via `float2tuple`) |
 
 Notes on the fixes:
 
@@ -223,6 +270,13 @@ Notes on the fixes:
   trailing space, `MAD` is `un dírham` but `dos dirhams`, `ZRZ` pairs a
   `likuta` singular with a `makuta` plural, and `ISK` uses the unrelated
   `eyrir`/`aurar` pair).
+- **M6 — CJK, Scandinavian, Slavic and Southeast Asian expansion:** nine new
+  codes were added — `zh`, `zh_TW`, `ja`, `ko`, `sv`, `no`, `da`, `id`, `pl` —
+  bringing the project to **20 language codes**, **265 currency pairs** and
+  **22573 comparisons**. This milestone introduced `group4` (10⁴ scale words),
+  the Japanese era table, the Chinese `元/角/分` renderer and the Danish
+  `float2tuple` currency split; the defects found while aligning them are rows
+  13–16 above.
 
 ---
 
@@ -257,11 +311,13 @@ regular):
    normalised to `злотых`. Everything else — including the Spanish
    masculine *quinientos* and the Russian feminine *одна миллион* — is
    compared verbatim.
-4. **Vietnamese negatives.** Upstream 0.5.14 reads `-1` as `mười chín` and
-   raises `IndexError` for smaller negatives, so the negative cardinal samples
-   are excluded from the Vietnamese fixtures. This project spells them
-   (`âm bốn mươi hai`). Vietnamese `year`, `ordinal_num` and `currency` are
-   absent upstream (`AttributeError`) and are not part of the fixtures either.
+4. **Vietnamese and Polish negatives.** Upstream 0.5.14 reads Vietnamese `-1`
+   as `mười chín` and raises `IndexError` for smaller negatives; Polish raises
+   `ValueError` for any negative input. The negative cardinal samples are
+   excluded from both fixtures. This project spells them (`âm bốn mươi hai`,
+   `minus czterdzieści dwa`). Vietnamese and Swedish `year`, `ordinal_num` and
+   `currency` are absent upstream (`AttributeError`) and are not part of the
+   fixtures either.
 5. **Turkish currency.** Upstream's `to_currency` takes no ISO code, truncates
    cents through `int(val * 100)` and returns `bedelsiz` for any amount below
    one lira. Only clean amounts (no third decimal, at least one lira) are
@@ -269,7 +325,9 @@ regular):
    the exact-decimal rule in item 3.
 6. **Decimals.** Fractional digits are spelled one by one here, while `tr`/`vi`
    upstream read the last two digits as a number (`12.34` → *otuz dört* /
-   *ba mươi bốn*). Decimal cardinals are therefore not part of the fixtures
+   *ba mươi bốn*). Chinese/Japanese join the point without spaces (`零点五`),
+   Korean spaces it (`점 오`), and the other languages insert a space before
+   each digit. Decimal cardinals are therefore not part of the fixtures
    (this also applies to the earlier languages). Three further consequences of
    upstream's `Decimal` pipeline are not reproduced, because this project
    spells the digits exactly as given:
@@ -277,20 +335,34 @@ regular):
      (`1.10` → *one point one zero* here, *one point one* upstream);
    * `0.0` → *zero point zero* here, *zero* upstream;
    * a negative amount keeps its sign here (`-0.5` → *minus zero point five*),
-     while upstream loses it (*zero point five*).
-7. **Negative years.** English appends `BC` and Portuguese `antes de Cristo`,
-   exactly as upstream (`-44` → *forty-four BC* / *quarenta e quatro antes de
-   Cristo*); German and Dutch upstream apply `//`/`%` to the negative value and
-   emit nonsense (`-1` → *minuseinshundertneunundneunzig* /
-   *min één honderd negenennegentig*), so those two spell a clean
-   *minus* / *min* followed by the year here and are excluded from the year
-   fixtures. All other languages match upstream (`moins`, `menos`, `meno`,
-   `минус`, `eksi`).
+     while upstream loses it (*zero point five*; likewise for Japanese,
+     Korean and Chinese floats).
+7. **Negative years.** English appends `BC`, Portuguese `antes de Cristo` and
+   Chinese `公元前`, exactly as upstream (`-44` → *forty-four BC* /
+   *quarenta e quatro antes de Cristo* / *公元前四四年*); German and Dutch
+   upstream apply `//`/`%` to the negative value and emit nonsense (`-1` →
+   *minuseinshundertneunundneunzig* / *min één honderd negenennegentig*), so
+   those two spell a clean *minus* / *min* followed by the year here and are
+   excluded from the year fixtures. Japanese era years below 645 and negative
+   years raise upstream and return `""` here. All other languages match
+   upstream (`moins`, `menos`, `meno`, `минус`, `eksi`, `기원전`, `min`).
+8. **Chinese source.** Upstream 0.5.14 has no Chinese module. `zh_TW` is
+   compared verbatim against the `lang_ZH.py` on upstream master (vendored in
+   `tools/upstream_lang_ZH_master.py`); `zh` is the same output passed through
+   a Traditional-to-Simplified character table (萬→万, 億→亿, 負→负, 點→点, …)
+   plus the corresponding currency names. The grammar is identical.
+9. **Danish and Indonesian currency.** Danish upstream calls `to_splitnum` on
+   the raw float, so `0.5` → *fem øre* (not fifty) and `0` → `""`; Indonesian
+   spells `<cardinal> koma nol rupiah` for integers and the fractional digits
+   after `koma` otherwise. Both are reproduced and compared verbatim. Japanese
+   rejects any fractional JPY amount (fixtures use integral amounts); Korean
+   KRW/JPY reject cents, while USD always spells them.
 
-No other comparison rule is applied: cardinal output for `en`,
-`fr`, `es`, `de`, `ru`, `nl` and `tr` is compared byte-for-byte (and `vi` after
-excluding its broken negatives), and so are years for positive values; the
-currency and negative-year rules above only affect the cases they name.
+No other comparison rule is applied: cardinal output for `en`, `fr`, `es`,
+`de`, `ru`, `nl`, `tr`, `ja`, `ko`, `sv`, `no`, `da`, `id` and `zh_TW` is
+compared byte-for-byte (and `vi`/`pl` after excluding their broken negatives),
+and so are years for positive values; the currency and negative-year rules
+above only affect the cases they name.
 
 ---
 
@@ -299,5 +371,5 @@ currency and negative-year rules above only affect the cases they name.
 ```bash
 pip install num2words==0.5.14
 python tools/gen_fixtures.py   # rewrites diff_fixtures_wbtest.mbt
-moon test                      # replays all 14633 comparisons
+moon test                      # replays all 22573 comparisons
 ```

@@ -24,6 +24,15 @@ pub enum Variant {
   Nl
   Tr
   Vi
+  Zh
+  ZhTw
+  Ja
+  Ko
+  Sv
+  No
+  Da
+  Id
+  Pl
 }
 
 ///|
@@ -50,6 +59,26 @@ pub fn group3(n : BigInt) -> Array[(BigInt, Int)] {
   while x != BigInt::from_int(0) {
     low.push((x % BigInt::from_int(1000), power))
     x = x / BigInt::from_int(1000)
+    power = power + 1
+  }
+  let res : Array[(BigInt, Int)] = []
+  for i = low.length() - 1; i >= 0; i = i - 1 {
+    res.push(low[i])
+  }
+  res
+}
+
+///|
+/// Split `n` (>0) into 4-digit groups from low to high, return high-to-low.
+/// Chinese, Japanese and Korean scale words advance by 10^4 instead of 10^3:
+/// 1_2345 -> [(1, 1), (2345, 0)] -> "一万二千三百四十五".
+pub fn group4(n : BigInt) -> Array[(BigInt, Int)] {
+  let low : Array[(BigInt, Int)] = []
+  let mut x = n
+  let mut power = 0
+  while x != BigInt::from_int(0) {
+    low.push((x % BigInt::from_int(10000), power))
+    x = x / BigInt::from_int(10000)
     power = power + 1
   }
   let res : Array[(BigInt, Int)] = []
@@ -329,7 +358,10 @@ pub fn Lang::supports(self : Lang, n : BigInt) -> Bool {
   if x == BigInt::from_int(0) {
     return true
   }
-  let groups = group3(x)
+  let groups = match self.variant {
+    Zh | ZhTw | Ja | Ko => group4(x)
+    _ => group3(x)
+  }
   let (_, top_power) = groups[0]
   top_power < self.thousands.length()
 }
@@ -354,5 +386,14 @@ pub fn Lang::cardinal(self : Lang, n : BigInt) -> String {
     Nl => self.cardinal_nl(n)
     Tr => self.cardinal_tr(n)
     Vi => self.cardinal_vi(n)
+    Zh => self.cardinal_zh(n)
+    ZhTw => self.cardinal_zh_tw(n)
+    Ja => self.cardinal_ja(n)
+    Ko => self.cardinal_ko(n)
+    Sv => self.cardinal_sv(n)
+    No => self.cardinal_no(n)
+    Da => self.cardinal_da(n)
+    Id => self.cardinal_id(n)
+    Pl => self.cardinal_pl(n)
   }
 }

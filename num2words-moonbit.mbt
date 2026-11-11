@@ -5,13 +5,16 @@
 //
 // API: `num2words(value, lang, to)` where `value` is a BigInt (or use the
 // `num2words_int` / `num2words_float` convenience wrappers), `lang` is
-// "en" | "fr" | "es" | "de" | "it" | "pt" | "pt_PT" | "ru" | "nl" | "tr" | "vi",
+// "en" | "fr" | "es" | "de" | "it" | "pt" | "pt_PT" | "ru" | "nl" | "tr" | "vi"
+// | "zh" | "zh_TW" | "ja" | "ko" | "sv" | "no" | "da" | "id" | "pl",
 // and `to` is "cardinal" (default), "ordinal", "ordinal_num", "year" or
 // "currency".
 //
 // Currency takes a decimal amount string and an ISO-4217 code through
 // `num2words_currency`; the `to = "currency"` dispatch path uses the language
-// default code (EUR, BRL for `pt`, TRY for `tr`).
+// default code (EUR, BRL for `pt`, TRY for `tr`, 元/XXX for Chinese, JPY for
+// Japanese, KRW for Korean, NOK for Norwegian, DKK for Danish, IDR for
+// Indonesian).
 
 // --- input validation -------------------------------------------------------
 //
@@ -152,14 +155,38 @@ fn expand_scientific(s : String) -> String {
 }
 
 ///|
+/// Negative prefix for a whole phrase. Chinese and Japanese attach it without
+/// a space (负一 / マイナス一); Korean and the other languages use a space.
+fn negative_prefix(l : Lang) -> String {
+  match l.variant {
+    Zh | ZhTw | Ja => l.negative
+    _ => l.negative + " "
+  }
+}
+
+///|
 /// Spell the fractional digits of a decimal: `"5"` -> `" point five"`.
 fn decimal_tail(l : Lang, frac : String) -> String {
-  let mut out = " " + l.decimal
-  for i = 0; i < frac.length(); i = i + 1 {
-    let d = BigInt::from_string(frac[i:i + 1].to_owned()).to_int()
-    out = out + " " + l.ones[d]
+  match l.variant {
+    // CJK (except Korean) writes the point and digits without spaces: 零点五.
+    Zh | ZhTw | Ja => {
+      let mut out = l.decimal
+      for i = 0; i < frac.length(); i = i + 1 {
+        let d = BigInt::from_string(frac[i:i + 1].to_owned()).to_int()
+        out = out + l.ones[d]
+      }
+      out
+    }
+    // Korean spaces the point and every digit: 천이백삼십사 점 오 육.
+    _ => {
+      let mut out = " " + l.decimal
+      for i = 0; i < frac.length(); i = i + 1 {
+        let d = BigInt::from_string(frac[i:i + 1].to_owned()).to_int()
+        out = out + " " + l.ones[d]
+      }
+      out
+    }
   }
-  out
 }
 
 ///|
@@ -177,6 +204,15 @@ pub fn get_lang(code : String) -> Lang {
     "nl" => lang_nl()
     "tr" => lang_tr()
     "vi" => lang_vi()
+    "zh" => lang_zh()
+    "zh_TW" => lang_zh_tw()
+    "ja" => lang_ja()
+    "ko" => lang_ko()
+    "sv" => lang_sv()
+    "no" => lang_no()
+    "da" => lang_da()
+    "id" => lang_id()
+    "pl" => lang_pl()
     _ => lang_en()
   }
 }
@@ -197,6 +233,15 @@ fn ordinal_for(l : Lang, value : BigInt) -> String {
     Nl => ordinal_nl(value)
     Tr => ordinal_tr(value)
     Vi => ordinal_vi(value)
+    Zh => ordinal_zh(value)
+    ZhTw => ordinal_zh_tw(value)
+    Ja => ordinal_ja(value)
+    Ko => ordinal_ko(value)
+    Sv => ordinal_sv(value)
+    No => ordinal_no(value)
+    Da => ordinal_da(value)
+    Id => ordinal_id(value)
+    Pl => ordinal_pl(value)
   }
 }
 
@@ -216,6 +261,15 @@ fn ordinal_num_for(l : Lang, value : BigInt) -> String {
     Nl => ordinal_num_nl(value)
     Tr => ordinal_num_tr(value)
     Vi => ordinal_num_vi(value)
+    Zh => ordinal_num_zh(value)
+    ZhTw => ordinal_num_zh(value)
+    Ja => ordinal_num_ja(value)
+    Ko => ordinal_num_ko(value)
+    Sv => ordinal_num_sv(value)
+    No => ordinal_num_no(value)
+    Da => ordinal_num_da(value)
+    Id => ordinal_num_id(value)
+    Pl => ordinal_num_pl(value)
   }
 }
 
@@ -234,6 +288,15 @@ fn year_for(l : Lang, value : BigInt) -> String {
     Tr => year_tr(value)
     // Vietnamese has no `to_year` upstream (AttributeError).
     Vi => ""
+    Zh => year_zh(value)
+    ZhTw => year_zh(value)
+    Ja => year_ja(value)
+    Ko => year_ko(value)
+    Sv => year_sv(value)
+    No => year_no(value)
+    Da => year_da(value)
+    Id => year_id(value)
+    Pl => year_pl(value)
   }
 }
 
@@ -301,7 +364,7 @@ pub fn num2words_float(value : Double, lang : String, to : String) -> String {
     // `-0` is normalised to zero by `BigInt`, so restore the minus sign for
     // negative values below one (e.g. -0.5 -> "minus zero point five").
     if neg && int_part == BigInt::from_int(0) {
-      out = l.negative + " " + out
+      out = negative_prefix(l) + out
     }
   }
   out
@@ -335,7 +398,7 @@ pub fn num2words_str(value : String, lang : String, to : String) -> String {
     // Restore the sign for negative values below one (e.g. -0.5).
     let neg = value.length() > 0 && value[0:1].to_owned() == "-"
     if neg && int_part == BigInt::from_int(0) {
-      out = l.negative + " " + out
+      out = negative_prefix(l) + out
     }
     out
   } else {

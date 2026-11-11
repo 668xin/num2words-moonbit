@@ -23,4 +23,4 @@ keywords = [ "num2words", "i18n", "numbers", "moonbit", "hackathon" ]
 
 preferred_target = "native"
 
-description = "Convert numbers into words in pure MoonBit (EN/FR/ES/DE/IT/PT/PT_PT/RU/NL/TR/VI): cardinal, ordinal, ordinal_num, year, and currency."
+description = "Convert numbers into words in pure MoonBit (20 language codes: EN/FR/ES/DE/IT/PT/PT_PT/RU/NL/TR/VI/ZH/ZH_TW/JA/KO/SV/NO/DA/ID/PL): cardinal, ordinal, ordinal_num, year, and currency."

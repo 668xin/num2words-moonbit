@@ -12,5 +12,6 @@ __pycache__/
 pkg.generated.mbti
 *.generated.mbti
 
-# 内部开发计划，不提交到仓库
+# 内部开发计划与审计记录，不提交到仓库
 DEV_PLAN.md
+ISSUES.md

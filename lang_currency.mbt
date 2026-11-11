@@ -1035,7 +1035,14 @@ fn currency_supported_lang(lang : String) -> Bool {
   lang == "pt_PT" ||
   lang == "ru" ||
   lang == "nl" ||
-  lang == "tr"
+  lang == "tr" ||
+  lang == "zh" ||
+  lang == "zh_TW" ||
+  lang == "ja" ||
+  lang == "ko" ||
+  lang == "no" ||
+  lang == "da" ||
+  lang == "id"
 }
 
 ///|
@@ -1044,6 +1051,19 @@ fn currency_default_code(lang : String) -> String {
     "BRL"
   } else if lang == "tr" {
     "TRY"
+  } else if lang == "zh" || lang == "zh_TW" {
+    // Upstream master's Chinese `to_currency` defaults to "XXX" (plain 元).
+    "XXX"
+  } else if lang == "ja" {
+    "JPY"
+  } else if lang == "ko" {
+    "KRW"
+  } else if lang == "no" {
+    "NOK"
+  } else if lang == "da" {
+    "DKK"
+  } else if lang == "id" {
+    "IDR"
   } else {
     "EUR"
   }
@@ -1237,6 +1257,154 @@ fn currency_join(
   }
 }
 
+// --- CJK currency -----------------------------------------------------------
+//
+// Chinese, Japanese and Korean do not inflect the currency noun, so they use
+// their own renderers instead of `CurrencyForm`. Chinese is ported from
+// upstream master's `lang_ZH.py` (the module postdates 0.5.14); Japanese and
+// Korean follow 0.5.14.
+
+///|
+/// True when the decimal string carries a non-zero fractional digit
+/// (`1.004` -> true). Japanese refuses any fraction, even one that would round
+/// to zero cents.
+fn currency_fraction_nonzero(amount : String) -> Bool {
+  let parts = amount.split(".").map(fn(w) { w.to_owned() }).collect()
+  if parts.length() < 2 {
+    return false
+  }
+  let frac = parts[1]
+  for i = 0; i < frac.length(); i = i + 1 {
+    if frac[i:i + 1].to_owned() != "0" {
+      return true
+    }
+  }
+  false
+}
+
+///|
+/// Chinese currency name (the prefix before the amount). `XXX` has none.
+fn currency_zh_name(
+  code : String,
+  traditional : Bool,
+) -> Result[String, String] {
+  match code {
+    "XXX" => Ok("")
+    "CNY" => Ok(if traditional { "人民幣" } else { "人民币" })
+    "NTD" => Ok(if traditional { "新台幣" } else { "新台币" })
+    "HKD" => Ok(if traditional { "港幣" } else { "港币" })
+    "MOP" => Ok(if traditional { "澳門幣" } else { "澳门币" })
+    "SGD" => Ok("新加坡元")
+    "MYR" =>
+      Ok(if traditional { "馬來西亞令吉" } else { "马来西亚令吉" })
+    "USD" => Ok("美元")
+    "EUR" => Ok(if traditional { "歐元" } else { "欧元" })
+    "GBP" => Ok(if traditional { "英鎊" } else { "英镑" })
+    "JPY" => Ok("日元")
+    "CHF" => Ok("瑞士法郎")
+    "CAD" => Ok("加元")
+    "AUD" => Ok(if traditional { "澳幣" } else { "澳币" })
+    "NZD" => Ok(if traditional { "紐西蘭元" } else { "纽西兰元" })
+    "THB" => Ok(if traditional { "泰銖" } else { "泰铢" })
+    "KRW" => Ok(if traditional { "韓元" } else { "韩元" })
+    _ => Err(code)
+  }
+}
+
+///|
+/// `角`/`分` tail: 5 -> 零五分, 50 -> 五角, 56 -> 五角六分.
+fn currency_zh_cents(l : Lang, cents : BigInt) -> String {
+  if cents == BigInt::from_int(0) {
+    return ""
+  }
+  let c = cents.to_int()
+  let jiao = c / 10
+  let fen = c % 10
+  let mut out = l.ones[jiao]
+  if jiao > 0 {
+    out = out + "角"
+  }
+  if fen > 0 {
+    out = out + l.ones[fen] + "分"
+  }
+  out
+}
+
+///|
+fn currency_zh(
+  units : BigInt,
+  cents : BigInt,
+  neg : Bool,
+  lang : String,
+  code : String,
+) -> Result[String, String] {
+  let traditional = lang == "zh_TW"
+  let l = get_lang(lang)
+  if !l.supports(units) {
+    return Err("magnitude out of supported range: " + units.to_string())
+  }
+  match currency_zh_name(code, traditional) {
+    Err(c) => Err("currency code not supported for " + lang + ": " + c)
+    Ok(name) => {
+      let nonzero = units > BigInt::from_int(0) || cents > BigInt::from_int(0)
+      let sign = if neg && nonzero { l.negative } else { "" }
+      Ok(name + sign + l.cardinal(units) + "元" + currency_zh_cents(l, cents))
+    }
+  }
+}
+
+///|
+/// Japanese only knows JPY and rejects every fractional amount.
+fn currency_ja(
+  amount : String,
+  units : BigInt,
+  neg : Bool,
+  code : String,
+) -> Result[String, String] {
+  if code != "JPY" {
+    return Err("currency code not supported for ja: " + code)
+  }
+  if currency_fraction_nonzero(amount) {
+    return Err("decimals not supported for " + code)
+  }
+  let l = get_lang("ja")
+  if !l.supports(units) {
+    return Err("magnitude out of supported range: " + units.to_string())
+  }
+  let sign = if neg && units > BigInt::from_int(0) { l.negative } else { "" }
+  Ok(sign + l.cardinal(units) + "円")
+}
+
+///|
+/// Korean knows KRW/JPY (no cents) and USD (원/달러/엔, with 센트).
+fn currency_ko(
+  units : BigInt,
+  cents : BigInt,
+  neg : Bool,
+  code : String,
+) -> Result[String, String] {
+  let (unit, cent) = match code {
+    "KRW" => ("원", "")
+    "USD" => ("달러", "센트")
+    "JPY" => ("엔", "")
+    _ => return Err("currency code not supported for ko: " + code)
+  }
+  if cents != BigInt::from_int(0) && cent == "" {
+    return Err("decimals not supported for " + code)
+  }
+  let l = get_lang("ko")
+  if !l.supports(units) {
+    return Err("magnitude out of supported range: " + units.to_string())
+  }
+  let nonzero = units > BigInt::from_int(0) || cents > BigInt::from_int(0)
+  let sign = if neg && nonzero { l.negative + " " } else { "" }
+  let mut body = join_parts(split_to_array(l.cardinal(units), " "), "") + unit
+  if cent != "" {
+    body = body + " " + l.cardinal(cents) + cent
+  }
+  Ok(sign + body)
+}
+
 ///|
 /// Spell a currency amount. `code` is an ISO-4217 code (case-insensitive) or
 /// `""` for the language default (EUR, or BRL for `pt`).
@@ -1260,6 +1428,26 @@ pub fn num2words_currency(
         currency_default_code(lang)
       } else {
         currency_upper(code)
+      }
+      // CJK languages use dedicated renderers: no plural/gender agreement and
+      // their own decimal-unit rules (元/角/分, JPY without cents, KRW/USD).
+      if lang == "zh" || lang == "zh_TW" {
+        return currency_zh(units, cents, neg, lang, resolved)
+      }
+      if lang == "ja" {
+        return currency_ja(amount, units, neg, resolved)
+      }
+      if lang == "ko" {
+        return currency_ko(units, cents, neg, resolved)
+      }
+      if lang == "no" {
+        return currency_no(units, cents, neg, resolved)
+      }
+      if lang == "da" {
+        return currency_da(amount, units, cents, neg, resolved)
+      }
+      if lang == "id" {
+        return currency_id(units, cents, neg, resolved)
       }
       match currency_form(lang, resolved) {
         Err(c) => Err("currency code not supported for " + lang + ": " + c)

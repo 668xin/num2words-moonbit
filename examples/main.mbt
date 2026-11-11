@@ -19,6 +19,15 @@ fn main {
   println(@lib.num2words_int(1234, "nl", "cardinal"))
   println(@lib.num2words_int(1234, "tr", "cardinal"))
   println(@lib.num2words_int(1234, "vi", "cardinal"))
+  println(@lib.num2words_int(1234, "zh", "cardinal"))
+  println(@lib.num2words_int(1234, "zh_TW", "cardinal"))
+  println(@lib.num2words_int(1234, "ja", "cardinal"))
+  println(@lib.num2words_int(1234, "ko", "cardinal"))
+  println(@lib.num2words_int(1234, "sv", "cardinal"))
+  println(@lib.num2words_int(1234, "no", "cardinal"))
+  println(@lib.num2words_int(1234, "da", "cardinal"))
+  println(@lib.num2words_int(1234, "id", "cardinal"))
+  println(@lib.num2words_int(1234, "pl", "cardinal"))
 
   println("")
   println("== other modes (en) ==")
@@ -38,6 +47,18 @@ fn main {
     Err(msg) => println("error: " + msg)
   }
   match @lib.num2words_currency("1000000", "pt_PT", "EUR") {
+    Ok(words) => println(words)
+    Err(msg) => println("error: " + msg)
+  }
+  match @lib.num2words_currency("1234.56", "zh", "CNY") {
+    Ok(words) => println(words)
+    Err(msg) => println("error: " + msg)
+  }
+  match @lib.num2words_currency("1000", "ja", "JPY") {
+    Ok(words) => println(words)
+    Err(msg) => println("error: " + msg)
+  }
+  match @lib.num2words_currency("1234.56", "ko", "USD") {
     Ok(words) => println(words)
     Err(msg) => println("error: " + msg)
   }

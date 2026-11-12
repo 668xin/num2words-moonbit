@@ -63,6 +63,35 @@ fn Lang::group_tr(self : Lang, t : Int, power : Int) -> String {
 }
 
 ///|
+/// True when any group from `from` onwards is non-zero.
+fn tr_has_lower_nonzero(groups : Array[(BigInt, Int)], from : Int) -> Bool {
+  for i = from; i < groups.length(); i = i + 1 {
+    let (triple, _) = groups[i]
+    if triple != BigInt::from_int(0) {
+      return true
+    }
+  }
+  false
+}
+
+///|
+/// Upstream drops the trailing "bir" of the leading thousands group when that
+/// group also has a hundreds digit and the number continues:
+/// 591170 -> "beşyüzdoksanbinyüzyetmiş" but 591000 -> "beşyüzdoksanbirbin".
+fn tr_top_thousands_drop(
+  groups : Array[(BigInt, Int)],
+  i : Int,
+  power : Int,
+  t : Int,
+) -> Bool {
+  i == 0 &&
+  power == 1 &&
+  t / 100 > 0 &&
+  t % 10 == 1 &&
+  tr_has_lower_nonzero(groups, 1)
+}
+
+///|
 fn Lang::cardinal_tr(self : Lang, n : BigInt) -> String {
   if n == BigInt::from_int(0) {
     return self.zero
@@ -80,7 +109,8 @@ fn Lang::cardinal_tr(self : Lang, n : BigInt) -> String {
     if t == 0 {
       continue
     }
-    out = out + self.group_tr(t, power)
+    let tt = if tr_top_thousands_drop(groups, i, power, t) { t - 1 } else { t }
+    out = out + self.group_tr(tt, power)
   }
   if neg {
     self.negative + out
@@ -181,10 +211,11 @@ pub fn ordinal_tr(n : BigInt) -> String {
     if t == 0 {
       continue
     }
+    let tt = if tr_top_thousands_drop(groups, i, power, t) { t - 1 } else { t }
     if i == last {
-      out = out + l.group_ordinal_tr(t, power)
+      out = out + l.group_ordinal_tr(tt, power)
     } else {
-      out = out + l.group_tr(t, power)
+      out = out + l.group_tr(tt, power)
     }
   }
   out

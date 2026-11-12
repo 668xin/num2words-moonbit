@@ -100,15 +100,107 @@ fn Lang::triple_pt(self : Lang, t : Int) -> String {
 }
 
 ///|
-/// "e" joins a scale group to the next one when the next group is below 100
-/// or an exact multiple of 100 ("mil e um", "mil e cem"); otherwise a plain
-/// space is used ("mil duzentos e trinta e quatro").
-fn pt_group_sep(next_triple : Int) -> String {
-  if next_triple < 100 || next_triple % 100 == 0 {
-    " e "
-  } else {
-    " "
+fn pt_find_from(s : String, sub : String, from : Int) -> Int {
+  let n = s.length()
+  let m = sub.length()
+  let mut i = from
+  while i + m <= n {
+    if s[i:i + m].to_owned() == sub {
+      return i
+    }
+    i = i + 1
   }
+  -1
+}
+
+///|
+fn pt_replace_all(s : String, old : String, new : String) -> String {
+  join_parts(split_to_array(s, old), new)
+}
+
+///|
+fn pt_replace_first(s : String, old : String, new : String) -> String {
+  let idx = pt_find_from(s, old, 0)
+  if idx < 0 {
+    s
+  } else {
+    s[0:idx].to_owned() + new + s[idx + old.length():s.length()].to_owned()
+  }
+}
+
+///|
+/// A word matched by upstream's `\w*entos?` (the hundreds words, excluding
+/// the standalone "cem").
+fn pt_is_hundreds_token(t : String) -> Bool {
+  t == "cento" ||
+  t == "duzentos" ||
+  t == "trezentos" ||
+  t == "quatrocentos" ||
+  t == "quinhentos" ||
+  t == "seiscentos" ||
+  t == "setecentos" ||
+  t == "oitocentos" ||
+  t == "novecentos"
+}
+
+///|
+/// Upstream's post-processing regex:
+/// `.*<ext> e \w*entos? (?=.*e)` — a scale word followed by " e ", a hundreds
+/// word, and at least one more "e" later.
+fn pt_has_scale_e(s : String, ext : String) -> Bool {
+  let marker = ext + " e "
+  let mut from = 0
+  while true {
+    let idx = pt_find_from(s, marker, from)
+    if idx < 0 {
+      break
+    }
+    let after = idx + marker.length()
+    let rest = s[after:s.length()].to_owned()
+    let mut end = 0
+    while end < rest.length() && rest[end:end + 1].to_owned() != " " {
+      end = end + 1
+    }
+    let token = rest[0:end].to_owned()
+    if pt_is_hundreds_token(token) {
+      let tail = rest[end:rest.length()].to_owned()
+      if tail.contains("e") {
+        return true
+      }
+    }
+    from = after
+  }
+  false
+}
+
+///|
+/// Remove the "e" that upstream's post-processing drops. European Portuguese
+/// removes every occurrence of `<ext> e` once the regex matches; Brazilian
+/// Portuguese removes only the first.
+fn pt_postprocess(s : String, european : Bool) -> String {
+  let exts : Array[String] = if european {
+    [
+      "mil", "milhão", "milhões", "mil milhões", "bilião", "biliões", "mil biliões",
+    ]
+  } else {
+    [
+      "mil", "milhão", "milhões", "bilhão", "bilhões", "trilhão", "trilhões",
+      "quatrilhão", "quatrilhões",
+    ]
+  }
+  let mut out = s
+  for i = 0; i < exts.length(); i = i + 1 {
+    let ext = exts[i]
+    if pt_has_scale_e(out, ext) {
+      let old = ext + " e"
+      out = if european {
+        pt_replace_all(out, old, ext)
+      } else {
+        pt_replace_first(out, old, ext)
+      }
+    }
+  }
+  out
 }
 
 ///|
@@ -123,7 +215,6 @@ fn Lang::cardinal_pt(self : Lang, n : BigInt) -> String {
   let n = if neg { -n } else { n }
   let groups = group3(n)
   let texts : Array[String] = []
-  let triples : Array[Int] = []
   for i = 0; i < groups.length(); i = i + 1 {
     let (triple, power) = groups[i]
     let t = triple.to_int()
@@ -144,15 +235,8 @@ fn Lang::cardinal_pt(self : Lang, n : BigInt) -> String {
       }
     }
     texts.push(s)
-    triples.push(t)
   }
-  let mut joined = ""
-  for i = 0; i < texts.length(); i = i + 1 {
-    if i > 0 {
-      joined = joined + pt_group_sep(triples[i])
-    }
-    joined = joined + texts[i]
-  }
+  let joined = pt_postprocess(join_parts(texts, " e "), false)
   if neg {
     "menos " + joined
   } else {

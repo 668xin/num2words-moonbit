@@ -102,6 +102,34 @@ fn Lang::triple_es(self : Lang, t : Int) -> String {
 }
 
 ///|
+fn es_group_value(groups : Array[(BigInt, Int)], power : Int) -> Int {
+  for i = 0; i < groups.length(); i = i + 1 {
+    let (value, p) = groups[i]
+    if p == power {
+      return value.to_int()
+    }
+  }
+  0
+}
+
+///|
+/// Speak 0..999999 as a plain number ("mil", "mil uno", "cuatro mil
+/// cuatrocientos cuarenta"), used inside a long-scale phrase.
+fn Lang::es_below_million(self : Lang, v : Int) -> String {
+  let high = v / 1000
+  let low = v % 1000
+  if high == 0 {
+    return self.triple_es(low)
+  }
+  let head = if high == 1 { "mil" } else { self.triple_es(high) + " mil" }
+  if low == 0 {
+    head
+  } else {
+    head + " " + self.triple_es(low)
+  }
+}
+
+///|
 fn Lang::cardinal_es(self : Lang, n : BigInt) -> String {
   if n == BigInt::from_int(0) {
     return self.zero
@@ -112,33 +140,38 @@ fn Lang::cardinal_es(self : Lang, n : BigInt) -> String {
   let neg = n < BigInt::from_int(0)
   let n = if neg { -n } else { n }
   let groups = group3(n)
+  let top = groups[0].1
   let parts : Array[String] = []
-  for i = 0; i < groups.length(); i = i + 1 {
-    let (triple, power) = groups[i]
-    let t = triple.to_int()
-    if t == 0 {
-      continue
-    }
-    let mut s = self.triple_es(t)
-    if power > 0 {
-      if power == 1 {
-        if t == 1 {
-          s = "mil"
-        } else {
-          s = s + " mil"
-        }
-      } else if t == 1 {
-        // "mil millones" is already a scale phrase: never "un mil millones".
-        if power >= 3 && power % 2 == 1 {
-          s = es_scale_sing[power]
-        } else {
-          s = "un " + es_scale_sing[power]
-        }
+  // Long scale: the groups at 10^(2k+1) and 10^(2k) form one phrase
+  // (4_440_000_000 -> "cuatro mil cuatrocientos cuarenta millones").
+  let mut p = if top % 2 == 0 { top } else { top - 1 }
+  while p >= 2 {
+    let odd = es_group_value(groups, p + 1)
+    let even = es_group_value(groups, p)
+    let value = odd * 1000 + even
+    if value > 0 {
+      let s = if value == 1 {
+        "un " + es_scale_sing[p]
       } else {
-        s = s + " " + es_scale_plur[power]
+        self.es_below_million(value) + " " + es_scale_plur[p]
       }
+      parts.push(s)
     }
-    parts.push(s)
+    p = p - 2
+  }
+  let thousands = es_group_value(groups, 1)
+  if thousands > 0 {
+    parts.push(
+      if thousands == 1 {
+        "mil"
+      } else {
+        self.triple_es(thousands) + " mil"
+      },
+    )
+  }
+  let units = es_group_value(groups, 0)
+  if units > 0 {
+    parts.push(self.triple_es(units))
   }
   let joined = join_parts(parts, " ")
   if neg {

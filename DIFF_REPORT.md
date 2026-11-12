@@ -222,6 +222,11 @@ The differential run exposed real divergences; all but the documented rules in
 | 14 | `zh_TW` (ordinal) | `10000` | `第一万` | `第一萬` (traditional tables used for ordinals) |
 | 15 | `ko` (ordinal) | `123456` | `삼천사백쉰여섯` | `삼천사백 쉰여섯` (upstream joins the `백` fragments with `백 `) |
 | 16 | `da` (currency) | `0.5` | `halvtreds øre` | `fem øre` (upstream splits the raw float via `float2tuple`) |
+| 17 | `es` | `4440376435` | `cuatro mil millones cuatrocientos…` | `cuatro mil cuatrocientos cuarenta millones…` (10^9 + 10^6 form one long-scale phrase) |
+| 18 | `pt_PT` | `600990392858037` | `… biliões e novecentos e noventa mil e trezentos…` | `… biliões novecentos e noventa mil trezentos…` (all occurrences removed after the regex matches) |
+| 19 | `pt` | `743147310600031` | `… milhões e seiscentos mil…` | `… milhões seiscentos mil…` (Brazilian removes only the first occurrence per scale word) |
+| 20 | `it` | `786790526496` | `… miliardi e … milioni e …` | `… miliardi, … milioni e …` (comma when the remainder itself contains ` e `) |
+| 21 | `tr` | `591170` | `beşyüzdoksanbirbinyüzyetmiş` | `beşyüzdoksanbinyüzyetmiş` (leading thousands group drops its trailing `bir` when it has hundreds and the number continues) |
 
 Notes on the fixes:
 
@@ -277,6 +282,13 @@ Notes on the fixes:
   the Japanese era table, the Chinese `元/角/分` renderer and the Danish
   `float2tuple` currency split; the defects found while aligning them are rows
   13–16 above.
+- **M7 — randomized audit:** a 1,799-assertion randomized differential sweep
+  across all twenty languages (random magnitudes, ordinals, years and currency
+  amounts) found the long-scale, post-processing and Turkish defects in rows
+  17–21. They are fixed and pinned by regression assertions in
+  `num2words-moonbit_wbtest.mbt`. The same sweep also led to rejecting unknown
+  language/mode names explicitly (`""` / `Err(...)`) instead of falling back to
+  English/`cardinal`.
 
 ---
 

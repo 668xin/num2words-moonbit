@@ -118,7 +118,9 @@ import "668xin/num2words-moonbit" @n2w
 | `is_valid_number` | `(value : String) -> Bool` | validates before conversion |
 
 `lang` and `to` are positional (no defaults): use `""`/`"en"`/`"cardinal"`
-explicitly.
+explicitly. `get_lang` is the lenient resolver (unknown codes fall back to
+English) used for direct table access; the conversion entry points reject
+unknown codes and modes instead.
 
 ---
 
@@ -158,6 +160,20 @@ first:
 $ moon run cmd/main -- 1.2.3
 error: invalid number: 1.2.3
 ```
+
+### Unknown language or mode
+
+Conversion entry points do **not** silently fall back to English or
+`cardinal`:
+
+| API | Unknown `lang` / `to` |
+| --- | --- |
+| `num2words`, `num2words_int`, `num2words_float`, `num2words_str` | returns `""` |
+| `num2words_str_checked` | `Err("unknown language: <code>")` / `Err("unknown mode: <mode>")` |
+| CLI | prints the error to stderr |
+
+`get_lang("zz")` still returns the English descriptor so callers who only need
+word tables keep the historical lenient behaviour.
 
 ### Supported magnitude
 
@@ -203,7 +219,7 @@ power of 1000 for most languages, and of 10⁴ for Chinese, Japanese and Korean.
   Every mode upstream implements is ported and machine-checked; modes upstream
   does not implement (`vi` year/`ordinal_num`/currency, `sv`
   year/`ordinal_num`/currency, `pl` currency) return `""` / `Err`. Upstream's
-  other ~36 language codes are out of scope (see [COMPAT.md](COMPAT.md)).
+  other ~38 language codes are out of scope (see [COMPAT.md](COMPAT.md)).
 - **Magnitudes are bounded** by each language's scale-word table — see
   *Supported magnitude* above. "Arbitrarily large" is **not** claimed.
 - **Release status**: mooncakes.io carries `0.1.0`, which predates this rework

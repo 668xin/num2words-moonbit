@@ -133,6 +133,62 @@ fn Lang::triple_it(self : Lang, t : Int) -> String {
 }
 
 ///|
+/// Speak 0..999999 ("mille", "duemilatrecentoquarantacinque").
+fn Lang::it_below_million(self : Lang, n : Int) -> String {
+  if n < 1000 {
+    return self.triple_it(n)
+  }
+  let thousands = n / 1000
+  let rest = n % 1000
+  let head = if thousands == 1 {
+    "mille"
+  } else {
+    self.triple_it(thousands) + "mila"
+  }
+  if rest == 0 {
+    head
+  } else {
+    head + self.triple_it(rest)
+  }
+}
+
+///|
+/// Recursive long-scale composition, mirroring upstream
+/// `big_number_to_cardinal`: the separator before the remaining lower part is
+/// ", " when that part itself contains the conjunction " e " (`un miliardo,
+/// duecentotrentaquattro milioni e ...`) and " e " otherwise (`un bilione e un
+/// miliardo`).
+fn Lang::cardinal_it_raw(self : Lang, n : BigInt) -> String {
+  let million = BigInt::from_int(1000000)
+  if n < million {
+    return self.it_below_million(n.to_int())
+  }
+  let digits = n.to_string()
+  let len = digits.length()
+  let predigits = if len % 3 == 0 { 3 } else { len % 3 }
+  let multiplier = BigInt::from_string(digits[0:predigits].to_owned())
+  let exponent = BigInt::from_string(digits[predigits:len].to_owned())
+  let power = (len - predigits) / 3
+  let one = BigInt::from_int(1)
+  let prefix = if multiplier == one {
+    "un "
+  } else {
+    self.cardinal_it_raw(multiplier)
+  }
+  let infix = if multiplier == one {
+    it_scale_sing[power]
+  } else {
+    " " + it_scale_plur[power]
+  }
+  if exponent == BigInt::from_int(0) {
+    return prefix + infix
+  }
+  let postfix = self.cardinal_it_raw(exponent)
+  let sep = if postfix.contains(" e ") { ", " } else { " e " }
+  prefix + infix + sep + postfix
+}
+
+///|
 fn Lang::cardinal_it(self : Lang, n : BigInt) -> String {
   if n == BigInt::from_int(0) {
     return self.zero
@@ -141,44 +197,8 @@ fn Lang::cardinal_it(self : Lang, n : BigInt) -> String {
     return ""
   }
   let neg = n < BigInt::from_int(0)
-  let n = if neg { -n } else { n }
-  let groups = group3(n)
-  let parts : Array[String] = []
-  let powers : Array[Int] = []
-  for i = 0; i < groups.length(); i = i + 1 {
-    let (triple, power) = groups[i]
-    let t = triple.to_int()
-    if t == 0 {
-      continue
-    }
-    let mut s = self.triple_it(t)
-    if power > 0 {
-      if power == 1 {
-        // 1000 -> "mille"; 2000 -> "duemila" (attached, no space)
-        s = if t == 1 { "mille" } else { s + "mila" }
-      } else if t == 1 {
-        // 1000000 -> "un milione"
-        s = "un " + it_scale_sing[power]
-      } else {
-        // 2000000 -> "due milioni"
-        s = s + " " + it_scale_plur[power]
-      }
-    }
-    parts.push(s)
-    powers.push(power)
-  }
-  // Italian writes a number as one word; a space (and the conjunction "e")
-  // appears only after a million-or-larger scale word: 1234567 -> "un milione
-  // e duecentotrentaquattromilacinquecentosessantasette", 2345 ->
-  // "duemilatrecentoquarantacinque", 1001 -> "milleuno".
-  let mut joined = ""
-  for i = 0; i < parts.length(); i = i + 1 {
-    if i > 0 && powers[i - 1] >= 2 {
-      joined = joined + " e "
-    }
-    joined = joined + parts[i]
-  }
-  joined = it_accent_final(joined)
+  let abs_n = if neg { -n } else { n }
+  let joined = it_accent_final(self.cardinal_it_raw(abs_n))
   if neg {
     "meno " + joined
   } else {

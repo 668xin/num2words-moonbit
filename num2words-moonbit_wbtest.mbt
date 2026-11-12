@@ -294,6 +294,28 @@ test "pt_PT: long scale, teens and currency" {
     num2words_int(1234567, "pt_PT", "cardinal"),
     "um milhão duzentos e trinta e quatro mil quinhentos e sessenta e sete",
   )
+  // European Portuguese removes every "e" per scale word once the regex
+  // matches, and composes long-scale pairs.
+  assert_eq(
+    num2words_str("600990392858037", "pt_PT", "cardinal"),
+    "seiscentos biliões novecentos e noventa mil trezentos e noventa e dois milhões oitocentos e cinquenta e oito mil trinta e sete",
+  )
+  assert_eq(
+    num2words_str("4440376435", "pt_PT", "cardinal"),
+    "quatro mil quatrocentos e quarenta milhões trezentos e setenta e seis mil quatrocentos e trinta e cinco",
+  )
+  assert_eq(
+    num2words_str("310600031", "pt_PT", "cardinal"),
+    "trezentos e dez milhões seiscentos mil e trinta e um",
+  )
+  assert_eq(
+    num2words_str("1000001234", "pt_PT", "cardinal"),
+    "mil milhões e mil duzentos e trinta e quatro",
+  )
+  assert_eq(
+    num2words_str("2500000", "pt_PT", "cardinal"),
+    "dois milhões e quinhentos mil",
+  )
   // The scale table stops at 10^24 (upstream raises OverflowError at 10^27).
   assert_eq(
     num2words_str("1000000000000000000000000000", "pt_PT", "cardinal"),
@@ -439,6 +461,20 @@ test "es cardinal" {
     num2words(BigInt::from_string("2000000000"), "es", "cardinal"),
     "dos mil millones",
   )
+  // The 10^9 and 10^6 groups form one long-scale phrase.
+  assert_eq(
+    num2words_str("4440376435", "es", "cardinal"),
+    "cuatro mil cuatrocientos cuarenta millones trescientos setenta y seis mil cuatrocientos treinta y cinco",
+  )
+  assert_eq(
+    num2words_str("21000000000", "es", "cardinal"),
+    "veintiuno mil millones",
+  )
+  assert_eq(num2words_str("1001000000", "es", "cardinal"), "mil uno millones")
+  assert_eq(
+    num2words_str("1001000000000", "es", "cardinal"),
+    "un billón mil millones",
+  )
 }
 
 ///|
@@ -526,6 +562,24 @@ test "it cardinal" {
     num2words_int(1234567, "it", "cardinal"),
     "un milione e duecentotrentaquattromilacinquecentosessantasette",
   )
+  // Multi-scale groups: a comma follows miliardi/bilioni when the rest itself
+  // contains " e "; otherwise the conjunction is used.
+  assert_eq(
+    num2words_str("786790526496", "it", "cardinal"),
+    "settecentottantasei miliardi, settecentonovanta milioni e cinquecentoventiseimilaquattrocentonovantasei",
+  )
+  assert_eq(
+    num2words_str("1234567890", "it", "cardinal"),
+    "un miliardo, duecentotrentaquattro milioni e cinquecentosessantasettemilaottocentonovanta",
+  )
+  assert_eq(
+    num2words_str("2000001000", "it", "cardinal"),
+    "due miliardi e mille",
+  )
+  assert_eq(
+    num2words_str("1001000000000", "it", "cardinal"),
+    "un bilione e un miliardo",
+  )
   assert_eq(num2words_int(2000000, "it", "cardinal"), "due milioni")
   // 10^12 does not fit in Int, so it goes through the BigInt entry point
   assert_eq(
@@ -556,8 +610,8 @@ test "pt cardinal" {
   assert_eq(num2words_int(234, "pt", "cardinal"), "duzentos e trinta e quatro")
   assert_eq(num2words_int(900, "pt", "cardinal"), "novecentos")
   assert_eq(num2words_int(999, "pt", "cardinal"), "novecentos e noventa e nove")
-  // "e" after a scale group only when the next group is < 100 or a multiple
-  // of 100
+  // "e" after a scale group is removed when the next part starts with a
+  // hundreds word and the number continues (upstream's regex post-processing).
   assert_eq(num2words_int(1000, "pt", "cardinal"), "mil")
   assert_eq(num2words_int(1001, "pt", "cardinal"), "mil e um")
   assert_eq(num2words_int(1100, "pt", "cardinal"), "mil e cem")
@@ -575,6 +629,23 @@ test "pt cardinal" {
   assert_eq(
     num2words_int(1234567, "pt", "cardinal"),
     "um milhão duzentos e trinta e quatro mil quinhentos e sessenta e sete",
+  )
+  // Brazilian Portuguese removes only the first "e" per scale word.
+  assert_eq(
+    num2words_str("743147310600031", "pt", "cardinal"),
+    "setecentos e quarenta e três trilhões cento e quarenta e sete bilhões trezentos e dez milhões seiscentos mil e trinta e um",
+  )
+  assert_eq(
+    num2words_str("310600031", "pt", "cardinal"),
+    "trezentos e dez milhões seiscentos mil e trinta e um",
+  )
+  assert_eq(
+    num2words_str("1000001234", "pt", "cardinal"),
+    "um bilhão e mil duzentos e trinta e quatro",
+  )
+  assert_eq(
+    num2words_str("2500000", "pt", "cardinal"),
+    "dois milhões e quinhentos mil",
   )
   // 10^9 and 10^12 need the BigInt entry point
   assert_eq(
@@ -757,6 +828,20 @@ test "checked API reports success and failure" {
     num2words_str_checked("1234", "en", "cardinal"),
     Ok("one thousand, two hundred and thirty-four"),
   )
+  // Unknown language / mode must not silently fall back to English.
+  assert_eq(num2words_int(42, "zz", "cardinal"), "")
+  assert_eq(num2words_str("42", "fr-FR", "cardinal"), "")
+  assert_eq(num2words_float(1.5, "zz", "cardinal"), "")
+  assert_eq(
+    num2words_str_checked("42", "zz", "cardinal"),
+    Err("unknown language: zz"),
+  )
+  assert_eq(num2words_str("42", "en", "foo"), "")
+  assert_eq(num2words_str_checked("42", "en", "foo"), Err("unknown mode: foo"))
+  // A known language without a mode still reports its upstream boundary.
+  assert_eq(num2words_str("1", "sv", "currency"), "")
+  // `get_lang` remains the lenient resolver for direct callers.
+  assert_eq(get_lang("zz").cardinal(BigInt::from_int(1)), "one")
 }
 
 ///|
@@ -988,6 +1073,15 @@ test "tr cardinal" {
     num2words_int(123456789, "tr", "cardinal"),
     "yüzyirmiüçmilyondörtyüzellialtıbinyediyüzseksendokuz",
   )
+  // The leading thousands group drops its trailing "bir" when it has hundreds
+  // and the number continues; a two-digit group keeps it.
+  assert_eq(
+    num2words_int(591170, "tr", "cardinal"),
+    "beşyüzdoksanbinyüzyetmiş",
+  )
+  assert_eq(num2words_int(591000, "tr", "cardinal"), "beşyüzdoksanbirbin")
+  assert_eq(num2words_int(101170, "tr", "cardinal"), "yüzbinyüzyetmiş")
+  assert_eq(num2words_int(21170, "tr", "cardinal"), "yirmibirbinyüzyetmiş")
   assert_eq(num2words_int(-42, "tr", "cardinal"), "eksikırkiki")
 }
 
@@ -1004,6 +1098,10 @@ test "tr ordinal and ordinal_num" {
   assert_eq(num2words_int(1001, "tr", "ordinal"), "binbirinci")
   assert_eq(num2words_int(2000, "tr", "ordinal"), "ikibininci")
   assert_eq(num2words_int(1000000, "tr", "ordinal"), "birmilyonuncu")
+  assert_eq(
+    num2words_int(591170, "tr", "ordinal"),
+    "beşyüzdoksanbinyüzyetmişinci",
+  )
   // Upstream's 10^18 ordinal entry lacks the "-uncu" suffix.
   assert_eq(
     num2words(BigInt::from_string("1000000000000000000"), "tr", "ordinal"),

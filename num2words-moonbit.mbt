@@ -190,6 +190,46 @@ fn decimal_tail(l : Lang, frac : String) -> String {
 }
 
 ///|
+/// True for a language code implemented by this library. The lenient
+/// `get_lang` still falls back to English for direct callers, but the
+/// conversion entry points reject unknown codes instead of silently
+/// producing English words.
+fn known_lang(code : String) -> Bool {
+  match code {
+    "en"
+    | "fr"
+    | "es"
+    | "de"
+    | "it"
+    | "pt"
+    | "pt_PT"
+    | "ru"
+    | "nl"
+    | "tr"
+    | "vi"
+    | "zh"
+    | "zh_TW"
+    | "ja"
+    | "ko"
+    | "sv"
+    | "no"
+    | "da"
+    | "id"
+    | "pl" => true
+    _ => false
+  }
+}
+
+///|
+/// True for one of the five output modes.
+fn known_mode(to : String) -> Bool {
+  match to {
+    "cardinal" | "ordinal" | "ordinal_num" | "year" | "currency" => true
+    _ => false
+  }
+}
+
+///|
 /// Resolve a language code to its `Lang` descriptor.
 pub fn get_lang(code : String) -> Lang {
   match code {
@@ -313,6 +353,9 @@ fn currency_string(amount : String, lang : String) -> String {
 ///|
 /// Spell a big integer.
 pub fn num2words(value : BigInt, lang : String, to : String) -> String {
+  if !known_lang(lang) || !known_mode(to) {
+    return ""
+  }
   let l = get_lang(lang)
   if !l.supports(value) {
     // Beyond the language's scale-word table: report as unsupported rather
@@ -344,6 +387,9 @@ pub fn num2words_int(value : Int, lang : String, to : String) -> String {
 /// and non-finite values (`NaN` / infinity), return `""` instead of aborting.
 /// With `to = "currency"` the amount is rendered with the default code (EUR).
 pub fn num2words_float(value : Double, lang : String, to : String) -> String {
+  if !known_lang(lang) || !known_mode(to) {
+    return ""
+  }
   let s = expand_scientific(value.to_string())
   if to == "currency" {
     return currency_string(s, lang)
@@ -379,6 +425,9 @@ pub fn num2words_float(value : Double, lang : String, to : String) -> String {
 /// Malformed input returns `""` instead of aborting; use
 /// `num2words_str_checked` when the caller needs to tell the two apart.
 pub fn num2words_str(value : String, lang : String, to : String) -> String {
+  if !known_lang(lang) || !known_mode(to) {
+    return ""
+  }
   if to == "currency" {
     return currency_string(value, lang)
   }
@@ -417,6 +466,12 @@ pub fn num2words_str_checked(
   lang : String,
   to : String,
 ) -> Result[String, String] {
+  if !known_lang(lang) {
+    return Err("unknown language: " + lang)
+  }
+  if !known_mode(to) {
+    return Err("unknown mode: " + to)
+  }
   if to == "currency" {
     return num2words_currency(value, lang, "")
   }

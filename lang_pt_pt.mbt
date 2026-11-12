@@ -61,6 +61,34 @@ pub fn lang_pt_pt() -> Lang {
 }
 
 ///|
+fn pt_pt_group_value(groups : Array[(BigInt, Int)], power : Int) -> Int {
+  for i = 0; i < groups.length(); i = i + 1 {
+    let (value, p) = groups[i]
+    if p == power {
+      return value.to_int()
+    }
+  }
+  0
+}
+
+///|
+/// Speak 0..999999 as a plain number ("mil e um", "quatro mil quatrocentos e
+/// quarenta"), used inside a long-scale phrase.
+fn Lang::pt_pt_below_million(self : Lang, v : Int) -> String {
+  let high = v / 1000
+  let low = v % 1000
+  if high == 0 {
+    return self.triple_pt(low)
+  }
+  let head = if high == 1 { "mil" } else { self.triple_pt(high) + " mil" }
+  if low == 0 {
+    head
+  } else {
+    head + " e " + self.triple_pt(low)
+  }
+}
+
+///|
 fn Lang::cardinal_pt_pt(self : Lang, n : BigInt) -> String {
   if n == BigInt::from_int(0) {
     return self.zero
@@ -71,42 +99,41 @@ fn Lang::cardinal_pt_pt(self : Lang, n : BigInt) -> String {
   let neg = n < BigInt::from_int(0)
   let n = if neg { -n } else { n }
   let groups = group3(n)
+  let top = groups[0].1
   let texts : Array[String] = []
-  let triples : Array[Int] = []
-  for i = 0; i < groups.length(); i = i + 1 {
-    let (triple, power) = groups[i]
-    let t = triple.to_int()
-    if t == 0 {
-      continue
-    }
-    let mut s = self.triple_pt(t)
-    if power > 0 {
-      if power == 1 {
-        // 1000 -> "mil"; 2000 -> "dois mil"
-        s = if t == 1 { "mil" } else { s + " mil" }
-      } else if power % 2 == 1 {
-        // 10^9 -> "mil milhões", 2x10^9 -> "dois mil milhões".
-        let word = "mil " + pt_pt_long_plur[(power - 1) / 2]
-        s = if t == 1 { word } else { s + " " + word }
+  // Long scale: 10^(2k+1) and 10^(2k) form one phrase
+  // (4_440_000_000 -> "quatro mil quatrocentos e quarenta milhões").
+  let mut p = if top % 2 == 0 { top } else { top - 1 }
+  while p >= 2 {
+    let odd = pt_pt_group_value(groups, p + 1)
+    let even = pt_pt_group_value(groups, p)
+    let value = odd * 1000 + even
+    if value > 0 {
+      let idx = p / 2
+      let s = if value == 1 {
+        "um " + pt_pt_long_sing[idx]
       } else {
-        let idx = power / 2
-        s = if t == 1 {
-          "um " + pt_pt_long_sing[idx]
-        } else {
-          s + " " + pt_pt_long_plur[idx]
-        }
+        self.pt_pt_below_million(value) + " " + pt_pt_long_plur[idx]
       }
+      texts.push(s)
     }
-    texts.push(s)
-    triples.push(t)
+    p = p - 2
   }
-  let mut joined = ""
-  for i = 0; i < texts.length(); i = i + 1 {
-    if i > 0 {
-      joined = joined + pt_group_sep(triples[i])
-    }
-    joined = joined + texts[i]
+  let thousands = pt_pt_group_value(groups, 1)
+  if thousands > 0 {
+    texts.push(
+      if thousands == 1 {
+        "mil"
+      } else {
+        self.triple_pt(thousands) + " mil"
+      },
+    )
   }
+  let units = pt_pt_group_value(groups, 0)
+  if units > 0 {
+    texts.push(self.triple_pt(units))
+  }
+  let joined = pt_postprocess(join_parts(texts, " e "), true)
   if neg {
     "menos " + joined
   } else {

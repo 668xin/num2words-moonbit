@@ -47,7 +47,7 @@ Notes:
 | `no`, `da`, `id` | same | cardinal, ordinal, year and one currency |
 | `pl` | `pl` | cardinal, ordinal, year; upstream has no currency |
 | *(master only)* `lang_ZH` | `zh`, `zh_TW` | Simplified and Traditional Chinese; not present in the 0.5.14 release |
-| other ~36 codes | — | not implemented |
+| other ~38 codes | — | not implemented |
 
 Upstream 0.5.14 exposes **56 language codes**; this project implements **20**.
 Unknown codes fall back to English here, while upstream raises
@@ -181,12 +181,12 @@ ceiling return `""` (`Err("magnitude out of supported range: ...")` from
 | integer type | Python `int` (arbitrary precision) | `BigInt` |
 | decimal type | `float` / `Decimal` | decimal string; no binary-float conversion |
 | invalid number | `decimal.InvalidOperation` | `""` or `Err("invalid number: ...")` |
-| unknown language | `NotImplementedError` | silently falls back to English |
-| unknown mode | `NotImplementedError` | silently falls back to `cardinal` |
+| unknown language | `NotImplementedError` | `""` / `Err("unknown language: ...")` |
+| unknown mode | `NotImplementedError` | `""` / `Err("unknown mode: ...")` |
 | out-of-range | may raise | `""` or `Err("magnitude out of supported range: ...")` |
 | negative ordinal | `TypeError` | `""` (Italian: `meno ...`) |
 | unsupported currency code | `NotImplementedError` | `Err(...)` / `""` |
-| unknown language in `num2words_currency` | `NotImplementedError` | `Err("currency not implemented for language: ...")` (the other entry points fall back to English) |
+| unknown language in `num2words_currency` | `NotImplementedError` | `Err("currency not implemented for language: ...")` |
 | mode absent upstream (`vi`/`sv` year / `ordinal_num` / currency, `pl` currency) | `AttributeError` / `NotImplementedError` | `""` / `Err(...)` |
 | negative cardinal (`vi`, `pl`) | broken (Vietnamese `-1` → *mười chín*; Polish raises `ValueError`) | `"âm ..."` / `"minus ..."` |
 | return type | `str` (or `int` for `it`/`ru`/`pl` `ordinal_num`) | `String` / `Result[String, String]` |
@@ -283,5 +283,5 @@ python tools/gen_fixtures.py
 
 ## 9. Not implemented / roadmap
 
-* The other ~36 upstream language codes.
+* The other ~38 upstream language codes.
 * Reverse conversion (`words → number`).

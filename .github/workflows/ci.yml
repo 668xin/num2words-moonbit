@@ -34,3 +34,16 @@ jobs:
 
       - name: Run tests
         run: moon test
+
+      - name: Check formatting
+        run: moon fmt --check
+
+      - name: Check types
+        run: moon check
+
+      - name: Smoke test examples and CLI
+        run: |
+          moon run examples
+          moon run cmd/main -- 1234 --lang en
+          moon run cmd/main -- 2024 --lang ja --to year
+          moon run cmd/main -- 1234.56 --lang zh --to currency

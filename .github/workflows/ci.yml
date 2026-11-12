@@ -13,6 +13,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+    # Pin the toolchain so `moon fmt --check` is deterministic: formatter
+    # output changes between MoonBit releases even when the code is unchanged.
+    env:
+      MOONBIT_INSTALL_VERSION: 0.1.20260921
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,6 +35,9 @@ jobs:
           Set-ExecutionPolicy Bypass -Scope Process -Force
           irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
           "$HOME\.moon\bin" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
+
+      - name: Show MoonBit version
+        run: moon version
 
       - name: Run tests
         run: moon test

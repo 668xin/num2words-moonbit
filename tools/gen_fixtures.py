@@ -104,6 +104,10 @@ LANGS = {
     "da": "da",
     "id": "id",
     "pl": "pl",
+    "ar": "ar",
+    "th": "th",
+    "fi": "fi",
+    "uk": "uk",
     # No 0.5.14 module: generated through the vendored upstream master module.
     "zh": "zh",
     "zh_TW": "zh_TW",
@@ -140,6 +144,10 @@ YEAR_LANGS = {
     "da": "da",
     "id": "id",
     "pl": "pl",
+    "ar": "ar",
+    "th": "th",
+    "fi": "fi",
+    "uk": "uk",
     "zh": "zh",
     "zh_TW": "zh_TW",
 }
@@ -160,6 +168,10 @@ YEAR_BC_LANGS = {
     "pt": "pt_PT",
     "ko": "ko",
     "id": "id",
+    "ar": "ar",
+    "th": "th",
+    "fi": "fi",
+    "uk": "uk",
     "zh": "zh",
     "zh_TW": "zh_TW",
 }
@@ -204,6 +216,8 @@ CURRENCY_LANGS = {
     "id": "id",
     "zh": "zh",
     "zh_TW": "zh_TW",
+    # Finnish is the only one of the four with a currency mode.
+    "fi": "fi",
 }
 CURRENCY_CODES = {
     "en": [
@@ -225,6 +239,11 @@ CURRENCY_CODES = {
     "no": ["NOK"],
     "da": ["DKK"],
     "id": ["IDR"],
+    "fi": [
+        "BRL", "CHF", "CNY", "EUR", "FIM", "INR", "JPY", "KRW", "KPW",
+        "MXN", "RUB", "TRY", "ZAR", "DKK", "ISK", "NOK", "SEK", "AUD",
+        "CAD", "HKD", "NZD", "SGD", "USD", "GBP",
+    ],
     # Chinese: every code upstream master's lang_ZH implements (incl. XXX).
     "zh": sorted(ZH_MASTER.CURRENCY_FORMS.keys()),
     "zh_TW": sorted(ZH_MASTER.CURRENCY_FORMS.keys()),
@@ -282,6 +301,10 @@ CURRENCY_SAMPLES = {
     "id": [
         "0", "0.01", "0.5", "1", "2", "21", "101", "1000",
         "1234.56", "-3.5",
+    ],
+    "fi": [
+        "0", "0.01", "0.5", "1", "1.5", "2", "21", "101", "1000",
+        "1234.56", "-3.5", "-0.5",
     ],
 }
 

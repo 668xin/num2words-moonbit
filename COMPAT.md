@@ -3,7 +3,7 @@
 Reference: Python [`num2words`](https://github.com/savoirfairelinux/num2words)
 **0.5.14** (LGPL-2.1). This document maps the two APIs call by call, records the
 supported surface, and lists every known behavioural difference. Output parity
-is machine-checked by **22573 recorded comparisons** (see
+is machine-checked by **26217 recorded comparisons** (see
 [DIFF_REPORT.md](DIFF_REPORT.md)); `moon test` replays them without Python.
 
 ---
@@ -44,12 +44,13 @@ Notes:
 | `vi` | `vi` | cardinal and ordinal only (upstream has no year / `ordinal_num` / currency) |
 | `ja`, `ko` | same | 10⁴ grouping; Japanese era years; Korean KRW/USD/JPY |
 | `sv` | `sv` | cardinal and ordinal only (upstream has no year / `ordinal_num` / currency) |
-| `no`, `da`, `id` | same | cardinal, ordinal, year and one currency |
+| `no`, `da`, `id`, `fi` | same | cardinal, ordinal, year and one or more currencies (`fi` has 24 codes) |
 | `pl` | `pl` | cardinal, ordinal, year; upstream has no currency |
+| `ar`, `th`, `uk` | same | cardinal, ordinal, year; upstream has no currency |
 | *(master only)* `lang_ZH` | `zh`, `zh_TW` | Simplified and Traditional Chinese; not present in the 0.5.14 release |
-| other ~38 codes | — | not implemented |
+| other ~34 codes | — | not implemented |
 
-Upstream 0.5.14 exposes **56 language codes**; this project implements **20**.
+Upstream 0.5.14 exposes **56 language codes**; this project implements **24**.
 Unknown codes fall back to English here, while upstream raises
 `NotImplementedError`.
 
@@ -79,6 +80,10 @@ Unknown codes fall back to English here, while upstream raises
 | `da` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `id` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `pl` | ✅ | ✅ | ✅ | ✅ | n.a. |
+| `ar` | ✅ | ✅ | ✅ | ✅ | n.a. |
+| `th` | ✅ | ✅ | ✅ | ✅ | n.a. |
+| `fi` | ✅ | ✅ | ✅ | n.a. | ✅ |
+| `uk` | ✅ | ✅ | ✅ | ✅ | n.a. |
 
 ✅ native and aligned; n.a. not implemented upstream (the call returns `""`
 here). `year` follows upstream for every code, including the German
@@ -115,9 +120,10 @@ Currency is native for every code; the exact ISO-code coverage differs — see �
 | `id` | IDR only (upstream `to_currency` takes no code argument) | IDR | — |
 | `zh` | 17 (master): XXX, CNY, NTD, HKD, MOP, SGD, MYR, USD, EUR, GBP, JPY, CHF, CAD, AUD, NZD, THB, KRW | all 17 | — |
 | `zh_TW` | same 17 (Traditional names) | all 17 | — |
-| `vi`, `sv`, `pl` | none (upstream has no `to_currency`) | — | n.a. |
+| `fi` | 24: BRL, CHF, CNY, EUR, FIM, INR, JPY, KRW, KPW, MXN, RUB, TRY, ZAR, DKK, ISK, NOK, SEK, AUD, CAD, HKD, NZD, SGD, USD, GBP | all 24 | — |
+| `vi`, `sv`, `pl`, `ar`, `th`, `uk` | none (upstream has no `to_currency`) | — | n.a. |
 
-Coverage is **265 of 265 upstream language/code pairs** (Chinese measured
+Coverage is **289 of 289 upstream language/code pairs** (Chinese measured
 against upstream master, which is the only upstream source for `lang_ZH`).
 Unsupported codes (and codes that are valid upstream but not for a given
 language) return `Err("currency code not supported for ...")` (or `""` from the
@@ -163,6 +169,10 @@ Measured on 0.5.14 (values above the ceiling raise in Python, return `""` /
 | `sv` | 10^603 | 10^603 |
 | `no`, `da`, `id` | 10^603 in principle | 10^33 |
 | `pl` | 10^63 (higher powers → `KeyError`) | 10^63 |
+| `ar` | 10^51 | 10^48 |
+| `th` | no explicit ceiling in `to_cardinal` | 10^24 (10^6 groups) |
+| `fi` | 10^603 | 10^600 |
+| `uk` | 10^33 | 10^30 |
 
 Ceilings differ in both directions: this project is more conservative for
 `en`/`fr`/`es`/`de`/`it`/`pt_PT`/`tr` and for `no`/`da`/`id` (10^33), but
@@ -187,8 +197,8 @@ ceiling return `""` (`Err("magnitude out of supported range: ...")` from
 | negative ordinal | `TypeError` | `""` (Italian: `meno ...`) |
 | unsupported currency code | `NotImplementedError` | `Err(...)` / `""` |
 | unknown language in `num2words_currency` | `NotImplementedError` | `Err("currency not implemented for language: ...")` |
-| mode absent upstream (`vi`/`sv` year / `ordinal_num` / currency, `pl` currency) | `AttributeError` / `NotImplementedError` | `""` / `Err(...)` |
-| negative cardinal (`vi`, `pl`) | broken (Vietnamese `-1` → *mười chín*; Polish raises `ValueError`) | `"âm ..."` / `"minus ..."` |
+| mode absent upstream (`vi`/`sv` year / `ordinal_num` / currency, `pl`/`ar`/`th`/`uk` currency, `fi` `ordinal_num`) | `AttributeError` / `NotImplementedError` | `""` / `Err(...)` |
+| negative cardinal (`vi`, `pl`, `ar`, `uk`) | broken (Vietnamese `-1` → *mười chín*; Polish/Ukrainian raise; Arabic indexes from the end) | `"âm ..."` / `"minus ..."` / `"سالب ..."` / `"мінус ..."` |
 | return type | `str` (or `int` for `it`/`ru`/`pl` `ordinal_num`) | `String` / `Result[String, String]` |
 
 The CLI prints `error: <message>` to **stderr** and still exits 0 (the MoonBit
@@ -257,6 +267,14 @@ These are deliberate and recorded in [DIFF_REPORT.md](DIFF_REPORT.md) §4.
     upstream's `float2tuple` (`0.5` → `fem øre`, `0` → `""`); Indonesian
     spells integers as `<cardinal> koma nol rupiah` and fractions digit by
     digit. Both quirks are reproduced and pinned by fixtures.
+16. **Arabic, Thai, Finnish and Ukrainian.** Arabic keeps the dual/plural
+    scale forms and gender-aware ordinals; Thai uses 10^6 grouping with the
+    เอ็ด rule; Finnish concatenates compounds below a million, removes spaces
+    in `to_year` and appends *ennen ajanlaskun alkua* for negative years;
+    Ukrainian has three-way plurals and feminine thousands. Upstream breaks on
+    Arabic/Ukrainian negatives and Ukrainian zero, and has no currency for
+    Arabic/Thai/Ukrainian or `ordinal_num` for Finnish; this project fills
+    those gaps and documents them.
 
 Everything else — cardinals, positive years, ordinals and `ordinal_num` for the
 codes that implement them, and currency for the codes listed in §4 — matches
@@ -267,7 +285,7 @@ upstream byte-for-byte (after the normalisations above).
 ## 8. Verification
 
 ```bash
-moon test          # 161 tests, 22573 differential comparisons
+moon test          # 183 tests, 26217 differential comparisons
 moon build         # library + CLI
 ```
 
@@ -283,5 +301,5 @@ python tools/gen_fixtures.py
 
 ## 9. Not implemented / roadmap
 
-* The other ~38 upstream language codes.
+* The other ~34 upstream language codes.
 * Reverse conversion (`words → number`).

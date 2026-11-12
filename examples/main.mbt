@@ -28,6 +28,10 @@ fn main {
   println(@lib.num2words_int(1234, "da", "cardinal"))
   println(@lib.num2words_int(1234, "id", "cardinal"))
   println(@lib.num2words_int(1234, "pl", "cardinal"))
+  println(@lib.num2words_int(1234, "ar", "cardinal"))
+  println(@lib.num2words_int(1234, "th", "cardinal"))
+  println(@lib.num2words_int(1234, "fi", "cardinal"))
+  println(@lib.num2words_int(1234, "uk", "cardinal"))
 
   println("")
   println("== other modes (en) ==")
@@ -59,6 +63,10 @@ fn main {
     Err(msg) => println("error: " + msg)
   }
   match @lib.num2words_currency("1234.56", "ko", "USD") {
+    Ok(words) => println(words)
+    Err(msg) => println("error: " + msg)
+  }
+  match @lib.num2words_currency("1234.56", "fi", "EUR") {
     Ok(words) => println(words)
     Err(msg) => println("error: " + msg)
   }

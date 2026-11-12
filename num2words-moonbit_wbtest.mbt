@@ -888,7 +888,7 @@ test "path consistency: string and int agree" {
 test "path consistency: string and int agree in every language" {
   let langs = [
     "en", "fr", "es", "de", "it", "pt", "pt_PT", "ru", "nl", "tr", "vi", "zh", "zh_TW",
-    "ja", "ko", "sv", "no", "da", "id", "pl",
+    "ja", "ko", "sv", "no", "da", "id", "pl", "ar", "th", "fi", "uk",
   ]
   let samples = [0, 21, 100, 1234, 1000000]
   for li = 0; li < langs.length(); li = li + 1 {
@@ -1600,5 +1600,160 @@ test "pl cardinal, ordinal and year" {
   assert_eq(
     num2words_currency("1", "pl", "PLN"),
     Err("currency not implemented for language: pl"),
+  )
+}
+
+// --- Arabic -----------------------------------------------------------------
+
+///|
+test "ar cardinal, ordinal and year" {
+  assert_eq(num2words_int(0, "ar", "cardinal"), "صفر")
+  assert_eq(num2words_int(1, "ar", "cardinal"), "واحد")
+  assert_eq(num2words_int(21, "ar", "cardinal"), "واحد و عشرون")
+  assert_eq(num2words_int(2000, "ar", "cardinal"), "ألفا")
+  assert_eq(num2words_int(3000, "ar", "cardinal"), "ثلاثة آلاف")
+  assert_eq(
+    num2words_int(1234, "ar", "cardinal"),
+    "ألف و مئتان و أربعة و ثلاثون",
+  )
+  assert_eq(num2words_int(1, "ar", "ordinal"), "اول")
+  assert_eq(num2words_int(21, "ar", "ordinal"), "إحدى و عشرون")
+  assert_eq(num2words_int(21, "ar", "ordinal_num"), "إحدى و عشرون")
+  assert_eq(
+    num2words_int(2024, "ar", "year"),
+    "ألفان و أربعة و عشرون",
+  )
+  assert_eq(
+    num2words_currency("1", "ar", "SAR"),
+    Err("currency not implemented for language: ar"),
+  )
+}
+
+// --- Thai -------------------------------------------------------------------
+
+///|
+test "th cardinal, ordinal and year" {
+  assert_eq(num2words_int(0, "th", "cardinal"), "ศูนย์")
+  assert_eq(num2words_int(11, "th", "cardinal"), "สิบเอ็ด")
+  assert_eq(
+    num2words_int(21, "th", "cardinal"),
+    "ยี่สิบเอ็ด",
+  )
+  assert_eq(
+    num2words_int(101, "th", "cardinal"),
+    "หนึ่งร้อยเอ็ด",
+  )
+  assert_eq(
+    num2words_int(1001, "th", "cardinal"),
+    "หนึ่งพันเอ็ด",
+  )
+  assert_eq(
+    num2words_int(1234, "th", "cardinal"),
+    "หนึ่งพันสองร้อยสามสิบสี่",
+  )
+  assert_eq(
+    num2words_int(-42, "th", "cardinal"),
+    "ติดลบสี่สิบสอง",
+  )
+  assert_eq(
+    num2words_int(21, "th", "ordinal"),
+    "ยี่สิบเอ็ด",
+  )
+  assert_eq(num2words_int(21, "th", "ordinal_num"), "21")
+  assert_eq(
+    num2words_int(2024, "th", "year"),
+    "สองพันยี่สิบสี่",
+  )
+  assert_eq(
+    num2words_currency("1", "th", "THB"),
+    Err("currency not implemented for language: th"),
+  )
+}
+
+// --- Finnish ----------------------------------------------------------------
+
+///|
+test "fi cardinal, ordinal and year" {
+  assert_eq(num2words_int(0, "fi", "cardinal"), "nolla")
+  assert_eq(num2words_int(21, "fi", "cardinal"), "kaksikymmentäyksi")
+  assert_eq(num2words_int(100, "fi", "cardinal"), "sata")
+  assert_eq(num2words_int(101, "fi", "cardinal"), "satayksi")
+  assert_eq(num2words_int(1000, "fi", "cardinal"), "tuhat")
+  assert_eq(
+    num2words_int(1234, "fi", "cardinal"),
+    "tuhat kaksisataakolmekymmentäneljä",
+  )
+  assert_eq(num2words_int(-42, "fi", "cardinal"), "miinus neljäkymmentäkaksi")
+  assert_eq(num2words_int(1, "fi", "ordinal"), "ensimmäinen")
+  assert_eq(num2words_int(21, "fi", "ordinal"), "kahdeskymmenesensimmäinen")
+  assert_eq(num2words_int(1000, "fi", "ordinal"), "tuhannes")
+  assert_eq(
+    num2words_int(1234, "fi", "ordinal"),
+    "tuhannes kahdessadaskolmaskymmenesneljäs",
+  )
+  // Upstream has no ordinal_num for Finnish.
+  assert_eq(num2words_int(21, "fi", "ordinal_num"), "")
+  assert_eq(
+    num2words_int(2024, "fi", "year"),
+    "kaksituhattakaksikymmentäneljä",
+  )
+  assert_eq(num2words_int(-3, "fi", "year"), "kolme ennen ajanlaskun alkua")
+}
+
+///|
+test "fi currency" {
+  assert_eq(
+    num2words_currency("1.5", "fi", "EUR"),
+    Ok("yksi euro ja viisikymmentä senttiä"),
+  )
+  assert_eq(
+    num2words_currency("1234.56", "fi", "EUR"),
+    Ok(
+      "tuhat kaksisataakolmekymmentäneljä euroa ja viisikymmentäkuusi senttiä",
+    ),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "fi", "EUR"),
+    Ok("miinus kolme euroa ja viisikymmentä senttiä"),
+  )
+  assert_eq(
+    num2words_currency("1", "fi", "XYZ"),
+    Err("currency code not supported for fi: XYZ"),
+  )
+}
+
+// --- Ukrainian --------------------------------------------------------------
+
+///|
+test "uk cardinal, ordinal and year" {
+  assert_eq(num2words_int(0, "uk", "cardinal"), "нуль")
+  assert_eq(num2words_int(21, "uk", "cardinal"), "двадцять один")
+  assert_eq(num2words_int(1000, "uk", "cardinal"), "одна тисяча")
+  assert_eq(num2words_int(2000, "uk", "cardinal"), "дві тисячі")
+  assert_eq(num2words_int(5000, "uk", "cardinal"), "п'ять тисяч")
+  assert_eq(
+    num2words_int(1234, "uk", "cardinal"),
+    "одна тисяча двісті тридцять чотири",
+  )
+  assert_eq(
+    num2words_int(-42, "uk", "cardinal"),
+    "мінус сорок два",
+  )
+  assert_eq(num2words_int(1, "uk", "ordinal"), "перший")
+  assert_eq(num2words_int(21, "uk", "ordinal"), "двадцять перший")
+  assert_eq(num2words_int(1000, "uk", "ordinal"), "тисячний")
+  assert_eq(num2words_int(100000, "uk", "ordinal"), "стотисячний")
+  assert_eq(
+    num2words_int(1234, "uk", "ordinal"),
+    "одна тисяча двісті тридцять четвертий",
+  )
+  assert_eq(num2words_int(1234, "uk", "ordinal_num"), "1234")
+  assert_eq(
+    num2words_int(2024, "uk", "year"),
+    "дві тисячі двадцять чотири",
+  )
+  assert_eq(
+    num2words_currency("1", "uk", "UAH"),
+    Err("currency not implemented for language: uk"),
   )
 }

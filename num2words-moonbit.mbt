@@ -6,7 +6,8 @@
 // API: `num2words(value, lang, to)` where `value` is a BigInt (or use the
 // `num2words_int` / `num2words_float` convenience wrappers), `lang` is
 // "en" | "fr" | "es" | "de" | "it" | "pt" | "pt_PT" | "ru" | "nl" | "tr" | "vi"
-// | "zh" | "zh_TW" | "ja" | "ko" | "sv" | "no" | "da" | "id" | "pl",
+// | "zh" | "zh_TW" | "ja" | "ko" | "sv" | "no" | "da" | "id" | "pl" | "ar" | "th"
+// | "fi" | "uk",
 // and `to` is "cardinal" (default), "ordinal", "ordinal_num", "year" or
 // "currency".
 //
@@ -14,7 +15,7 @@
 // `num2words_currency`; the `to = "currency"` dispatch path uses the language
 // default code (EUR, BRL for `pt`, TRY for `tr`, 元/XXX for Chinese, JPY for
 // Japanese, KRW for Korean, NOK for Norwegian, DKK for Danish, IDR for
-// Indonesian).
+// Indonesian; Finnish accepts its 24-code upstream set).
 
 // --- input validation -------------------------------------------------------
 //
@@ -215,7 +216,11 @@ fn known_lang(code : String) -> Bool {
     | "no"
     | "da"
     | "id"
-    | "pl" => true
+    | "pl"
+    | "ar"
+    | "th"
+    | "fi"
+    | "uk" => true
     _ => false
   }
 }
@@ -253,6 +258,10 @@ pub fn get_lang(code : String) -> Lang {
     "da" => lang_da()
     "id" => lang_id()
     "pl" => lang_pl()
+    "ar" => lang_ar()
+    "th" => lang_th()
+    "fi" => lang_fi()
+    "uk" => lang_uk()
     _ => lang_en()
   }
 }
@@ -282,6 +291,10 @@ fn ordinal_for(l : Lang, value : BigInt) -> String {
     Da => ordinal_da(value)
     Id => ordinal_id(value)
     Pl => ordinal_pl(value)
+    Ar => ordinal_ar(value)
+    Th => ordinal_th(value)
+    Fi => ordinal_fi(value)
+    Uk => ordinal_uk(value)
   }
 }
 
@@ -310,6 +323,10 @@ fn ordinal_num_for(l : Lang, value : BigInt) -> String {
     Da => ordinal_num_da(value)
     Id => ordinal_num_id(value)
     Pl => ordinal_num_pl(value)
+    Ar => ordinal_num_ar(value)
+    Th => ordinal_num_th(value)
+    Fi => ordinal_num_fi(value)
+    Uk => ordinal_num_uk(value)
   }
 }
 
@@ -337,6 +354,10 @@ fn year_for(l : Lang, value : BigInt) -> String {
     Da => year_da(value)
     Id => year_id(value)
     Pl => year_pl(value)
+    Ar => year_ar(value)
+    Th => year_th(value)
+    Fi => year_fi(value)
+    Uk => year_uk(value)
   }
 }
 

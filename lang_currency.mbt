@@ -1042,7 +1042,8 @@ fn currency_supported_lang(lang : String) -> Bool {
   lang == "ko" ||
   lang == "no" ||
   lang == "da" ||
-  lang == "id"
+  lang == "id" ||
+  lang == "fi"
 }
 
 ///|
@@ -1448,6 +1449,9 @@ pub fn num2words_currency(
       }
       if lang == "id" {
         return currency_id(units, cents, neg, resolved)
+      }
+      if lang == "fi" {
+        return currency_fi(units, cents, neg, resolved)
       }
       match currency_form(lang, resolved) {
         Err(c) => Err("currency code not supported for " + lang + ": " + c)

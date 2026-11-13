@@ -340,7 +340,8 @@ Notes on the fixes:
   sweep across all 24 languages found no further mismatch.
 - **M9 — Romanian, Hungarian, Hebrew, Persian and Esperanto:** five more
   full-mode language codes were added (`ro`, `hu`, `he`, `fa`, `eo`), bringing
-  the project to **29 language codes**, **337 currency pairs** and **31407
+  the project to **29 language codes**, **338 currency entries** (337 ISO-code
+  pairs plus Persian's code-less toman mode) and **31407
   comparisons**. Romanian contributes the three-way scale inflection and
   upstream's raw `biliard/e` quirk, Hungarian its single-word compounds and
   suffix ordinals, Hebrew its gender/construct grammar, Persian its

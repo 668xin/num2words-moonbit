@@ -58,8 +58,9 @@ Add it to your `moon.mod` (requires the MoonBit toolchain ≥ 0.1.20260921).
 
 The latest published release is **0.1.0**, which **predates this rework** (it
 covers the original seven language codes). The version in this repository —
-29 language codes and 337 currency pairs — will be released as **0.1.1**; until
-then, depend on the repository checkout if you need the new languages.
+29 language codes and 338 currency entries (337 ISO-code pairs plus Persian's
+code-less toman mode) — will be released as **0.1.1**; until then, depend on the
+repository checkout if you need the new languages.
 
 ```bash
 moon add 668xin/num2words-moonbit   # resolves to 0.1.0
@@ -237,7 +238,7 @@ power of 1000 for most languages, and of 10⁴ for Chinese, Japanese and Korean.
 - **Magnitudes are bounded** by each language's scale-word table — see
   *Supported magnitude* above. "Arbitrarily large" is **not** claimed.
 - **Release status**: mooncakes.io carries `0.1.0`, which predates this rework
-  (seven language codes); the 29-language, 337-currency-pair version in this
+  (seven language codes); the 29-language, 338-currency-entry version in this
   repository is pending release as `0.1.1`.
 - **Chinese is post-0.5.14**: upstream 0.5.14 has no Chinese module, so `zh`
   (Simplified) and `zh_TW` (Traditional) follow the `lang_ZH.py` added on
@@ -434,7 +435,8 @@ here).
 - **Ordinals.** Native for every language where upstream implements them, and
   machine-checked against upstream.
 - **Currency.** Native for 23 language codes with upstream's complete code
-  sets (337 language/code pairs); see [COMPAT.md](COMPAT.md) §4.
+  sets (337 ISO-code pairs, 338 entries including Persian's code-less toman
+  mode); see [COMPAT.md](COMPAT.md) §4.
 - **Scale ceilings.** Both sides use a finite scale-word table, but the
   ceilings differ; see [Supported magnitude](#supported-magnitude) for ours.
 - **Input handling.** Upstream raises exceptions on malformed numbers; this

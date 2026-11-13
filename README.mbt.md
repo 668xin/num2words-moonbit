@@ -20,7 +20,7 @@ moon add 668xin/num2words-moonbit
 ```
 
 > The published `0.1.0` predates this rework (seven language codes); the
-> 29-language, 337-currency-pair version in the repository is pending release
+> 29-language, 338-currency-entry version in the repository is pending release
 > as `0.1.1`.
 
 ```mbt nocheck

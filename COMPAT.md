@@ -138,8 +138,10 @@ Currency is native for every code; the exact ISO-code coverage differs — see �
 | `fa` | tomans only (upstream `to_currency` takes no code argument) | tomans | — |
 | `vi`, `sv`, `pl`, `ar`, `th`, `uk` | none (upstream has no `to_currency`) | — | n.a. |
 
-Coverage is **337 of 337 upstream language/code pairs** (Chinese measured
-against upstream master, which is the only upstream source for `lang_ZH`).
+Coverage is **338 language/code rows — 337 ISO-code pairs plus Persian's
+code-less toman entry** — matching upstream's sets for every language (Chinese
+measured against upstream master, which is the only upstream source for
+`lang_ZH`).
 Unsupported codes (and codes that are valid upstream but not for a given
 language) return `Err("currency code not supported for ...")` (or `""` from the
 non-`Result` entry points), while upstream raises `NotImplementedError` or

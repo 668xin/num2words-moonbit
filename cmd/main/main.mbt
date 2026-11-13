@@ -1,7 +1,7 @@
 // num2words — command line tool.
 // Converts a number (integer or decimal, optionally very large) into words.
 //
-//   num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi|zh|zh_TW|ja|ko|sv|no|da|id|pl|ar|th|fi|uk]
+//   num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi|zh|zh_TW|ja|ko|sv|no|da|id|pl|ar|th|fi|uk|ro|hu|he|fa|eo]
 //                     [--to cardinal|ordinal|ordinal_num|year|currency]
 //                     [--currency EUR|USD|GBP]
 //
@@ -23,15 +23,15 @@ fn usage() -> Unit {
   println("")
   println("Usage:")
   println(
-    "  num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi|zh|zh_TW|ja|ko|sv|no|da|id|pl|ar|th|fi|uk] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]",
+    "  num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi|zh|zh_TW|ja|ko|sv|no|da|id|pl|ar|th|fi|uk|ro|hu|he|fa|eo] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]",
   )
   println("")
   println(
-    "Languages: en, fr, es, de, it, pt (Brazil), pt_PT (Europe), ru, nl, tr, vi, zh (Simplified Chinese), zh_TW (Traditional Chinese), ja, ko, sv, no, da, id, pl, ar, th, fi, uk",
+    "Languages: en, fr, es, de, it, pt (Brazil), pt_PT (Europe), ru, nl, tr, vi, zh (Simplified Chinese), zh_TW (Traditional Chinese), ja, ko, sv, no, da, id, pl, ar, th, fi, uk, ro, hu, he, fa, eo",
   )
   println("Modes    : cardinal (default), ordinal, ordinal_num, year, currency")
   println(
-    "Currency : ISO code, default EUR (BRL for pt, TRY for tr, 元/XXX for zh, JPY for ja, KRW for ko, NOK for no, DKK for da, IDR for id); en 20, fr/de 5, it/nl 4, es 171, ru 8, pt_PT 5, ja 1, ko 3, fi 24, zh/zh_TW 17",
+    "Currency : ISO code, default EUR (BRL for pt, TRY for tr, 元/XXX for zh, JPY for ja, KRW for ko, NOK for no, DKK for da, IDR for id, RON for ro, HUF for hu, ILS for he; fa writes tomans); en/ro/hu 20, fr/de 5, it/nl 4, es 171, ru 8, pt_PT 5, ja 1, ko 3, he 3, eo 5, fi 24, zh/zh_TW 17",
   )
   println("")
   println("Examples:")

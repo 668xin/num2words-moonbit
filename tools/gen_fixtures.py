@@ -78,6 +78,9 @@ def expected_currency(
         return zh_out(
             ZH_MASTER.to_currency(float(amount), currency=code), ours
         )
+    # Persian `to_currency` takes only the value (no ISO code).
+    if upstream == "fa":
+        return num2words(float(amount), lang=upstream, to="currency")
     if upstream in ("pt_BR", "tr", "da", "id"):
         return num2words(float(amount), lang=upstream, to="currency")
     return num2words(
@@ -108,6 +111,11 @@ LANGS = {
     "th": "th",
     "fi": "fi",
     "uk": "uk",
+    "ro": "ro",
+    "hu": "hu",
+    "he": "he",
+    "fa": "fa",
+    "eo": "eo",
     # No 0.5.14 module: generated through the vendored upstream master module.
     "zh": "zh",
     "zh_TW": "zh_TW",
@@ -148,6 +156,11 @@ YEAR_LANGS = {
     "th": "th",
     "fi": "fi",
     "uk": "uk",
+    "ro": "ro",
+    "hu": "hu",
+    "he": "he",
+    "fa": "fa",
+    "eo": "eo",
     "zh": "zh",
     "zh_TW": "zh_TW",
 }
@@ -172,6 +185,11 @@ YEAR_BC_LANGS = {
     "th": "th",
     "fi": "fi",
     "uk": "uk",
+    "ro": "ro",
+    "hu": "hu",
+    "he": "he",
+    "fa": "fa",
+    "eo": "eo",
     "zh": "zh",
     "zh_TW": "zh_TW",
 }
@@ -218,6 +236,11 @@ CURRENCY_LANGS = {
     "zh_TW": "zh_TW",
     # Finnish is the only one of the four with a currency mode.
     "fi": "fi",
+    "ro": "ro",
+    "hu": "hu",
+    "he": "he",
+    "eo": "eo",
+    "fa": "fa",
 }
 CURRENCY_CODES = {
     "en": [
@@ -247,6 +270,21 @@ CURRENCY_CODES = {
     # Chinese: every code upstream master's lang_ZH implements (incl. XXX).
     "zh": sorted(ZH_MASTER.CURRENCY_FORMS.keys()),
     "zh_TW": sorted(ZH_MASTER.CURRENCY_FORMS.keys()),
+    # Romanian / Hungarian use the 20-code EU set.
+    "ro": [
+        "AUD", "BYN", "CAD", "EEK", "EUR", "GBP", "LTL", "LVL", "USD",
+        "RUB", "SEK", "NOK", "PLN", "MXN", "RON", "INR", "HUF", "ISK",
+        "UZS", "SAR",
+    ],
+    "hu": [
+        "AUD", "BYN", "CAD", "EEK", "EUR", "GBP", "LTL", "LVL", "USD",
+        "RUB", "SEK", "NOK", "PLN", "MXN", "RON", "INR", "HUF", "ISK",
+        "UZS", "SAR",
+    ],
+    "he": ["ILS", "EUR", "USD"],
+    "eo": ["EUR", "USD", "FRF", "GBP", "CNY"],
+    # Persian has no currency parameter; the empty code selects the default.
+    "fa": [""],
 }
 CURRENCY_SAMPLES_BASIC = [
     "0", "0.01", "0.5", "1", "2", "21", "28", "81", "101", "1000", "1001",
@@ -306,6 +344,11 @@ CURRENCY_SAMPLES = {
         "0", "0.01", "0.5", "1", "1.5", "2", "21", "101", "1000",
         "1234.56", "-3.5", "-0.5",
     ],
+    "ro": CURRENCY_SAMPLES_FULL,
+    "hu": CURRENCY_SAMPLES_FULL,
+    "he": CURRENCY_SAMPLES_FULL,
+    "eo": CURRENCY_SAMPLES_FULL,
+    "fa": CURRENCY_SAMPLES_FULL,
 }
 
 OUT = "diff_fixtures_wbtest.mbt"

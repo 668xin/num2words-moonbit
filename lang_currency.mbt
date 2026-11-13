@@ -1043,7 +1043,12 @@ fn currency_supported_lang(lang : String) -> Bool {
   lang == "no" ||
   lang == "da" ||
   lang == "id" ||
-  lang == "fi"
+  lang == "fi" ||
+  lang == "ro" ||
+  lang == "hu" ||
+  lang == "he" ||
+  lang == "fa" ||
+  lang == "eo"
 }
 
 ///|
@@ -1065,6 +1070,16 @@ fn currency_default_code(lang : String) -> String {
     "DKK"
   } else if lang == "id" {
     "IDR"
+  } else if lang == "ro" {
+    "RON"
+  } else if lang == "hu" {
+    "HUF"
+  } else if lang == "he" {
+    "ILS"
+  } else if lang == "fa" {
+    // Persian `to_currency` takes no code; the value is only used by the
+    // documentation and ignored by `currency_fa`.
+    "IRR"
   } else {
     "EUR"
   }
@@ -1425,10 +1440,35 @@ pub fn num2words_currency(
       if !currency_supported_lang(lang) {
         return Err("currency not implemented for language: " + lang)
       }
+      // Persian `to_currency` accepts no ISO code and reads the amount as a
+      // decimal (fractions keep their denominator words), so it is handled
+      // before the generic rounding path.
+      if lang == "fa" {
+        if code != "" {
+          return Err("currency code not supported for fa: " + code)
+        }
+        return currency_fa(amount)
+      }
       let resolved = if code == "" {
         currency_default_code(lang)
       } else {
         currency_upper(code)
+      }
+      // Languages whose currency grammar does not fit `CurrencyForm`:
+      // Romanian uses a three-way scale inflection plus the "una" multiplier,
+      // Hungarian and Esperanto only distinguish one-from-many, and Hebrew
+      // needs per-code gender and the construct state.
+      if lang == "ro" {
+        return currency_ro(units, cents, neg, resolved)
+      }
+      if lang == "hu" {
+        return currency_hu(units, cents, neg, resolved)
+      }
+      if lang == "he" {
+        return currency_he(units, cents, neg, resolved)
+      }
+      if lang == "eo" {
+        return currency_eo(units, cents, neg, resolved)
       }
       // CJK languages use dedicated renderers: no plural/gender agreement and
       // their own decimal-unit rules (元/角/分, JPY without cents, KRW/USD).

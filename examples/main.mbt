@@ -32,6 +32,11 @@ fn main {
   println(@lib.num2words_int(1234, "th", "cardinal"))
   println(@lib.num2words_int(1234, "fi", "cardinal"))
   println(@lib.num2words_int(1234, "uk", "cardinal"))
+  println(@lib.num2words_int(1234, "ro", "cardinal"))
+  println(@lib.num2words_int(1234, "hu", "cardinal"))
+  println(@lib.num2words_int(1234, "he", "cardinal"))
+  println(@lib.num2words_int(1234, "fa", "cardinal"))
+  println(@lib.num2words_int(1234, "eo", "cardinal"))
 
   println("")
   println("== other modes (en) ==")

@@ -7,7 +7,7 @@
 // `num2words_int` / `num2words_float` convenience wrappers), `lang` is
 // "en" | "fr" | "es" | "de" | "it" | "pt" | "pt_PT" | "ru" | "nl" | "tr" | "vi"
 // | "zh" | "zh_TW" | "ja" | "ko" | "sv" | "no" | "da" | "id" | "pl" | "ar" | "th"
-// | "fi" | "uk",
+// | "fi" | "uk" | "ro" | "hu" | "he" | "fa" | "eo",
 // and `to` is "cardinal" (default), "ordinal", "ordinal_num", "year" or
 // "currency".
 //
@@ -15,7 +15,8 @@
 // `num2words_currency`; the `to = "currency"` dispatch path uses the language
 // default code (EUR, BRL for `pt`, TRY for `tr`, 元/XXX for Chinese, JPY for
 // Japanese, KRW for Korean, NOK for Norwegian, DKK for Danish, IDR for
-// Indonesian; Finnish accepts its 24-code upstream set).
+// Indonesian, RON for Romanian, HUF for Hungarian, ILS for Hebrew; Persian has
+// no code and always writes tomans; Finnish accepts its 24-code upstream set).
 
 // --- input validation -------------------------------------------------------
 //
@@ -220,7 +221,12 @@ fn known_lang(code : String) -> Bool {
     | "ar"
     | "th"
     | "fi"
-    | "uk" => true
+    | "uk"
+    | "ro"
+    | "hu"
+    | "he"
+    | "fa"
+    | "eo" => true
     _ => false
   }
 }
@@ -262,6 +268,11 @@ pub fn get_lang(code : String) -> Lang {
     "th" => lang_th()
     "fi" => lang_fi()
     "uk" => lang_uk()
+    "ro" => lang_ro()
+    "hu" => lang_hu()
+    "he" => lang_he()
+    "fa" => lang_fa()
+    "eo" => lang_eo()
     _ => lang_en()
   }
 }
@@ -295,6 +306,11 @@ fn ordinal_for(l : Lang, value : BigInt) -> String {
     Th => ordinal_th(value)
     Fi => ordinal_fi(value)
     Uk => ordinal_uk(value)
+    Ro => ordinal_ro(value)
+    Hu => ordinal_hu(value)
+    He => ordinal_he(value)
+    Fa => ordinal_fa(value)
+    Eo => ordinal_eo(value)
   }
 }
 
@@ -327,6 +343,11 @@ fn ordinal_num_for(l : Lang, value : BigInt) -> String {
     Th => ordinal_num_th(value)
     Fi => ordinal_num_fi(value)
     Uk => ordinal_num_uk(value)
+    Ro => ordinal_num_ro(value)
+    Hu => ordinal_num_hu(value)
+    He => ordinal_num_he(value)
+    Fa => ordinal_num_fa(value)
+    Eo => ordinal_num_eo(value)
   }
 }
 
@@ -358,6 +379,11 @@ fn year_for(l : Lang, value : BigInt) -> String {
     Th => year_th(value)
     Fi => year_fi(value)
     Uk => year_uk(value)
+    Ro => year_ro(value)
+    Hu => year_hu(value)
+    He => year_he(value)
+    Fa => year_fa(value)
+    Eo => year_eo(value)
   }
 }
 

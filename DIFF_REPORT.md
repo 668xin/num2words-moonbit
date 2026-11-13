@@ -9,31 +9,36 @@ code.
   vendored in `tools/upstream_lang_ZH_master.py`, because 0.5.14 has no Chinese)
 - Upstream languages used: `en`, `fr`, `es`, `de`, `it`, `pt_BR`, `pt`, `ru`,
   `nl`, `tr`, `vi`, `ja`, `ko`, `sv`, `no`, `da`, `id`, `pl`, `ar`, `th`,
-  `fi`, `uk`, plus `lang_ZH` (master) for `zh`/`zh_TW`
+  `fi`, `uk`, `ro`, `hu`, `he`, `fa`, `eo`, plus `lang_ZH` (master) for
+  `zh`/`zh_TW`
 - Cardinal samples per language: **551** (`0..500` plus 50 multi-scale / signed
   values); Vietnamese and Polish use **547** (negative samples excluded —
   upstream's negative handling is broken); Arabic, Finnish and Ukrainian use
   **551** for the same reason (negatives skipped, zeros and positives match)
 - Year samples: **25** each for most language codes that implement `to_year`,
   plus **6 negative years** for `en`/`pt`/`pt_PT`/`ko`/`id`/`ar`/`th`/`fi`/
-  `uk`/`zh`/`zh_TW` (**31** each); Japanese uses **24** (years before 645 are
-  rejected upstream); Vietnamese and Swedish have no `to_year`
+  `uk`/`ro`/`hu`/`he`/`fa`/`eo`/`zh`/`zh_TW` (**31** each); Japanese uses
+  **24** (years before 645 are rejected upstream); Vietnamese and Swedish have
+  no `to_year`
 - Ordinal samples per language: **249** (dense `0..200` plus
   hundreds/thousands/scale boundaries; Portuguese drops the `10^18` sample that
-  upstream rejects, Korean drops its `KeyError` cases, Polish drops 0 and its
-  `IndexError` cases, Ukrainian drops its one rejected sample), `ordinal_num`:
-  **11** per language (Vietnamese, Swedish and Finnish upstream have no
-  `ordinal_num`)
-- Currency samples: **6222** total — **340** for `en` (20 codes × 17 amounts),
+  upstream rejects, Persian drops its empty `10^18` cardinal, Korean drops its
+  `KeyError` cases, Polish drops 0 and its `IndexError` cases, Ukrainian drops
+  its one rejected sample), `ordinal_num`: **11** per language (Vietnamese,
+  Swedish and Finnish upstream have no `ordinal_num`)
+- Currency samples: **7203** total — **340** for `en` (20 codes × 17 amounts),
   **85** each for `fr`/`de` (5 × 17), **68** for `nl` (4 × 17), **60** for `it`
   (4 × 17 minus its 8 rejected negative samples), **4446** for `es` (171 × 26),
   **208** for `ru` (8 × 26), **26** for `pt`, **130** for `pt_PT` (26 × 5),
   **13** for `tr` (clean amounts only, see §4), **7** for `ja`, **27** for `ko`,
   **11** for `no`, **10** each for `da`/`id`, **288** for `fi` (24 codes × 12
-  amounts) and **204** each for `zh`/`zh_TW` (17 codes × 12 amounts)
-- Total comparisons: **26217** (13216 cardinal + 615 year + 5933 ordinal
-  + 231 ordinal_num + 6222 currency)
-- MoonBit test suite: **183 tests, 183 passed, 0 failed**
+  amounts), **227** for `ro` (upstream raises for many two-form pairs),
+  **520** for `hu` (20 × 26), **78** for `he` (3 × 26), **130** for `eo`
+  (5 × 26), **26** for `fa` (toman amounts) and **204** each for
+  `zh`/`zh_TW` (17 codes × 12 amounts)
+- Total comparisons: **31407** (15971 cardinal + 770 year + 7177 ordinal
+  + 286 ordinal_num + 7203 currency)
+- MoonBit test suite: **213 tests, 213 passed, 0 failed**
 
 Run `moon test` from the project root to replay every comparison.
 
@@ -82,8 +87,10 @@ its complete upstream set of 171 codes, `ru` 26 × 8, `pt` 26 × `BRL` and
 1000001, 2000000`. `tr` uses 13 amounts that are
 free of upstream's float truncation, `ja` 7 integral amounts, `ko` 27
 KRW/USD/JPY samples, `no` 11, `da`/`id` 10 each, `fi` 288 (24 codes × 12
-amounts) and `zh`/`zh_TW` 12 amounts × 17 master codes. Amounts are passed to
-upstream as floats, so its type-dependent int-as-cents quirk does not apply.
+amounts), `ro` 227 (its upstream converter raises for the rest), `hu` 520
+(20 × 26), `he` 78 (3 × 26), `eo` 130 (5 × 26), `fa` 26 (toman amounts) and
+`zh`/`zh_TW` 12 amounts × 17 master codes. Amounts are passed to upstream as
+floats, so its type-dependent int-as-cents quirk does not apply.
 
 ---
 
@@ -115,6 +122,11 @@ upstream as floats, so its type-dependent int-as-cents quirk does not apply.
 | `th` | 551 | 551 | verbatim (10^6 groups, เอ็ด rule) |
 | `fi` | 551 | 551 | verbatim (negatives skipped) |
 | `uk` | 551 | 551 | verbatim (negatives skipped; three-way plurals) |
+| `ro` | 551 | 551 | verbatim (three-way scale inflection; raw `biliard/e` quirk) |
+| `hu` | 551 | 551 | verbatim (single-word compounds; *kettő*/*két*) |
+| `he` | 551 | 551 | verbatim (feminine/masculine agreement; construct state) |
+| `fa` | 551 | 551 | verbatim (*و*-joined groups; bare *هزار*) |
+| `eo` | 551 | 551 | verbatim (closed hundreds; *-j* plurals) |
 
 | Language | Year samples | Passed | Comparison |
 | --- | --- | --- | --- |
@@ -140,6 +152,11 @@ upstream as floats, so its type-dependent int-as-cents quirk does not apply.
 | `th` | 31 | 31 | cardinal, *ติดลบ* for negative years |
 | `fi` | 31 | 31 | space-free cardinal, *ennen ajanlaskun alkua* for negative years |
 | `uk` | 31 | 31 | cardinal, *мінус* for negative years |
+| `ro` | 31 | 31 | cardinal, *î.Hr.* suffix for negative years |
+| `hu` | 31 | 31 | cardinal, *i. e.* prefix for negative years |
+| `he` | 31 | 31 | feminine cardinal, *מינוס* for negative years |
+| `fa` | 31 | 31 | cardinal, *منفی* for negative years |
+| `eo` | 31 | 31 | cardinal, *minus* for negative years |
 
 | Language | Ordinal samples | `ordinal_num` | Passed | Comparison |
 | --- | --- | --- | --- | --- |
@@ -167,6 +184,11 @@ upstream as floats, so its type-dependent int-as-cents quirk does not apply.
 | `th` | 249 | 11 | 260 | verbatim (ordinal = cardinal; digits) |
 | `fi` | 249 | 0 | 249 | verbatim (no `ordinal_num` upstream) |
 | `uk` | 248 | 11 | 259 | verbatim (one rejected sample skipped) |
+| `ro` | 249 | 11 | 260 | verbatim (*al …lea*; negative ordinals return `""`) |
+| `hu` | 249 | 11 | 260 | verbatim (suffix table; negative ordinals supported) |
+| `he` | 249 | 11 | 260 | verbatim (definite article from 11 upwards) |
+| `fa` | 248 | 11 | 259 | verbatim (empty `10^18` cardinal skipped) |
+| `eo` | 249 | 11 | 260 | verbatim (suffix rewrite) |
 
 | Language | Currency samples | Passed | Comparison |
 | --- | --- | --- | --- |
@@ -188,8 +210,13 @@ upstream as floats, so its type-dependent int-as-cents quirk does not apply.
 | `zh` | 204 | 204 | upstream master, Simplified characters (see §4) |
 | `zh_TW` | 204 | 204 | upstream master, verbatim (元/角/分) |
 | `fi` | 288 | 288 | verbatim (24 codes × 12 amounts) |
+| `ro` | 227 | 227 | verbatim (20 codes; upstream raises for most two-form pairs) |
+| `hu` | 520 | 520 | verbatim (20 codes × 26 amounts; comma separator) |
+| `he` | 78 | 78 | verbatim (ILS/EUR/USD; gender and construct state) |
+| `eo` | 130 | 130 | verbatim (5 codes × 26 amounts; *kaj*) |
+| `fa` | 26 | 26 | verbatim (tomans; denominator fractions) |
 
-All **26217** comparisons pass under the documented comparison rules in §4.
+All **31407** comparisons pass under the documented comparison rules in §4.
 
 ### Ordinal comparison rules
 
@@ -311,6 +338,17 @@ Notes on the fixes:
   its 10^6 grouping, Finnish its partitive compounds plus 24 currency codes,
   and Ukrainian its three-way plurals. A 2142-assertion randomized differential
   sweep across all 24 languages found no further mismatch.
+- **M9 — Romanian, Hungarian, Hebrew, Persian and Esperanto:** five more
+  full-mode language codes were added (`ro`, `hu`, `he`, `fa`, `eo`), bringing
+  the project to **29 language codes**, **337 currency pairs** and **31407
+  comparisons**. Romanian contributes the three-way scale inflection and
+  upstream's raw `biliard/e` quirk, Hungarian its single-word compounds and
+  suffix ordinals, Hebrew its gender/construct grammar, Persian its
+  *و*-joined groups and denominator fractions, and Esperanto its closed
+  hundreds and *-j* plurals. Each algorithm was first iterated as a Python
+  closed form against upstream over dense `0..1000` ranges, scale boundaries
+  and Romanian's quirky hundreds+teens products (2044 values for Romanian
+  alone); the port then matched the committed fixtures without changes.
 
 ---
 
@@ -391,6 +429,19 @@ regular):
    after `koma` otherwise. Both are reproduced and compared verbatim. Japanese
    rejects any fractional JPY amount (fixtures use integral amounts); Korean
    KRW/JPY reject cents, while USD always spells them.
+10. **Romanian, Hungarian, Hebrew, Persian and Esperanto.** The new codes are
+    compared verbatim, including Romanian's raw `biliard/e` giga entry (its
+    `merge` skips the inflection for small multipliers) and Hungarian's
+    `kétezer-egy` hyphen. One upstream limitation is not copied: Romanian's
+    `to_currency` raises `IndexError` for most two-form code/amount pairs
+    (its `pluralize` can return a third form those tuples lack), so only the
+    227 pairs it handles are compared while this project always renders a
+    string. Persian `to_currency` takes no code, so its 26 toman samples are
+    generated without one and an explicit code returns `Err` here. Cardinally,
+    Persian and Hungarian decimals use the shared point/digit form rather than
+    upstream's custom fraction grammar (rule 6); Persian *currency* fractions
+    are reproduced exactly (`1.5` → *یک و نیم*, `1234.56` → *… و پنجاه و شش
+    صدم*).
 
 No other comparison rule is applied: cardinal output for `en`, `fr`, `es`,
 `de`, `ru`, `nl`, `tr`, `ja`, `ko`, `sv`, `no`, `da`, `id` and `zh_TW` is
@@ -405,5 +456,5 @@ above only affect the cases they name.
 ```bash
 pip install num2words==0.5.14
 python tools/gen_fixtures.py   # rewrites diff_fixtures_wbtest.mbt
-moon test                      # replays all 26217 comparisons
+moon test                      # replays all 31407 comparisons
 ```

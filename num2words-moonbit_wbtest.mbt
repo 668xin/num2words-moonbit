@@ -1757,3 +1757,247 @@ test "uk cardinal, ordinal and year" {
     Err("currency not implemented for language: uk"),
   )
 }
+
+// --- Romanian ---------------------------------------------------------------
+
+///|
+test "ro cardinal, ordinal, year and currency" {
+  assert_eq(num2words_int(0, "ro", "cardinal"), "zero")
+  assert_eq(num2words_int(21, "ro", "cardinal"), "douăzeci și unu")
+  assert_eq(
+    num2words_int(1234, "ro", "cardinal"),
+    "o mie două sute treizeci și patru",
+  )
+  assert_eq(
+    num2words_int(22000, "ro", "cardinal"),
+    "douăzeci și două de mii",
+  )
+  assert_eq(num2words_int(1000000, "ro", "cardinal"), "un milion")
+  // Upstream's merge skips the inflection of the giga scale word for small
+  // multipliers, leaving the raw table entry with its slash.
+  assert_eq(num2words_str("1000000000000000", "ro", "cardinal"), "biliard/e")
+  assert_eq(num2words_int(-42, "ro", "cardinal"), "minus patruzeci și doi")
+  assert_eq(num2words_int(1, "ro", "ordinal"), "primul")
+  assert_eq(num2words_int(2, "ro", "ordinal"), "al doilea")
+  assert_eq(num2words_int(21, "ro", "ordinal"), "al douăzeci și unulea")
+  assert_eq(num2words_int(100, "ro", "ordinal"), "al o sutălea")
+  assert_eq(num2words_int(1, "ro", "ordinal_num"), "1-ul")
+  assert_eq(num2words_int(21, "ro", "ordinal_num"), "al 21-lea")
+  assert_eq(num2words_int(2024, "ro", "year"), "două mii douăzeci și patru")
+  assert_eq(num2words_int(-44, "ro", "year"), "patruzeci și patru î.Hr.")
+  assert_eq(num2words_currency("0", "ro", ""), Ok("zero lei"))
+  assert_eq(num2words_currency("1", "ro", "RON"), Ok("un leu"))
+  assert_eq(num2words_currency("2", "ro", "RON"), Ok("doi lei"))
+  assert_eq(
+    num2words_currency("21", "ro", "RON"),
+    Ok("douăzeci și unu de lei"),
+  )
+  assert_eq(num2words_currency("101", "ro", "RON"), Ok("una sută unu lei"))
+  assert_eq(num2words_currency("1000", "ro", "RON"), Ok("una mie de lei"))
+  assert_eq(
+    num2words_currency("1234.56", "ro", "RON"),
+    Ok(
+      "una mie două sute treizeci și patru de lei și cincizeci și șase de bani",
+    ),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "ro", "RON"),
+    Ok("minus trei lei și cincizeci de bani"),
+  )
+  assert_eq(num2words_currency("1", "ro", "EUR"), Ok("unu euro și zero cents"))
+  assert_eq(
+    num2words_currency("1", "ro", "XYZ"),
+    Err("currency code not supported for ro: XYZ"),
+  )
+}
+
+// --- Hungarian --------------------------------------------------------------
+
+///|
+test "hu cardinal, ordinal, year and currency" {
+  assert_eq(num2words_int(0, "hu", "cardinal"), "nulla")
+  assert_eq(num2words_int(21, "hu", "cardinal"), "huszonegy")
+  // A remainder after a hundreds group switches 2 to "két".
+  assert_eq(num2words_int(102, "hu", "cardinal"), "százkét")
+  assert_eq(num2words_int(2001, "hu", "cardinal"), "kétezer-egy")
+  assert_eq(
+    num2words_int(123456, "hu", "cardinal"),
+    "százhuszonháromezer-négyszázötvenhat",
+  )
+  assert_eq(num2words_int(1000000, "hu", "cardinal"), "egymillió")
+  assert_eq(num2words_int(-42, "hu", "cardinal"), "mínusz negyvenkettő")
+  assert_eq(num2words_int(1, "hu", "ordinal"), "első")
+  assert_eq(num2words_int(2, "hu", "ordinal"), "második")
+  assert_eq(num2words_int(22, "hu", "ordinal"), "huszonkettedik")
+  assert_eq(num2words_int(1000000, "hu", "ordinal"), "egymmilliomodik")
+  assert_eq(num2words_int(21, "hu", "ordinal_num"), "21.")
+  assert_eq(num2words_int(2024, "hu", "year"), "kétezer-huszonnégy")
+  assert_eq(num2words_int(-44, "hu", "year"), "i. e. negyvennégy")
+  assert_eq(
+    num2words_currency("0", "hu", ""),
+    Ok("nulla forint, nulla fillér"),
+  )
+  assert_eq(
+    num2words_currency("21", "hu", "HUF"),
+    Ok("huszonegy forint, nulla fillér"),
+  )
+  assert_eq(
+    num2words_currency("1234.56", "hu", "HUF"),
+    Ok("ezerkétszázharmincnégy forint, ötvenhat fillér"),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "hu", "HUF"),
+    Ok("mínusz három forint, ötven fillér"),
+  )
+  assert_eq(
+    num2words_currency("2", "hu", "EUR"),
+    Ok("kettő euro, nulla cents"),
+  )
+  assert_eq(
+    num2words_currency("1", "hu", "XYZ"),
+    Err("currency code not supported for hu: XYZ"),
+  )
+}
+
+// --- Hebrew -----------------------------------------------------------------
+
+///|
+test "he cardinal, ordinal, year and currency" {
+  assert_eq(num2words_int(0, "he", "cardinal"), "אפס")
+  assert_eq(num2words_int(21, "he", "cardinal"), "עשרים ואחת")
+  assert_eq(
+    num2words_int(123, "he", "cardinal"),
+    "מאה עשרים ושלוש",
+  )
+  assert_eq(num2words_int(3000, "he", "cardinal"), "שלושת אלפים")
+  assert_eq(num2words_int(1000000, "he", "cardinal"), "מיליון")
+  assert_eq(
+    num2words_int(-42, "he", "cardinal"),
+    "מינוס ארבעים ושתיים",
+  )
+  assert_eq(num2words_int(1, "he", "ordinal"), "ראשון")
+  assert_eq(num2words_int(11, "he", "ordinal"), "האחד עשר")
+  assert_eq(num2words_int(100, "he", "ordinal"), "המאה")
+  assert_eq(num2words_int(21, "he", "ordinal_num"), "21")
+  assert_eq(num2words_int(1900, "he", "year"), "אלף ותשע מאות")
+  assert_eq(
+    num2words_int(2024, "he", "year"),
+    "אלפיים עשרים וארבע",
+  )
+  assert_eq(
+    num2words_currency("1", "he", ""),
+    Ok("שקל אחד ואפס אגורות"),
+  )
+  assert_eq(
+    num2words_currency("2", "he", "ILS"),
+    Ok("שני שקלים ואפס אגורות"),
+  )
+  assert_eq(
+    num2words_currency("1234.56", "he", "ILS"),
+    Ok(
+      "אלף מאתיים שלושים וארבעה שקלים וחמישים ושש אגורות",
+    ),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "he", "ILS"),
+    Ok("מינוס שלושה שקלים וחמישים אגורות"),
+  )
+  assert_eq(
+    num2words_currency("2", "he", "USD"),
+    Ok("שני דולרים ואפס סנטים"),
+  )
+  assert_eq(
+    num2words_currency("1", "he", "XYZ"),
+    Err("currency code not supported for he: XYZ"),
+  )
+}
+
+// --- Persian ----------------------------------------------------------------
+
+///|
+test "fa cardinal, ordinal, year and currency" {
+  assert_eq(num2words_int(0, "fa", "cardinal"), "صفر")
+  assert_eq(num2words_int(21, "fa", "cardinal"), "بیست و یک")
+  assert_eq(
+    num2words_int(1234, "fa", "cardinal"),
+    "هزار و دویست و سی و چهار",
+  )
+  assert_eq(
+    num2words_str("1000000000000", "fa", "cardinal"),
+    "یک تریلیون",
+  )
+  // Upstream's scale table stops at 10^15, so 10^18 is unsupported.
+  assert_eq(num2words_str("1000000000000000000", "fa", "cardinal"), "")
+  assert_eq(num2words_int(-42, "fa", "cardinal"), "منفی چهل و دو")
+  assert_eq(num2words_int(3, "fa", "ordinal"), "سوم")
+  assert_eq(num2words_int(30, "fa", "ordinal"), "سیم")
+  assert_eq(num2words_int(1000, "fa", "ordinal"), "هزارم")
+  assert_eq(num2words_int(21, "fa", "ordinal_num"), "21م")
+  assert_eq(
+    num2words_int(2024, "fa", "year"),
+    "دو هزار و بیست و چهار",
+  )
+  assert_eq(num2words_currency("0", "fa", ""), Ok("صفر تومان"))
+  assert_eq(
+    num2words_currency("1.5", "fa", ""),
+    Ok("یک و نیم تومان"),
+  )
+  assert_eq(
+    num2words_currency("1234.56", "fa", ""),
+    Ok(
+      "هزار و دویست و سی و چهار و پنجاه و شش صدم تومان",
+    ),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "fa", ""),
+    Ok("منفی سه و نیم تومان"),
+  )
+  assert_eq(num2words_currency("0.01", "fa", ""), Ok("یک صدم تومان"))
+  assert_eq(
+    num2words_currency("1", "fa", "IRR"),
+    Err("currency code not supported for fa: IRR"),
+  )
+}
+
+// --- Esperanto --------------------------------------------------------------
+
+///|
+test "eo cardinal, ordinal, year and currency" {
+  assert_eq(num2words_int(0, "eo", "cardinal"), "nul")
+  assert_eq(num2words_int(21, "eo", "cardinal"), "dudek unu")
+  // A group of exactly 100 attaches to the preceding scale phrase.
+  assert_eq(num2words_int(1100, "eo", "cardinal"), "milcent")
+  assert_eq(
+    num2words_int(123456, "eo", "cardinal"),
+    "cent dudek tri mil kvarcent kvindek ses",
+  )
+  assert_eq(num2words_int(2000000, "eo", "cardinal"), "du milionoj")
+  assert_eq(num2words_int(-42, "eo", "cardinal"), "minus kvardek du")
+  assert_eq(num2words_int(1, "eo", "ordinal"), "unua")
+  assert_eq(num2words_int(20, "eo", "ordinal"), "dudeka")
+  assert_eq(num2words_int(100, "eo", "ordinal"), "centa")
+  assert_eq(num2words_int(1000000, "eo", "ordinal"), "unu miliona")
+  assert_eq(num2words_int(21, "eo", "ordinal_num"), "21a")
+  assert_eq(num2words_int(2024, "eo", "year"), "du mil dudek kvar")
+  assert_eq(num2words_currency("1", "eo", ""), Ok("unu eŭro kaj nul centimo"))
+  assert_eq(
+    num2words_currency("2", "eo", "EUR"),
+    Ok("du eŭroj kaj nul centimo"),
+  )
+  assert_eq(
+    num2words_currency("1234.56", "eo", "EUR"),
+    Ok("mil ducent tridek kvar eŭroj kaj kvindek ses centimoj"),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "eo", "EUR"),
+    Ok("minus tri eŭroj kaj kvindek centimoj"),
+  )
+  assert_eq(
+    num2words_currency("1", "eo", "USD"),
+    Ok("unu dolaro kaj nul cendo"),
+  )
+  assert_eq(
+    num2words_currency("1", "eo", "XYZ"),
+    Err("currency code not supported for eo: XYZ"),
+  )
+}

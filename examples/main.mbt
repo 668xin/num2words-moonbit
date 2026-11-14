@@ -41,6 +41,7 @@ fn main {
   println(@lib.num2words_int(1234, "sk", "cardinal"))
   println(@lib.num2words_int(1234, "sr", "cardinal"))
   println(@lib.num2words_int(1234, "lt", "cardinal"))
+  println(@lib.num2words_int(1234, "az", "cardinal"))
 
   println("")
   println("== other modes (en) ==")

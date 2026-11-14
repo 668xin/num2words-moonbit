@@ -7,7 +7,8 @@
 // `num2words_int` / `num2words_float` convenience wrappers), `lang` is
 // "en" | "fr" | "es" | "de" | "it" | "pt" | "pt_PT" | "ru" | "nl" | "tr" | "vi"
 // | "zh" | "zh_TW" | "ja" | "ko" | "sv" | "no" | "da" | "id" | "pl" | "ar" | "th"
-// | "fi" | "uk" | "ro" | "hu" | "he" | "fa" | "eo" | "cs" | "sk" | "sr" | "lt",
+// | "fi" | "uk" | "ro" | "hu" | "he" | "fa" | "eo" | "cs" | "sk" | "sr" | "lt"
+// | "az",
 // and `to` is "cardinal" (default), "ordinal", "ordinal_num", "year" or
 // "currency".
 //
@@ -230,7 +231,8 @@ fn known_lang(code : String) -> Bool {
     | "cs"
     | "sk"
     | "sr"
-    | "lt" => true
+    | "lt"
+    | "az" => true
     _ => false
   }
 }
@@ -281,6 +283,7 @@ pub fn get_lang(code : String) -> Lang {
     "sk" => lang_sk()
     "sr" => lang_sr()
     "lt" => lang_lt()
+    "az" => lang_az()
     _ => lang_en()
   }
 }
@@ -323,6 +326,7 @@ fn ordinal_for(l : Lang, value : BigInt) -> String {
     Sk => ordinal_sk(value)
     Sr => ordinal_sr(value)
     Lt => ordinal_lt(value)
+    Az => ordinal_az(value)
   }
 }
 
@@ -364,6 +368,7 @@ fn ordinal_num_for(l : Lang, value : BigInt) -> String {
     Sk => ordinal_num_sk(value)
     Sr => ordinal_num_sr(value)
     Lt => ordinal_num_lt(value)
+    Az => ordinal_num_az(value)
   }
 }
 
@@ -404,6 +409,7 @@ fn year_for(l : Lang, value : BigInt) -> String {
     Sk => year_sk(value)
     Sr => year_sr(value)
     Lt => year_lt(value)
+    Az => year_az(value)
   }
 }
 

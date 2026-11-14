@@ -2191,3 +2191,44 @@ test "lt cardinal, ordinal, year and currency" {
     Err("currency code not supported for lt: CZK"),
   )
 }
+
+// --- Azerbaijani ------------------------------------------------------------
+
+///|
+test "az cardinal, ordinal, year and currency" {
+  assert_eq(num2words_int(0, "az", "cardinal"), "sıfır")
+  assert_eq(num2words_int(100, "az", "cardinal"), "yüz")
+  assert_eq(num2words_int(200, "az", "cardinal"), "iki yüz")
+  // "yüz" and the thousands word never take "bir"; 10^6+ does.
+  assert_eq(num2words_int(1000, "az", "cardinal"), "min")
+  assert_eq(num2words_int(2000, "az", "cardinal"), "iki min")
+  assert_eq(num2words_int(21000, "az", "cardinal"), "iyirmi min")
+  assert_eq(num2words_int(1000000, "az", "cardinal"), "bir milyon")
+  assert_eq(
+    num2words_int(123456, "az", "cardinal"),
+    "yüz iyirmi üç min dörd yüz əlli altı",
+  )
+  assert_eq(num2words_int(-42, "az", "cardinal"), "mənfi qırx iki")
+  // Vowel-harmony ordinals drop a final vowel.
+  assert_eq(num2words_int(1, "az", "ordinal"), "birinci")
+  assert_eq(num2words_int(2, "az", "ordinal"), "ikinci")
+  assert_eq(num2words_int(3, "az", "ordinal"), "üçüncü")
+  assert_eq(num2words_int(10, "az", "ordinal"), "onuncu")
+  assert_eq(num2words_int(20, "az", "ordinal"), "iyirminci")
+  assert_eq(num2words_int(100, "az", "ordinal"), "yüzüncü")
+  assert_eq(num2words_int(1000, "az", "ordinal"), "mininci")
+  assert_eq(num2words_int(1, "az", "ordinal_num"), "1-ci")
+  assert_eq(num2words_int(3, "az", "ordinal_num"), "3-cü")
+  assert_eq(num2words_int(10, "az", "ordinal_num"), "10-cu")
+  assert_eq(num2words_int(2024, "az", "year"), "iki min iyirmi dörd")
+  assert_eq(num2words_int(-44, "az", "year"), "e.ə. qırx dörd")
+  assert_eq(num2words_currency("1", "az", ""), Ok("bir manat, sıfır qəpik"))
+  assert_eq(
+    num2words_currency("1234.56", "az", "AZN"),
+    Ok("min iki yüz otuz dörd manat, əlli altı qəpik"),
+  )
+  assert_eq(
+    num2words_currency("1", "az", "USD"),
+    Err("currency code not supported for az: USD"),
+  )
+}

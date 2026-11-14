@@ -1136,6 +1136,15 @@ fn currency_form_lt(code : String) -> Result[CurrencyForm, String] {
 }
 
 ///|
+/// Azerbaijani implements AZN only.
+fn currency_form_az(code : String) -> Result[CurrencyForm, String] {
+  match code {
+    "AZN" => Ok(currency_entry("manat", "manat", "qəpik", "qəpik", false))
+    _ => Err(code)
+  }
+}
+
+///|
 fn currency_supported_lang(lang : String) -> Bool {
   lang == "en" ||
   lang == "fr" ||
@@ -1163,7 +1172,8 @@ fn currency_supported_lang(lang : String) -> Bool {
   lang == "cs" ||
   lang == "sk" ||
   lang == "sr" ||
-  lang == "lt"
+  lang == "lt" ||
+  lang == "az"
 }
 
 ///|
@@ -1191,6 +1201,8 @@ fn currency_default_code(lang : String) -> String {
     "HUF"
   } else if lang == "he" {
     "ILS"
+  } else if lang == "az" {
+    "AZN"
   } else if lang == "fa" {
     // Persian `to_currency` takes no code; the value is only used by the
     // documentation and ignored by `currency_fa`.
@@ -1217,6 +1229,7 @@ fn currency_form(lang : String, code : String) -> Result[CurrencyForm, String] {
     "sk" => currency_form_sk(code)
     "sr" => currency_form_sr(code)
     "lt" => currency_form_lt(code)
+    "az" => currency_form_az(code)
     _ => Err(code)
   }
 }
@@ -1447,6 +1460,7 @@ fn currency_join(
     "sk" => left + " " + unit + ", " + right + " " + cent
     "sr" => left + " " + unit + ", " + right + " " + cent
     "lt" => left + " " + unit + ", " + right + " " + cent
+    "az" => left + " " + unit + ", " + right + " " + cent
     _ => ""
   }
 }

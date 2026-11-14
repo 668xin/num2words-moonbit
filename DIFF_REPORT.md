@@ -10,7 +10,7 @@ code.
 - Upstream languages used: `en`, `fr`, `es`, `de`, `it`, `pt_BR`, `pt`, `ru`,
   `nl`, `tr`, `vi`, `ja`, `ko`, `sv`, `no`, `da`, `id`, `pl`, `ar`, `th`,
   `fi`, `uk`, `ro`, `hu`, `he`, `fa`, `eo`, `cs`, `sk`, `sr`, `lt`, `az`,
-  plus `lang_ZH` (master) for `zh`/`zh_TW`
+  `be`, plus `lang_ZH` (master) for `zh`/`zh_TW`
 - Cardinal samples per language: **551** (`0..500` plus 50 multi-scale / signed
   values); Vietnamese, Polish, Czech and Slovak use **547** (negative samples
   excluded — upstream's negative handling is broken); Arabic, Finnish and
@@ -18,7 +18,7 @@ code.
   positives match)
 - Year samples: **25** each for most language codes that implement `to_year`,
   plus **6 negative years** for `en`/`pt`/`pt_PT`/`ko`/`id`/`ar`/`th`/`fi`/
-  `uk`/`ro`/`hu`/`he`/`fa`/`eo`/`sr`/`lt`/`az`/`zh`/`zh_TW` (**31** each); Japanese
+  `uk`/`ro`/`hu`/`he`/`fa`/`eo`/`sr`/`lt`/`az`/`be`/`zh`/`zh_TW` (**31** each); Japanese
   uses **24** (years before 645 are rejected upstream); Czech, Slovak,
   Vietnamese and Swedish have no negative-year fixtures (the first two raise
   upstream, the last two have no `to_year`)
@@ -37,11 +37,11 @@ code.
   amounts), **227** for `ro` (upstream raises for many two-form pairs),
   **520** for `hu` (20 × 26), **78** for `he` (3 × 26), **130** for `eo`
   (5 × 26), **26** for `fa` (toman amounts), **52** for `cs`, **26** for `sk`,
-  **78** for `sr`, **156** for `lt`, **26** for `az` and **204** each for
-  `zh`/`zh_TW` (17 codes × 12 amounts)
-- Total comparisons: **34939** (18718 cardinal + 913 year + 7426 ordinal
-  + 341 ordinal_num + 7541 currency)
-- MoonBit test suite: **243 tests, 243 passed, 0 failed**
+  **78** for `sr`, **156** for `lt`, **26** for `az`, **208** for `be` (8 codes
+  × 26 amounts) and **204** each for `zh`/`zh_TW` (17 codes × 12 amounts)
+- Total comparisons: **35989** (19269 cardinal + 944 year + 7675 ordinal
+  + 352 ordinal_num + 7749 currency)
+- MoonBit test suite: **248 tests, 248 passed, 0 failed**
 
 Run `moon test` from the project root to replay every comparison.
 
@@ -135,6 +135,7 @@ floats, so its type-dependent int-as-cents quirk does not apply.
 | `sr` | 551 | 551 | verbatim (gender agreement; *bilion* = 10⁹) |
 | `lt` | 551 | 551 | verbatim (*šimtas*/*šimtai*; three-way scale) |
 | `az` | 551 | 551 | verbatim (digit scan; *yüz*/*min* without *bir*) |
+| `be` | 551 | 551 | verbatim (gender agreement; three-way scale forms) |
 
 | Language | Year samples | Passed | Comparison |
 | --- | --- | --- | --- |
@@ -170,6 +171,7 @@ floats, so its type-dependent int-as-cents quirk does not apply.
 | `sr` | 31 | 31 | cardinal, *minus* for negative years |
 | `lt` | 31 | 31 | cardinal, *minus* for negative years |
 | `az` | 31 | 31 | cardinal, *e.ə.* for negative years |
+| `be` | 31 | 31 | cardinal, *мінус* for negative years |
 
 | Language | Ordinal samples | `ordinal_num` | Passed | Comparison |
 | --- | --- | --- | --- | --- |
@@ -207,6 +209,7 @@ floats, so its type-dependent int-as-cents quirk does not apply.
 | `sr` | 0 | 11 | 11 | no `ordinal` upstream; `ordinal_num` is the plain number |
 | `lt` | 0 | 11 | 11 | no `ordinal` upstream; `ordinal_num` is the plain number |
 | `az` | 249 | 11 | 260 | verbatim (vowel-harmony suffix; final vowel dropped) |
+| `be` | 249 | 11 | 260 | verbatim (fused scale groups; 70/80 quirk reproduced) |
 
 | Language | Currency samples | Passed | Comparison |
 | --- | --- | --- | --- |
@@ -238,8 +241,9 @@ floats, so its type-dependent int-as-cents quirk does not apply.
 | `sr` | 78 | 78 | verbatim (3 codes × 26 amounts; gender agreement) |
 | `lt` | 156 | 156 | verbatim (6 codes × 26 amounts; feminine RUB cents) |
 | `az` | 26 | 26 | verbatim (AZN × 26 amounts) |
+| `be` | 208 | 208 | verbatim (8 codes × 26 amounts; UAH feminine units) |
 
-All **34939** comparisons pass under the documented comparison rules in §4.
+All **35989** comparisons pass under the documented comparison rules in §4.
 
 ### Ordinal comparison rules
 
@@ -393,6 +397,16 @@ Notes on the fixes:
   `ordinal_num` use vowel harmony from the last vowel of the cardinal and drop
   a final vowel (`iki` → `ikinci`, `altı` → `altıncı`). Currency is AZN only,
   and negative years prefix `e.ə.`.
+- **M12 — Belarusian:** the 35th language code (`be`), bringing the project to
+  **35 language codes**, **359 currency entries** (358 ISO-code pairs plus
+  Persian's code-less toman mode) and **35989 comparisons**. Belarusian inflects
+  the unit word for gender (the thousands group is feminine, higher groups
+  masculine), uses three scale forms (*тысяча*/*тысячы*/*тысяч*), rewrites the
+  last word for ordinals and fuses a trailing 000-group with its scale word
+  (*двухтысячны*). Upstream's quirk that both 70 and 80 become *сямідзясяты*
+  is reproduced because the fixtures are compared verbatim. Currency covers the
+  full upstream 8-code set with feminine *грыўна* for UAH and feminine
+  *капейка* cents for RUB/BYN/UAH.
 
 ---
 
@@ -504,10 +518,15 @@ regular):
     path differs: upstream reads the fractional part as a whole number
     (`1.56` → *… nöqtə əlli altı*), while this project spells the digits
     (`… nöqtə beş altı`); the fixtures use integers only.
+13. **Belarusian.** Cardinal, ordinal, `ordinal_num`, year and the 8-code
+    currency set are compared verbatim. The same decimal rule as Azerbaijani
+    applies: upstream reads the fractional part as a whole number (`1.56` →
+    *… коска пяцьдзясят шэсць*), while this project spells the digits
+    (*… коска пяць шэсць*); the fixtures use integers only.
 
 No other comparison rule is applied: cardinal output for `en`, `fr`, `es`,
 `de`, `ru`, `nl`, `tr`, `ja`, `ko`, `sv`, `no`, `da`, `id`, `zh_TW`, `sr`,
-`lt` and `az` is compared byte-for-byte (and `vi`/`pl`/`cs`/`sk` after
+`lt`, `az` and `be` is compared byte-for-byte (and `vi`/`pl`/`cs`/`sk` after
 excluding their broken negatives),
 and so are years for positive values; the currency and negative-year rules
 above only affect the cases they name.
@@ -519,5 +538,5 @@ above only affect the cases they name.
 ```bash
 pip install num2words==0.5.14
 python tools/gen_fixtures.py   # rewrites diff_fixtures_wbtest.mbt
-moon test                      # replays all 34939 comparisons
+moon test                      # replays all 35989 comparisons
 ```

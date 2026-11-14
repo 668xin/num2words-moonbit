@@ -1145,6 +1145,72 @@ fn currency_form_az(code : String) -> Result[CurrencyForm, String] {
 }
 
 ///|
+/// Belarusian: the unit noun is feminine for UAH (грыўна) and the cent noun
+/// is feminine for RUB / BYN / UAH (капейка), which the two gender flags
+/// express. EUR/KZT nouns are invariant across forms.
+fn currency_form_be(code : String) -> Result[CurrencyForm, String] {
+  match code {
+    "RUB" =>
+      Ok(
+        currency_entry_ru(
+          "расійскі рубель", "расійскія рублі", "расійскіх рублёў",
+          "капейка", "капейкі", "капеек", false, true,
+        ),
+      )
+    "EUR" =>
+      Ok(
+        currency_entry_ru(
+          "еўра", "еўра", "еўра", "цэнт", "цэнты", "цэнтаў",
+          false, false,
+        ),
+      )
+    "USD" =>
+      Ok(
+        currency_entry_ru(
+          "долар", "долары", "долараў", "цэнт", "цэнты",
+          "цэнтаў", false, false,
+        ),
+      )
+    "UAH" =>
+      Ok(
+        currency_entry_ru(
+          "грыўна", "грыўны", "грыўнаў", "капейка", "капейкі",
+          "капеек", true, true,
+        ),
+      )
+    "KZT" =>
+      Ok(
+        currency_entry_ru(
+          "тэнге", "тэнге", "тэнге", "тыйін", "тыйіны",
+          "тыйінаў", false, false,
+        ),
+      )
+    "BYN" =>
+      Ok(
+        currency_entry_ru(
+          "беларускі рубель", "беларускія рублі", "беларускіх рублёў",
+          "капейка", "капейкі", "капеек", false, true,
+        ),
+      )
+    "UZS" =>
+      Ok(
+        currency_entry_ru(
+          "сум", "сумы", "сумаў", "тыйін", "тыйіны", "тыйінаў",
+          false, false,
+        ),
+      )
+    "PLN" =>
+      Ok(
+        currency_entry_ru(
+          "злоты", "злотых", "злотых", "грош", "грошы",
+          "грошаў", false, false,
+        ),
+      )
+    _ => Err(code)
+  }
+}
+
+///|
 fn currency_supported_lang(lang : String) -> Bool {
   lang == "en" ||
   lang == "fr" ||
@@ -1173,7 +1239,8 @@ fn currency_supported_lang(lang : String) -> Bool {
   lang == "sk" ||
   lang == "sr" ||
   lang == "lt" ||
-  lang == "az"
+  lang == "az" ||
+  lang == "be"
 }
 
 ///|
@@ -1230,6 +1297,7 @@ fn currency_form(lang : String, code : String) -> Result[CurrencyForm, String] {
     "sr" => currency_form_sr(code)
     "lt" => currency_form_lt(code)
     "az" => currency_form_az(code)
+    "be" => currency_form_be(code)
     _ => Err(code)
   }
 }
@@ -1325,7 +1393,7 @@ fn currency_form_index(lang : String, n : BigInt) -> Int {
     } else {
       2
     }
-  } else if lang == "sr" {
+  } else if lang == "sr" || lang == "be" {
     // ...1 -> one; ...2..4 (not 12..14, 112..114, ...) -> few; else many.
     let m10 = (n % BigInt::from_int(10)).to_int()
     let m100 = (n % BigInt::from_int(100)).to_int()
@@ -1437,6 +1505,9 @@ fn currency_num(lang : String, n : BigInt, feminine : Bool) -> String {
   if lang == "lt" {
     return cardinal_lt_gendered(get_lang("lt"), n, feminine)
   }
+  if lang == "be" {
+    return cardinal_be_gendered(get_lang("be"), n, if feminine { 1 } else { 0 })
+  }
   card
 }
 
@@ -1461,6 +1532,7 @@ fn currency_join(
     "sr" => left + " " + unit + ", " + right + " " + cent
     "lt" => left + " " + unit + ", " + right + " " + cent
     "az" => left + " " + unit + ", " + right + " " + cent
+    "be" => left + " " + unit + ", " + right + " " + cent
     _ => ""
   }
 }

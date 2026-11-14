@@ -121,6 +121,7 @@ LANGS = {
     "sr": "sr",
     "lt": "lt",
     "az": "az",
+    "be": "be",
     # No 0.5.14 module: generated through the vendored upstream master module.
     "zh": "zh",
     "zh_TW": "zh_TW",
@@ -171,6 +172,7 @@ YEAR_LANGS = {
     "sr": "sr",
     "lt": "lt",
     "az": "az",
+    "be": "be",
     "zh": "zh",
     "zh_TW": "zh_TW",
 }
@@ -203,6 +205,7 @@ YEAR_BC_LANGS = {
     "sr": "sr",
     "lt": "lt",
     "az": "az",
+    "be": "be",
     "zh": "zh",
     "zh_TW": "zh_TW",
 }
@@ -259,6 +262,7 @@ CURRENCY_LANGS = {
     "sr": "sr",
     "lt": "lt",
     "az": "az",
+    "be": "be",
 }
 CURRENCY_CODES = {
     "en": [
@@ -308,6 +312,7 @@ CURRENCY_CODES = {
     "sr": ["RUB", "EUR", "RSD"],
     "lt": ["LTL", "EUR", "USD", "GBP", "PLN", "RUB"],
     "az": ["AZN"],
+    "be": ["RUB", "EUR", "USD", "UAH", "KZT", "BYN", "UZS", "PLN"],
 }
 CURRENCY_SAMPLES_BASIC = [
     "0", "0.01", "0.5", "1", "2", "21", "28", "81", "101", "1000", "1001",
@@ -377,6 +382,7 @@ CURRENCY_SAMPLES = {
     "sr": CURRENCY_SAMPLES_FULL,
     "lt": CURRENCY_SAMPLES_FULL,
     "az": CURRENCY_SAMPLES_FULL,
+    "be": CURRENCY_SAMPLES_FULL,
 }
 
 OUT = "diff_fixtures_wbtest.mbt"

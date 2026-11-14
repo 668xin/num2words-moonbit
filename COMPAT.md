@@ -3,7 +3,7 @@
 Reference: Python [`num2words`](https://github.com/savoirfairelinux/num2words)
 **0.5.14** (LGPL-2.1). This document maps the two APIs call by call, records the
 supported surface, and lists every known behavioural difference. Output parity
-is machine-checked by **34939 recorded comparisons** (see
+is machine-checked by **35989 recorded comparisons** (see
 [DIFF_REPORT.md](DIFF_REPORT.md)); `moon test` replays them without Python.
 
 ---
@@ -55,10 +55,11 @@ Notes:
 | `cs`, `sk` | same | cardinal, year and 2/1 currency codes; upstream has no `to_ordinal` |
 | `sr`, `lt` | same | cardinal, year and 3/6 currency codes; upstream has no `to_ordinal` |
 | `az` | `az` | cardinal, ordinal, ordinal_num, year and AZN |
+| `be` | `be` | cardinal, ordinal, ordinal_num, year and 8 currency codes |
 | *(master only)* `lang_ZH` | `zh`, `zh_TW` | Simplified and Traditional Chinese; not present in the 0.5.14 release |
 | other ~22 codes | — | not implemented |
 
-Upstream 0.5.14 exposes **56 language codes**; this project implements **34**.
+Upstream 0.5.14 exposes **56 language codes**; this project implements **35**.
 Unknown codes fall back to English here, while upstream raises
 `NotImplementedError`.
 
@@ -102,6 +103,7 @@ Unknown codes fall back to English here, while upstream raises
 | `sr` | ✅ | ✅ | n.a. | ✅ | ✅ |
 | `lt` | ✅ | ✅ | n.a. | ✅ | ✅ |
 | `az` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `be` | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ✅ native and aligned; n.a. not implemented upstream (the call returns `""`
 here). `year` follows upstream for every code, including the German
@@ -149,9 +151,10 @@ Currency is native for every code; the exact ISO-code coverage differs — see �
 | `sr` | 3: RUB, EUR, RSD | all 3 | — |
 | `lt` | 6: LTL, EUR, USD, GBP, PLN, RUB | all 6 | — |
 | `az` | 1: AZN | AZN | — |
+| `be` | 8: RUB, EUR, USD, UAH, KZT, BYN, UZS, PLN | all 8 | — |
 | `vi`, `sv`, `pl`, `ar`, `th`, `uk` | none (upstream has no `to_currency`) | — | n.a. |
 
-Coverage is **351 language/code rows — 350 ISO-code pairs plus Persian's
+Coverage is **359 language/code rows — 358 ISO-code pairs plus Persian's
 code-less toman entry** — matching upstream's sets for every language (Chinese
 measured against upstream master, which is the only upstream source for
 `lang_ZH`).
@@ -216,6 +219,7 @@ Measured on 0.5.14 (values above the ceiling raise in Python, return `""` /
 | `eo` | 10^549 | 10^41 (values below 10^42) |
 | `cs`, `sk`, `sr`, `lt` | 10^33 (scale table stops at power 10) | 10^33 |
 | `az` | 10^66 (scale table stops at power 63) | 10^66 |
+| `be` | 10^33 (scale table stops at power 10) | 10^33 |
 
 Ceilings differ in both directions: this project is more conservative for
 `en`/`fr`/`es`/`de`/`it`/`pt_PT`/`tr` and for `no`/`da`/`id` (10^33), but
@@ -353,6 +357,18 @@ These are deliberate and recorded in [DIFF_REPORT.md](DIFF_REPORT.md) §4.
     Currency is AZN only (*manat*/*qəpik*). Upstream reads the fractional part
     of a cardinal as a whole number; this project spells the digits one by one
     (`1.56` → *bir nöqtə beş altı*).
+20. **Belarusian.** Groups are space separated and inflect for gender: the
+    units group follows the caller (*адзін*/*адна*), the thousands group is
+    feminine (*адна тысяча*, *дзве тысячы*) and higher groups are masculine.
+    Scale words have three forms (*тысяча*/*тысячы*/*тысяч*). Ordinals rewrite
+    the last word and fuse a trailing 000-group with its scale word
+    (*двухтысячны*, *дваццаціаднамільённы*); upstream's quirk that both 70 and
+    80 ordinalise as *сямідзясяты* is reproduced. `ordinal_num` returns the
+    digits, and years are the plain cardinal (*мінус сорак чатыры* for -44).
+    Currency keeps upstream's 8-code set with feminine *грыўна* for UAH and
+    feminine *капейка* cents for RUB/BYN/UAH. Upstream reads the fractional
+    part of a cardinal as a whole number; this project spells the digits one by
+    one (`1.56` → *адзін коска пяць шэсць*).
 
 Everything else — cardinals, positive years, ordinals and `ordinal_num` for the
 codes that implement them, and currency for the codes listed in §4 — matches
@@ -363,7 +379,7 @@ upstream byte-for-byte (after the normalisations above).
 ## 8. Verification
 
 ```bash
-moon test          # 243 tests, 34939 differential comparisons
+moon test          # 248 tests, 35989 differential comparisons
 moon build         # library + CLI
 ```
 

@@ -1025,6 +1025,117 @@ fn currency_form_tr(code : String) -> Result[CurrencyForm, String] {
 }
 
 ///|
+/// Czech currency forms: CZK and EUR.
+fn currency_form_cs(code : String) -> Result[CurrencyForm, String] {
+  match code {
+    "CZK" =>
+      Ok(
+        currency_entry_ru(
+          "koruna", "koruny", "korun", "halíř", "halíře", "haléřů", false,
+          false,
+        ),
+      )
+    "EUR" =>
+      Ok(
+        currency_entry_ru(
+          "euro", "euro", "euro", "cent", "centy", "centů", false, false,
+        ),
+      )
+    _ => Err(code)
+  }
+}
+
+///|
+/// Slovak only implements EUR upstream.
+fn currency_form_sk(code : String) -> Result[CurrencyForm, String] {
+  match code {
+    "EUR" =>
+      Ok(
+        currency_entry_ru(
+          "euro", "eurá", "eur", "cent", "centy", "centov", false, false,
+        ),
+      )
+    _ => Err(code)
+  }
+}
+
+///|
+/// Serbian currency forms: RUB, EUR and RSD. `rublja`/`kopejka`/`para` are
+/// feminine, `evro`/`cent`/`dinar` masculine.
+fn currency_form_sr(code : String) -> Result[CurrencyForm, String] {
+  match code {
+    "RUB" =>
+      Ok(
+        currency_entry_ru(
+          "rublja", "rublje", "rublji", "kopejka", "kopejke", "kopejki", true, true,
+        ),
+      )
+    "EUR" =>
+      Ok(
+        currency_entry_ru(
+          "evro", "evra", "evra", "cent", "centa", "centi", false, false,
+        ),
+      )
+    "RSD" =>
+      Ok(
+        currency_entry_ru(
+          "dinar", "dinara", "dinara", "para", "pare", "para", false, true,
+        ),
+      )
+    _ => Err(code)
+  }
+}
+
+///|
+/// Lithuanian currency forms. RUB cents take feminine numerals ("viena
+/// kapeika"), everything else is masculine.
+fn currency_form_lt(code : String) -> Result[CurrencyForm, String] {
+  match code {
+    "LTL" =>
+      Ok(
+        currency_entry_ru(
+          "litas", "litai", "litų", "centas", "centai", "centų", false, false,
+        ),
+      )
+    "EUR" =>
+      Ok(
+        currency_entry_ru(
+          "euras", "eurai", "eurų", "centas", "centai", "centų", false, false,
+        ),
+      )
+    "USD" =>
+      Ok(
+        currency_entry_ru(
+          "doleris", "doleriai", "dolerių", "centas", "centai", "centų", false,
+          false,
+        ),
+      )
+    "GBP" =>
+      Ok(
+        currency_entry_ru(
+          "svaras sterlingų", "svarai sterlingų", "svarų sterlingų", "pensas",
+          "pensai", "pensų", false, false,
+        ),
+      )
+    "PLN" =>
+      Ok(
+        currency_entry_ru(
+          "zlotas", "zlotai", "zlotų", "grašis", "grašiai", "grašių", false,
+          false,
+        ),
+      )
+    "RUB" =>
+      Ok(
+        currency_entry_ru(
+          "rublis", "rubliai", "rublių", "kapeika", "kapeikos", "kapeikų", false,
+          true,
+        ),
+      )
+    _ => Err(code)
+  }
+}
+
+///|
 fn currency_supported_lang(lang : String) -> Bool {
   lang == "en" ||
   lang == "fr" ||
@@ -1048,7 +1159,11 @@ fn currency_supported_lang(lang : String) -> Bool {
   lang == "hu" ||
   lang == "he" ||
   lang == "fa" ||
-  lang == "eo"
+  lang == "eo" ||
+  lang == "cs" ||
+  lang == "sk" ||
+  lang == "sr" ||
+  lang == "lt"
 }
 
 ///|
@@ -1098,6 +1213,10 @@ fn currency_form(lang : String, code : String) -> Result[CurrencyForm, String] {
     "ru" => currency_form_ru(code)
     "nl" => currency_form_nl(code)
     "tr" => currency_form_tr(code)
+    "cs" => currency_form_cs(code)
+    "sk" => currency_form_sk(code)
+    "sr" => currency_form_sr(code)
+    "lt" => currency_form_lt(code)
     _ => Err(code)
   }
 }
@@ -1158,8 +1277,9 @@ fn currency_pick(
 }
 
 ///|
-/// 0 = one, 1 = few (Russian 2..4), 2 = many. Languages other than Russian
-/// only distinguish one from the rest (zero uses the plural).
+/// 0 = one, 1 = few (Slavic/Baltic 2..4), 2 = many. Languages without a
+/// distinct paucal form only distinguish one from the rest (zero uses the
+/// plural).
 fn currency_form_index(lang : String, n : BigInt) -> Int {
   if lang == "ru" {
     let form = ru_form((n % BigInt::from_int(100)).to_int())
@@ -1169,6 +1289,54 @@ fn currency_form_index(lang : String, n : BigInt) -> Int {
       1
     } else {
       2
+    }
+  } else if lang == "cs" {
+    // 1 -> one; 2..4 (not 12..14, 112..114, ...) -> few; else many.
+    if n == BigInt::from_int(1) {
+      0
+    } else {
+      let m10 = (n % BigInt::from_int(10)).to_int()
+      let m100 = (n % BigInt::from_int(100)).to_int()
+      if m10 > 1 && m10 < 5 && (m100 < 10 || m100 > 20) {
+        1
+      } else {
+        2
+      }
+    }
+  } else if lang == "sk" {
+    // 1 -> one; 2..4 -> few; everything else (incl. 21) -> many.
+    if n == BigInt::from_int(1) {
+      0
+    } else if n > BigInt::from_int(1) && n < BigInt::from_int(5) {
+      1
+    } else {
+      2
+    }
+  } else if lang == "sr" {
+    // ...1 -> one; ...2..4 (not 12..14, 112..114, ...) -> few; else many.
+    let m10 = (n % BigInt::from_int(10)).to_int()
+    let m100 = (n % BigInt::from_int(100)).to_int()
+    if m100 < 10 || m100 > 20 {
+      if m10 == 1 {
+        0
+      } else if m10 > 1 && m10 < 5 {
+        1
+      } else {
+        2
+      }
+    } else {
+      2
+    }
+  } else if lang == "lt" {
+    // ...1 -> one; ...2..9 -> few; 0 and 10..19 -> many.
+    let n1 = (n % BigInt::from_int(10)).to_int()
+    let n2 = (n / BigInt::from_int(10) % BigInt::from_int(10)).to_int()
+    if n2 == 1 || n1 == 0 || n == BigInt::from_int(0) {
+      2
+    } else if n1 == 1 {
+      0
+    } else {
+      1
     }
   } else if n == BigInt::from_int(1) {
     0
@@ -1250,6 +1418,12 @@ fn currency_num(lang : String, n : BigInt, feminine : Bool) -> String {
   if lang == "ru" {
     return get_lang("ru").cardinal_ru_gendered(n, feminine)
   }
+  if lang == "sr" {
+    return cardinal_sr_gendered(get_lang("sr"), n, feminine)
+  }
+  if lang == "lt" {
+    return cardinal_lt_gendered(get_lang("lt"), n, feminine)
+  }
   card
 }
 
@@ -1269,6 +1443,10 @@ fn currency_join(
     "es" => left + " " + unit + " con " + right + " " + cent
     "ru" => left + " " + unit + ", " + right + " " + cent
     "nl" => left + " " + unit + ", " + right + " " + cent
+    "cs" => left + " " + unit + ", " + right + " " + cent
+    "sk" => left + " " + unit + ", " + right + " " + cent
+    "sr" => left + " " + unit + ", " + right + " " + cent
+    "lt" => left + " " + unit + ", " + right + " " + cent
     _ => ""
   }
 }

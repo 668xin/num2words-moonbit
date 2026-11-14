@@ -42,6 +42,10 @@ pub enum Variant {
   He
   Fa
   Eo
+  Cs
+  Sk
+  Sr
+  Lt
 }
 
 ///|
@@ -413,5 +417,9 @@ pub fn Lang::cardinal(self : Lang, n : BigInt) -> String {
     He => self.cardinal_he(n)
     Fa => self.cardinal_fa(n)
     Eo => self.cardinal_eo(n)
+    Cs => self.cardinal_cs(n)
+    Sk => self.cardinal_sk(n)
+    Sr => self.cardinal_sr(n)
+    Lt => self.cardinal_lt(n)
   }
 }

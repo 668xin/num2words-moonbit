@@ -2001,3 +2001,193 @@ test "eo cardinal, ordinal, year and currency" {
     Err("currency code not supported for eo: XYZ"),
   )
 }
+
+// --- Czech ------------------------------------------------------------------
+
+///|
+test "cs cardinal, ordinal, year and currency" {
+  assert_eq(num2words_int(0, "cs", "cardinal"), "nula")
+  assert_eq(num2words_int(21, "cs", "cardinal"), "dvacet jedna")
+  // Solid hundreds; a lone 1 before a scale word is dropped.
+  assert_eq(
+    num2words_int(123456, "cs", "cardinal"),
+    "sto dvacet tři tisíce čtyřista padesát šest",
+  )
+  assert_eq(num2words_int(1000000, "cs", "cardinal"), "milion")
+  assert_eq(num2words_int(2000000000, "cs", "cardinal"), "dva miliardy")
+  assert_eq(num2words_int(5000, "cs", "cardinal"), "pět tisíc")
+  // Upstream raises ValueError on negatives; this project spells them.
+  assert_eq(num2words_int(-42, "cs", "cardinal"), "mínus čtyřicet dva")
+  // Upstream has no to_ordinal.
+  assert_eq(num2words_int(5, "cs", "ordinal"), "")
+  assert_eq(num2words_int(21, "cs", "ordinal_num"), "21")
+  assert_eq(num2words_int(2024, "cs", "year"), "dva tisíce dvacet čtyři")
+  assert_eq(
+    num2words_currency("1", "cs", "CZK"),
+    Ok("jedna koruna, nula haléřů"),
+  )
+  // The default code is EUR, as upstream's base `to_currency`.
+  assert_eq(num2words_currency("1", "cs", ""), Ok("jedna euro, nula centů"))
+  assert_eq(
+    num2words_currency("2", "cs", "CZK"),
+    Ok("dva koruny, nula haléřů"),
+  )
+  assert_eq(
+    num2words_currency("1234.56", "cs", "CZK"),
+    Ok("tisíc dvěstě třicet čtyři koruny, padesát šest haléřů"),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "cs", "CZK"),
+    Ok("mínus tři koruny, padesát haléřů"),
+  )
+  assert_eq(num2words_currency("1", "cs", "EUR"), Ok("jedna euro, nula centů"))
+  assert_eq(
+    num2words_currency("1", "cs", "USD"),
+    Err("currency code not supported for cs: USD"),
+  )
+}
+
+// --- Slovak -----------------------------------------------------------------
+
+///|
+test "sk cardinal, ordinal, year and currency" {
+  assert_eq(num2words_int(0, "sk", "cardinal"), "nula")
+  // Groups are glued together; only the last group is separated by a space.
+  assert_eq(num2words_int(21, "sk", "cardinal"), "dvadsaťjeden")
+  assert_eq(
+    num2words_int(123456, "sk", "cardinal"),
+    "stodvadsaťtritisícštyristopäťdesiatšesť",
+  )
+  assert_eq(num2words_int(1000000, "sk", "cardinal"), "milión")
+  assert_eq(num2words_int(2000, "sk", "cardinal"), "dvetisíc")
+  assert_eq(num2words_int(2000000000, "sk", "cardinal"), "dve miliardy")
+  assert_eq(num2words_int(-42, "sk", "cardinal"), "mínus štyridsaťdva")
+  assert_eq(num2words_int(5, "sk", "ordinal"), "")
+  assert_eq(num2words_int(21, "sk", "ordinal_num"), "21")
+  assert_eq(num2words_int(2024, "sk", "year"), "dvetisícdvadsaťštyri")
+  assert_eq(num2words_currency("1", "sk", ""), Ok("jeden euro, nula centov"))
+  assert_eq(num2words_currency("2", "sk", "EUR"), Ok("dva eurá, nula centov"))
+  assert_eq(
+    num2words_currency("1234.56", "sk", "EUR"),
+    Ok("tisícdvestotridsaťštyri eur, päťdesiatšesť centov"),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "sk", "EUR"),
+    Ok("mínus tri eurá, päťdesiat centov"),
+  )
+  assert_eq(
+    num2words_currency("1", "sk", "USD"),
+    Err("currency code not supported for sk: USD"),
+  )
+}
+
+// --- Serbian ----------------------------------------------------------------
+
+///|
+test "sr cardinal, ordinal, year and currency" {
+  assert_eq(num2words_int(0, "sr", "cardinal"), "nula")
+  assert_eq(num2words_int(21, "sr", "cardinal"), "dvadeset jedan")
+  // "hiljada" is feminine; 10^9 is "bilion", not "miliarda".
+  assert_eq(num2words_int(1000, "sr", "cardinal"), "jedna hiljada")
+  assert_eq(num2words_int(2000, "sr", "cardinal"), "dve hiljade")
+  assert_eq(
+    num2words_int(123456, "sr", "cardinal"),
+    "sto dvadeset tri hiljade četristo pedeset šest",
+  )
+  assert_eq(num2words_int(1000000000, "sr", "cardinal"), "jedan bilion")
+  assert_eq(num2words_int(-42, "sr", "cardinal"), "minus četrdeset dva")
+  assert_eq(num2words_int(5, "sr", "ordinal"), "")
+  assert_eq(num2words_int(21, "sr", "ordinal_num"), "21")
+  assert_eq(num2words_int(2024, "sr", "year"), "dve hiljade dvadeset četiri")
+  assert_eq(num2words_int(-44, "sr", "year"), "minus četrdeset četiri")
+  assert_eq(num2words_currency("1", "sr", ""), Ok("jedan evro, nula centi"))
+  assert_eq(
+    num2words_currency("21", "sr", "EUR"),
+    Ok("dvadeset jedan evro, nula centi"),
+  )
+  assert_eq(
+    num2words_currency("1", "sr", "RUB"),
+    Ok("jedna rublja, nula kopejki"),
+  )
+  assert_eq(
+    num2words_currency("2", "sr", "RUB"),
+    Ok("dve rublje, nula kopejki"),
+  )
+  assert_eq(
+    num2words_currency("21", "sr", "RSD"),
+    Ok("dvadeset jedan dinar, nula para"),
+  )
+  assert_eq(
+    num2words_currency("1234.56", "sr", "RSD"),
+    Ok("jedna hiljada dvesta trideset četiri dinara, pedeset šest para"),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "sr", "RSD"),
+    Ok("minus tri dinara, pedeset para"),
+  )
+  assert_eq(
+    num2words_currency("1", "sr", "GBP"),
+    Err("currency code not supported for sr: GBP"),
+  )
+}
+
+// --- Lithuanian -------------------------------------------------------------
+
+///|
+test "lt cardinal, ordinal, year and currency" {
+  assert_eq(num2words_int(0, "lt", "cardinal"), "nulis")
+  assert_eq(num2words_int(21, "lt", "cardinal"), "dvidešimt vienas")
+  // "šimtas" after one, "šimtai" after 2..9.
+  assert_eq(num2words_int(100, "lt", "cardinal"), "vienas šimtas")
+  assert_eq(num2words_int(200, "lt", "cardinal"), "du šimtai")
+  assert_eq(num2words_int(1000, "lt", "cardinal"), "vienas tūkstantis")
+  assert_eq(num2words_int(11000, "lt", "cardinal"), "vienuolika tūkstančių")
+  assert_eq(
+    num2words_int(21000, "lt", "cardinal"),
+    "dvidešimt vienas tūkstantis",
+  )
+  assert_eq(
+    num2words_int(123456, "lt", "cardinal"),
+    "vienas šimtas dvidešimt trys tūkstančiai keturi šimtai penkiasdešimt šeši",
+  )
+  assert_eq(num2words_int(-42, "lt", "cardinal"), "minus keturiasdešimt du")
+  assert_eq(num2words_int(5, "lt", "ordinal"), "")
+  assert_eq(num2words_int(21, "lt", "ordinal_num"), "21")
+  assert_eq(
+    num2words_int(2024, "lt", "year"),
+    "du tūkstančiai dvidešimt keturi",
+  )
+  assert_eq(num2words_currency("1", "lt", ""), Ok("vienas euras, nulis centų"))
+  assert_eq(num2words_currency("2", "lt", "EUR"), Ok("du eurai, nulis centų"))
+  assert_eq(
+    num2words_currency("1234.56", "lt", "EUR"),
+    Ok(
+      "vienas tūkstantis du šimtai trisdešimt keturi eurai, penkiasdešimt šeši centai",
+    ),
+  )
+  assert_eq(
+    num2words_currency("1", "lt", "RUB"),
+    Ok("vienas rublis, nulis kapeikų"),
+  )
+  // RUB cents take feminine numerals.
+  assert_eq(
+    num2words_currency("0.01", "lt", "RUB"),
+    Ok("nulis rublių, viena kapeika"),
+  )
+  assert_eq(
+    num2words_currency("0.02", "lt", "RUB"),
+    Ok("nulis rublių, dvi kapeikos"),
+  )
+  assert_eq(
+    num2words_currency("0.21", "lt", "RUB"),
+    Ok("nulis rublių, dvidešimt viena kapeika"),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "lt", "EUR"),
+    Ok("minus trys eurai, penkiasdešimt centų"),
+  )
+  assert_eq(
+    num2words_currency("1", "lt", "CZK"),
+    Err("currency code not supported for lt: CZK"),
+  )
+}

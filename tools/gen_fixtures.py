@@ -116,6 +116,10 @@ LANGS = {
     "he": "he",
     "fa": "fa",
     "eo": "eo",
+    "cs": "cs",
+    "sk": "sk",
+    "sr": "sr",
+    "lt": "lt",
     # No 0.5.14 module: generated through the vendored upstream master module.
     "zh": "zh",
     "zh_TW": "zh_TW",
@@ -161,6 +165,10 @@ YEAR_LANGS = {
     "he": "he",
     "fa": "fa",
     "eo": "eo",
+    "cs": "cs",
+    "sk": "sk",
+    "sr": "sr",
+    "lt": "lt",
     "zh": "zh",
     "zh_TW": "zh_TW",
 }
@@ -190,6 +198,8 @@ YEAR_BC_LANGS = {
     "he": "he",
     "fa": "fa",
     "eo": "eo",
+    "sr": "sr",
+    "lt": "lt",
     "zh": "zh",
     "zh_TW": "zh_TW",
 }
@@ -241,6 +251,10 @@ CURRENCY_LANGS = {
     "he": "he",
     "eo": "eo",
     "fa": "fa",
+    "cs": "cs",
+    "sk": "sk",
+    "sr": "sr",
+    "lt": "lt",
 }
 CURRENCY_CODES = {
     "en": [
@@ -285,6 +299,10 @@ CURRENCY_CODES = {
     "eo": ["EUR", "USD", "FRF", "GBP", "CNY"],
     # Persian has no currency parameter; the empty code selects the default.
     "fa": [""],
+    "cs": ["CZK", "EUR"],
+    "sk": ["EUR"],
+    "sr": ["RUB", "EUR", "RSD"],
+    "lt": ["LTL", "EUR", "USD", "GBP", "PLN", "RUB"],
 }
 CURRENCY_SAMPLES_BASIC = [
     "0", "0.01", "0.5", "1", "2", "21", "28", "81", "101", "1000", "1001",
@@ -349,6 +367,10 @@ CURRENCY_SAMPLES = {
     "he": CURRENCY_SAMPLES_FULL,
     "eo": CURRENCY_SAMPLES_FULL,
     "fa": CURRENCY_SAMPLES_FULL,
+    "cs": CURRENCY_SAMPLES_FULL,
+    "sk": CURRENCY_SAMPLES_FULL,
+    "sr": CURRENCY_SAMPLES_FULL,
+    "lt": CURRENCY_SAMPLES_FULL,
 }
 
 OUT = "diff_fixtures_wbtest.mbt"

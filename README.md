@@ -62,7 +62,8 @@ Add it to your `moon.mod` (requires the MoonBit toolchain ≥ 0.1.20260921).
 
 The latest published release is **0.1.0**, which **predates this rework** (it
 covers the original seven language codes). The version in this repository —
-36 language codes and 520 currency entries (519 ISO-code pairs plus Persian's
+36 language codes and 520 currency entries (519 code pairs, including Arabic's
+`SR` default and its ISO alias `SAR`, plus Persian's
 code-less toman mode) — will be released as **0.1.1**; until then, depend on the
 repository checkout if you need the new languages.
 
@@ -186,10 +187,10 @@ word tables keep the historical lenient behaviour.
 
 ### Supported magnitude
 
-Scale-word tables are finite, so each language has a ceiling. Values past it
-are **reported, never crashed**:
+Scale-word tables are finite, so each language has a ceiling. Values that need
+a scale word beyond the table are **reported, never crashed**:
 
-| Language | Largest spellable | Example |
+| Language | Highest scale word | Example |
 | --- | --- | --- |
 | `en` | 10³³ (10^33) | `10^33` → *one decillion* |
 | `fr` | 10³⁰ | `10^30` → *un sextillion* |
@@ -215,10 +216,10 @@ are **reported, never crashed**:
 | `he` | 10⁶⁵ (values below 10⁶⁶) | `10^18` → *קווינטיליון* |
 | `fa` | 10¹⁷ (values below 10¹⁸) | `10^12` → *یک تریلیون* |
 | `eo` | 10⁴¹ (values below 10⁴²) | `10^18` → *unu triliono* |
-| `cs`, `sk`, `sr`, `lt` | 10³³ | `10^30` → *kvintillion* / *kvintilión* / *nonilion* / *naintilijonas* |
-| `az` | 10⁶⁶ | `10^63` → *vigintilyon* |
-| `be` | 10³³ | `10^30` → *адзін нанільён* |
-| `is` | 10⁵⁴ | `10^51` → *einn oktilljarður* |
+| `cs`, `sk`, `sr`, `lt` | 10³⁰ (values below 10³³) | `10^30` → *kvintillion* / *kvintilión* / *nonilion* / *naintilijonas* |
+| `az` | 10⁶³ (values below 10⁶⁶) | `10^63` → *vigintilyon* |
+| `be` | 10³⁰ (values below 10³³) | `10^30` → *адзін нанільён* |
+| `is` | 10⁵¹ (values below 10⁵⁴) | `10^51` → *einn oktilljarður* |
 
 ```mbt
 @n2w.num2words_str_checked("1" + <36 zeros>, "en", "cardinal")
@@ -482,7 +483,7 @@ here).
 - **Ordinals.** Native for every language where upstream implements them, and
   machine-checked against upstream.
 - **Currency.** Native for 33 language codes with upstream's complete code
-  sets (519 ISO-code pairs, 520 entries including Persian's code-less toman
+  sets (519 code pairs, 520 entries including Persian's code-less toman
   mode); see [COMPAT.md](COMPAT.md) §4.
 - **Scale ceilings.** Both sides use a finite scale-word table, but the
   ceilings differ; see [Supported magnitude](#supported-magnitude) for ours.

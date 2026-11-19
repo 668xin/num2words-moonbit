@@ -1653,6 +1653,14 @@ test "ar cardinal, ordinal and year" {
     Ok(" و خمسون هللة"),
   )
   assert_eq(
+    num2words_currency("-0.5", "ar", "SR"),
+    Ok("سالب و خمسون هللة"),
+  )
+  assert_eq(
+    num2words_currency("-1.01", "ar", "SR"),
+    Ok("سالب واحد ريال و إحدى هللة"),
+  )
+  assert_eq(
     num2words_currency("5.25", "ar", "TND"),
     Ok("خمسة دينارات و مئتان و خمسون مليم"),
   )

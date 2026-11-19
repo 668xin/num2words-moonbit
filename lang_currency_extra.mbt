@@ -754,7 +754,8 @@ let ar_currency_tnd_cent : Array[String] = [
 ///
 /// Deviation: upstream raises `InvalidOperation` for negative fractional
 /// amounts and silently drops the sign for negative integers; this port
-/// prefixes "سالب " like the cardinal path.
+/// prefixes "سالب " like the cardinal path (collapsing the separator space
+/// when there is no major part).
 fn currency_ar(
   amount : String,
   neg : Bool,
@@ -800,7 +801,7 @@ fn currency_ar(
       ar_currency_cent(cent_forms, cents)
   }
   if neg {
-    Ok("سالب " + out)
+    Ok("سالب " + trim_spaces(out))
   } else {
     Ok(out)
   }

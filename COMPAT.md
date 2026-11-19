@@ -62,8 +62,8 @@ Notes:
 | other ~20 codes | — | not implemented |
 
 Upstream 0.5.14 exposes **56 language codes**; this project implements **36**.
-Unknown codes fall back to English here, while upstream raises
-`NotImplementedError`.
+Unknown codes are rejected here (`""` / `Err("unknown language: ...")`), while
+upstream raises `NotImplementedError`.
 
 ---
 
@@ -160,11 +160,11 @@ Currency is native for every code; the exact ISO-code coverage differs — see �
 | `uk` | 150: the complete upstream 0.5.14 table | all 150 | — |
 | `th` | 3: THB, USD, EUR | all 3 | — |
 | `ar` | 5: SR (default), SAR (alias), EGP, KWD, TND | all 5 | — |
-| `vi`, `sv` | none (upstream has no `to_currency`) | — | n.a. |
+| `vi`, `sv`, `is` | none (upstream has no `to_currency`) | — | n.a. |
 
-Coverage is **520 language/code rows — 519 ISO-code pairs (including `SAR`,
-Arabic's ISO alias of upstream's `SR` default) plus Persian's
-code-less toman entry** — matching upstream's sets for every language (Chinese
+Coverage is **520 language/code rows — 519 code pairs (including Arabic's `SR`
+default and its ISO alias `SAR`) plus Persian's code-less toman entry** —
+matching upstream's sets for every language (Chinese
 measured against upstream master, which is the only upstream source for
 `lang_ZH`).
 Unsupported codes (and codes that are valid upstream but not for a given
@@ -200,7 +200,10 @@ forms from the last two digits (`ريال`, `ريالان`, `ريالات`, `ر�
 ## 5. Magnitude ceilings
 
 Measured on 0.5.14 (values above the ceiling raise in Python, return `""` /
-`Err` here):
+`Err` here). The "This library" column names the **highest scale word**; the
+largest representable value is one tier higher (×1000 for 10³-grouping
+languages, ×10000 for the 10⁴-grouping ones), except `ro`/`hu`/`eo`, whose
+`10^41` word only accepts values below `10^42`:
 
 | Code | Upstream | This library |
 | --- | --- | --- |
@@ -231,10 +234,10 @@ Measured on 0.5.14 (values above the ceiling raise in Python, return `""` /
 | `he` | 10^65 (10^66 → `OverflowError`) | 10^65 (values below 10^66) |
 | `fa` | 10^17 (10^18 → empty output) | 10^17 (values below 10^18) |
 | `eo` | 10^549 | 10^41 (values below 10^42) |
-| `cs`, `sk`, `sr`, `lt` | 10^33 (scale table stops at power 10) | 10^33 |
-| `az` | 10^66 (scale table stops at power 63) | 10^66 |
-| `be` | 10^33 (scale table stops at power 10) | 10^33 |
-| `is` | 10^54 (MAXVAL = 1000 × 10^51) | 10^54 |
+| `cs`, `sk`, `sr`, `lt` | 10^33 (scale table stops at power 10) | 10^30 scale word, values below 10^33 |
+| `az` | 10^66 (scale table stops at power 63) | 10^63 scale word, values below 10^66 |
+| `be` | 10^33 (scale table stops at power 10) | 10^30 scale word, values below 10^33 |
+| `is` | 10^54 (MAXVAL = 1000 × 10^51) | 10^51 scale word, values below 10^54 |
 
 Ceilings differ in both directions: this project is more conservative for
 `en`/`fr`/`es`/`de`/`it`/`pt_PT`/`tr` and for `no`/`da`/`id` (10^33), but
@@ -259,7 +262,7 @@ ceiling return `""` (`Err("magnitude out of supported range: ...")` from
 | negative ordinal | `TypeError` (Hungarian/Persian: supported) | `""` (Italian: `meno ...`; Hungarian: `mínusz ...`; Persian: `منفی ...`) |
 | unsupported currency code | `NotImplementedError` | `Err(...)` / `""` |
 | unknown language in `num2words_currency` | `NotImplementedError` | `Err("currency not implemented for language: ...")` |
-| mode absent upstream (`vi`/`sv` year / `ordinal_num` / currency, `pl`/`ar`/`th`/`uk` currency, `fi` `ordinal_num`, `cs`/`sk`/`sr`/`lt` ordinal) | `AttributeError` / `NotImplementedError` | `""` / `Err(...)` |
+| mode absent upstream (`vi`/`sv` year / `ordinal_num` / currency, `fi` `ordinal_num`, `cs`/`sk`/`sr`/`lt` ordinal) | `AttributeError` / `NotImplementedError` | `""` / `Err(...)` |
 | negative cardinal (`vi`, `pl`, `ar`, `uk`) | broken (Vietnamese `-1` → *mười chín*; Polish/Ukrainian raise; Arabic indexes from the end) | `"âm ..."` / `"minus ..."` / `"سالب ..."` / `"мінус ..."` |
 | return type | `str` (or `int` for `it`/`ru`/`pl` `ordinal_num`) | `String` / `Result[String, String]` |
 

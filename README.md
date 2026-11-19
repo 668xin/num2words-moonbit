@@ -60,15 +60,13 @@ general-purpose multilingual number-to-words package on
 
 Add it to your `moon.mod` (requires the MoonBit toolchain ≥ 0.1.20260921).
 
-The latest published release is **0.1.0**, which **predates this rework** (it
-covers the original seven language codes). The version in this repository —
-36 language codes and 520 currency entries (519 code pairs, including Arabic's
-`SR` default and its ISO alias `SAR`, plus Persian's
-code-less toman mode) — will be released as **0.1.1**; until then, depend on the
-repository checkout if you need the new languages.
+The latest published release is **0.1.1** — 36 language codes and 520 currency
+entries (519 code pairs, including Arabic's `SR` default and its ISO alias
+`SAR`, plus Persian's code-less toman mode). `0.1.0` predates this rework and
+only covers seven language codes.
 
 ```bash
-moon add 668xin/num2words-moonbit   # resolves to 0.1.0
+moon add 668xin/num2words-moonbit   # resolves to 0.1.1
 ```
 
 Then import it in your package:
@@ -248,9 +246,9 @@ power of 1000 for most languages, and of 10⁴ for Chinese, Japanese and Korean.
   out of scope (see [COMPAT.md](COMPAT.md)).
 - **Magnitudes are bounded** by each language's scale-word table — see
   *Supported magnitude* above. "Arbitrarily large" is **not** claimed.
-- **Release status**: mooncakes.io carries `0.1.0`, which predates this rework
-  (seven language codes); the 36-language, 520-currency-entry version in this
-  repository is pending release as `0.1.1`.
+- **Release status**: mooncakes.io carries `0.1.1` (36 language codes, 520
+  currency entries); `0.1.0` is the pre-rework release with seven language
+  codes.
 - **Chinese is post-0.5.14**: upstream 0.5.14 has no Chinese module, so `zh`
   (Simplified) and `zh_TW` (Traditional) follow the `lang_ZH.py` added on
   upstream master, including its 元/角/分 currency split. `zh` maps the

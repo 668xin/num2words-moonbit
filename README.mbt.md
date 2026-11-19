@@ -24,9 +24,8 @@ Persian writes tomans and takes no code).
 moon add 668xin/num2words-moonbit
 ```
 
-> The published `0.1.0` predates this rework (seven language codes); the
-> 36-language, 520-currency-entry version in the repository is pending release
-> as `0.1.1`.
+> The latest published release is `0.1.1` (36 language codes, 520 currency
+> entries). `0.1.0` predates this rework and only covers seven language codes.
 
 ```mbt nocheck
 import "668xin/num2words-moonbit" @n2w

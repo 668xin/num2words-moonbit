@@ -1,7 +1,7 @@
 // num2words — command line tool.
 // Converts a number (integer or decimal, optionally very large) into words.
 //
-//   num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi|zh|zh_TW|ja|ko|sv|no|da|id|pl|ar|th|fi|uk|ro|hu|he|fa|eo|cs|sk|sr|lt|az|be]
+//   num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi|zh|zh_TW|ja|ko|sv|no|da|id|pl|ar|th|fi|uk|ro|hu|he|fa|eo|cs|sk|sr|lt|az|be|is]
 //                     [--to cardinal|ordinal|ordinal_num|year|currency]
 //                     [--currency EUR|USD|GBP]
 //
@@ -23,11 +23,11 @@ fn usage() -> Unit {
   println("")
   println("Usage:")
   println(
-    "  num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi|zh|zh_TW|ja|ko|sv|no|da|id|pl|ar|th|fi|uk|ro|hu|he|fa|eo|cs|sk|sr|lt|az|be] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]",
+    "  num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi|zh|zh_TW|ja|ko|sv|no|da|id|pl|ar|th|fi|uk|ro|hu|he|fa|eo|cs|sk|sr|lt|az|be|is] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]",
   )
   println("")
   println(
-    "Languages: en, fr, es, de, it, pt (Brazil), pt_PT (Europe), ru, nl, tr, vi, zh (Simplified Chinese), zh_TW (Traditional Chinese), ja, ko, sv, no, da, id, pl, ar, th, fi, uk, ro, hu, he, fa, eo, cs, sk, sr, lt, az, be",
+    "Languages: en, fr, es, de, it, pt (Brazil), pt_PT (Europe), ru, nl, tr, vi, zh (Simplified Chinese), zh_TW (Traditional Chinese), ja, ko, sv, no, da, id, pl, ar, th, fi, uk, ro, hu, he, fa, eo, cs, sk, sr, lt, az, be, is",
   )
   println("Modes    : cardinal (default), ordinal, ordinal_num, year, currency")
   println(

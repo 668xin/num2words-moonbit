@@ -246,7 +246,15 @@ pub fn lang_uk() -> Lang {
 ///|
 /// Upstream `_int2word` for the nominative case. The thousands group is spoken
 /// with feminine unit words, all other groups with masculine ones.
-fn Lang::cardinal_uk(self : Lang, n : BigInt) -> String {
+///
+/// `feminine` additionally feminises the units group, mirroring upstream's
+/// `feminine and i == 0` rule; currency mode sets it when the currency noun is
+/// feminine ("одна гривня", "двадцять одна гривня").
+fn Lang::cardinal_uk_gendered(
+  self : Lang,
+  n : BigInt,
+  feminine : Bool,
+) -> String {
   if n == BigInt::from_int(0) {
     return self.zero
   }
@@ -264,7 +272,7 @@ fn Lang::cardinal_uk(self : Lang, n : BigInt) -> String {
       continue
     }
     // "тисяча" is feminine: 1 -> "одна тисяча", 2 -> "дві тисячі".
-    let mut s = self.triple_uk(x, power == 1)
+    let mut s = self.triple_uk(x, power == 1 || (power == 0 && feminine))
     if power > 0 {
       s = s + " " + uk_scale(power, uk_form(x))
     }
@@ -276,6 +284,11 @@ fn Lang::cardinal_uk(self : Lang, n : BigInt) -> String {
   } else {
     joined
   }
+}
+
+///|
+fn Lang::cardinal_uk(self : Lang, n : BigInt) -> String {
+  self.cardinal_uk_gendered(n, false)
 }
 
 // --- ordinal ----------------------------------------------------------------

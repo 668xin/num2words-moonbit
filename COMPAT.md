@@ -3,7 +3,7 @@
 Reference: Python [`num2words`](https://github.com/savoirfairelinux/num2words)
 **0.5.14** (LGPL-2.1). This document maps the two APIs call by call, records the
 supported surface, and lists every known behavioural difference. Output parity
-is machine-checked by **35989 recorded comparisons** (see
+is machine-checked by **40736 recorded comparisons** (see
 [DIFF_REPORT.md](DIFF_REPORT.md)); `moon test` replays them without Python.
 
 ---
@@ -29,7 +29,8 @@ Notes:
 * `num2words_currency("...", lang, "")` uses the language default: **EUR**,
   **BRL** for `pt`, **TRY** for `tr`, **元/XXX** for `zh`/`zh_TW`, **JPY** for
   `ja`, **KRW** for `ko`, **NOK** for `no`, **DKK** for `da`, **IDR** for
-  `id`, **RON** for `ro`, **HUF** for `hu` and **ILS** for `he` (Persian has
+  `id`, **RON** for `ro`, **HUF** for `hu`, **ILS** for `he`, **THB** for
+  `th` and **SR** for `ar` (Persian has
   no code and always writes tomans). `num2words(..., "currency")` does the same
   with the integer value treated as major units.
 
@@ -46,8 +47,8 @@ Notes:
 | `ja`, `ko` | same | 10⁴ grouping; Japanese era years; Korean KRW/USD/JPY |
 | `sv` | `sv` | cardinal and ordinal only (upstream has no year / `ordinal_num` / currency) |
 | `no`, `da`, `id`, `fi` | same | cardinal, ordinal, year and one or more currencies (`fi` has 24 codes) |
-| `pl` | `pl` | cardinal, ordinal, year; upstream has no currency |
-| `ar`, `th`, `uk` | same | cardinal, ordinal, year; upstream has no currency |
+| `pl` | `pl` | cardinal, ordinal, year and PLN/EUR/USD currency (three plural forms) |
+| `ar`, `th`, `uk` | same | cardinal, ordinal, year and currency (`ar`: SR/SAR/EGP/KWD/TND; `th`: THB/USD/EUR; `uk`: 150 codes) |
 | `ro`, `hu` | same | cardinal, ordinal, year and 20 EU currency codes (`RON`/`HUF` default) |
 | `he` | `he` | cardinal, ordinal, year and ILS/EUR/USD currency |
 | `fa` | `fa` | cardinal, ordinal, year and a toman-only currency mode |
@@ -56,10 +57,11 @@ Notes:
 | `sr`, `lt` | same | cardinal, year and 3/6 currency codes; upstream has no `to_ordinal` |
 | `az` | `az` | cardinal, ordinal, ordinal_num, year and AZN |
 | `be` | `be` | cardinal, ordinal, ordinal_num, year and 8 currency codes |
+| `is` | `is` | cardinal only (upstream raises `NotImplementedError` for `ordinal`, `ordinal_num`, `year` and `currency`) |
 | *(master only)* `lang_ZH` | `zh`, `zh_TW` | Simplified and Traditional Chinese; not present in the 0.5.14 release |
-| other ~22 codes | — | not implemented |
+| other ~20 codes | — | not implemented |
 
-Upstream 0.5.14 exposes **56 language codes**; this project implements **35**.
+Upstream 0.5.14 exposes **56 language codes**; this project implements **36**.
 Unknown codes fall back to English here, while upstream raises
 `NotImplementedError`.
 
@@ -88,11 +90,11 @@ Unknown codes fall back to English here, while upstream raises
 | `no` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `da` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `id` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `pl` | ✅ | ✅ | ✅ | ✅ | n.a. |
-| `ar` | ✅ | ✅ | ✅ | ✅ | n.a. |
-| `th` | ✅ | ✅ | ✅ | ✅ | n.a. |
+| `pl` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `ar` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `th` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `fi` | ✅ | ✅ | ✅ | n.a. | ✅ |
-| `uk` | ✅ | ✅ | ✅ | ✅ | n.a. |
+| `uk` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `ro` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `hu` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `he` | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -104,6 +106,7 @@ Unknown codes fall back to English here, while upstream raises
 | `lt` | ✅ | ✅ | n.a. | ✅ | ✅ |
 | `az` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `be` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `is` | ✅ | n.a. | n.a. | n.a. | n.a. |
 
 ✅ native and aligned; n.a. not implemented upstream (the call returns `""`
 here). `year` follows upstream for every code, including the German
@@ -111,7 +114,8 @@ here). `year` follows upstream for every code, including the German
 *einundzwanzighundert*), the Dutch *-honderd* form (`1900` →
 *negentien honderd*), the Japanese era calendar (`2024` → *令和六年*) and the
 Chinese digit-by-digit form (`2024` → *二零二四年*); Turkish, Indonesian and
-Polish years are plain cardinals, and Vietnamese/Swedish have no year mode.
+Polish years are plain cardinals, and Vietnamese/Swedish/Icelandic have no year
+mode.
 Korean `ordinal` reproduces upstream's `KeyError` cases (0, 100, 1000, 10000,
 …) as `""`; Polish `ordinal_num` returns the digits, as upstream does.
 
@@ -152,9 +156,14 @@ Currency is native for every code; the exact ISO-code coverage differs — see �
 | `lt` | 6: LTL, EUR, USD, GBP, PLN, RUB | all 6 | — |
 | `az` | 1: AZN | AZN | — |
 | `be` | 8: RUB, EUR, USD, UAH, KZT, BYN, UZS, PLN | all 8 | — |
-| `vi`, `sv`, `pl`, `ar`, `th`, `uk` | none (upstream has no `to_currency`) | — | n.a. |
+| `pl` | 3: PLN, EUR, USD | all 3 | — |
+| `uk` | 150: the complete upstream 0.5.14 table | all 150 | — |
+| `th` | 3: THB, USD, EUR | all 3 | — |
+| `ar` | 5: SR (default), SAR (alias), EGP, KWD, TND | all 5 | — |
+| `vi`, `sv` | none (upstream has no `to_currency`) | — | n.a. |
 
-Coverage is **359 language/code rows — 358 ISO-code pairs plus Persian's
+Coverage is **520 language/code rows — 519 ISO-code pairs (including `SAR`,
+Arabic's ISO alias of upstream's `SR` default) plus Persian's
 code-less toman entry** — matching upstream's sets for every language (Chinese
 measured against upstream master, which is the only upstream source for
 `lang_ZH`).
@@ -179,7 +188,12 @@ the *una* multiplier and rewrites `unu leu`/`unu ban` (`una mie de lei`,
 (`ezer forint, nulla fillér`); Hebrew moves the noun before a count of one and
 uses the construct state for two (`שקל אחד`, `שני שקלים`); Esperanto joins with
 *kaj* (`du eŭroj kaj nul centimo`); Persian spells fractions with their
-denominator (`1234.56` → *… و پنجاه و شش صدم تومان*).
+denominator (`1234.56` → *… و پنجاه و شش صدم تومان*). Polish inflects the noun
+three ways (`jeden złoty`, `dwa złote`, `pięć złotych`), Ukrainian also genders
+it (`одна гривня`, `дві гривні`, `п'ять гривень`), Thai writes the number and
+noun as one word and appends *ถ้วน* to whole baht (`ห้าบาทถ้วน`), and Arabic
+truncates the fraction to the code's precision and selects one of four noun
+forms from the last two digits (`ريال`, `ريالان`, `ريالات`, `ريالاً`).
 
 ---
 
@@ -220,6 +234,7 @@ Measured on 0.5.14 (values above the ceiling raise in Python, return `""` /
 | `cs`, `sk`, `sr`, `lt` | 10^33 (scale table stops at power 10) | 10^33 |
 | `az` | 10^66 (scale table stops at power 63) | 10^66 |
 | `be` | 10^33 (scale table stops at power 10) | 10^33 |
+| `is` | 10^54 (MAXVAL = 1000 × 10^51) | 10^54 |
 
 Ceilings differ in both directions: this project is more conservative for
 `en`/`fr`/`es`/`de`/`it`/`pt_PT`/`tr` and for `no`/`da`/`id` (10^33), but
@@ -320,9 +335,12 @@ These are deliberate and recorded in [DIFF_REPORT.md](DIFF_REPORT.md) §4.
     เอ็ด rule; Finnish concatenates compounds below a million, removes spaces
     in `to_year` and appends *ennen ajanlaskun alkua* for negative years;
     Ukrainian has three-way plurals and feminine thousands. Upstream breaks on
-    Arabic/Ukrainian negatives and Ukrainian zero, and has no currency for
-    Arabic/Thai/Ukrainian or `ordinal_num` for Finnish; this project fills
-    those gaps and documents them.
+    Arabic/Ukrainian negatives and Ukrainian zero, and has no `ordinal_num` for
+    Finnish; this project fills those gaps and documents them. Currency is
+    implemented here for all four: Arabic truncates the fraction and raises
+    upstream for negative fractional amounts (this port prefixes `سالب`), and
+    Thai keeps upstream's space-free concatenation including *ถ้วน*; Ukrainian
+    currency uses 150 codes with the same gendered rules as its cardinals.
 17. **Romanian, Hungarian, Hebrew, Persian and Esperanto.** Romanian keeps the
     three-way scale inflection and upstream's raw `biliard/e` quirk; Hungarian
     the *kettő*/*két* alternation and the 2001+ hyphen; Hebrew the feminine
@@ -369,6 +387,16 @@ These are deliberate and recorded in [DIFF_REPORT.md](DIFF_REPORT.md) §4.
     feminine *капейка* cents for RUB/BYN/UAH. Upstream reads the fractional
     part of a cardinal as a whole number; this project spells the digits one by
     one (`1.56` → *адзін коска пяць шэсць*).
+21. **Icelandic.** Implemented only for `cardinal`, mirroring upstream's
+    split/merge engine: the multiplier agrees in gender (*eitt hundrað*,
+    *tvö þúsund*, *tvær milljónir*, *einn milljarður*), `og` appears only when
+    the right side is a single card (*tuttugu og einn*, *eitt hundrað og
+    einn*) and is absent before a composed remainder (*eitt hundrað tuttugu og
+    einn*), and scale nouns pluralise after any multiplier other than one
+    (*níu hundruð*, *þrjú þúsund*, *oktilljónir*). Decimals are spelled digit
+    by digit, as upstream does. `ordinal`, `ordinal_num`, `year` and
+    `currency` return `""` because upstream raises `NotImplementedError` for
+    all four.
 
 Everything else — cardinals, positive years, ordinals and `ordinal_num` for the
 codes that implement them, and currency for the codes listed in §4 — matches
@@ -379,7 +407,7 @@ upstream byte-for-byte (after the normalisations above).
 ## 8. Verification
 
 ```bash
-moon test          # 248 tests, 35989 differential comparisons
+moon test          # 255 tests, 40736 differential comparisons
 moon build         # library + CLI
 ```
 

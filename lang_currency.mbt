@@ -1240,7 +1240,11 @@ fn currency_supported_lang(lang : String) -> Bool {
   lang == "sr" ||
   lang == "lt" ||
   lang == "az" ||
-  lang == "be"
+  lang == "be" ||
+  lang == "pl" ||
+  lang == "uk" ||
+  lang == "th" ||
+  lang == "ar"
 }
 
 ///|
@@ -1274,6 +1278,12 @@ fn currency_default_code(lang : String) -> String {
     // Persian `to_currency` takes no code; the value is only used by the
     // documentation and ignored by `currency_fa`.
     "IRR"
+  } else if lang == "th" {
+    // Upstream `to_currency` defaults to THB.
+    "THB"
+  } else if lang == "ar" {
+    // Upstream `to_currency` defaults to the Saudi riyal ("SR").
+    "SR"
   } else {
     "EUR"
   }
@@ -1298,6 +1308,8 @@ fn currency_form(lang : String, code : String) -> Result[CurrencyForm, String] {
     "lt" => currency_form_lt(code)
     "az" => currency_form_az(code)
     "be" => currency_form_be(code)
+    "pl" => currency_form_pl(code)
+    "uk" => currency_form_uk(code)
     _ => Err(code)
   }
 }
@@ -1393,7 +1405,20 @@ fn currency_form_index(lang : String, n : BigInt) -> Int {
     } else {
       2
     }
-  } else if lang == "sr" || lang == "be" {
+  } else if lang == "pl" {
+    // 1 -> one; 2..4 (not 12..14, 112..114, ...) -> few; else many.
+    if n == BigInt::from_int(1) {
+      0
+    } else {
+      let m10 = (n % BigInt::from_int(10)).to_int()
+      let m100 = (n % BigInt::from_int(100)).to_int()
+      if m10 > 1 && m10 < 5 && (m100 < 10 || m100 > 20) {
+        1
+      } else {
+        2
+      }
+    }
+  } else if lang == "sr" || lang == "be" || lang == "uk" {
     // ...1 -> one; ...2..4 (not 12..14, 112..114, ...) -> few; else many.
     let m10 = (n % BigInt::from_int(10)).to_int()
     let m100 = (n % BigInt::from_int(100)).to_int()
@@ -1508,6 +1533,9 @@ fn currency_num(lang : String, n : BigInt, feminine : Bool) -> String {
   if lang == "be" {
     return cardinal_be_gendered(get_lang("be"), n, if feminine { 1 } else { 0 })
   }
+  if lang == "uk" {
+    return get_lang("uk").cardinal_uk_gendered(n, feminine)
+  }
   card
 }
 
@@ -1533,6 +1561,8 @@ fn currency_join(
     "lt" => left + " " + unit + ", " + right + " " + cent
     "az" => left + " " + unit + ", " + right + " " + cent
     "be" => left + " " + unit + ", " + right + " " + cent
+    "pl" => left + " " + unit + ", " + right + " " + cent
+    "uk" => left + " " + unit + ", " + right + " " + cent
     _ => ""
   }
 }
@@ -1756,6 +1786,14 @@ pub fn num2words_currency(
       }
       if lang == "fi" {
         return currency_fi(units, cents, neg, resolved)
+      }
+      // Thai concatenates words without spaces; Arabic truncates the fraction
+      // to the code's precision and uses four noun forms.
+      if lang == "th" {
+        return currency_th(units, cents, neg, resolved)
+      }
+      if lang == "ar" {
+        return currency_ar(amount, neg, resolved)
       }
       match currency_form(lang, resolved) {
         Err(c) => Err("currency code not supported for " + lang + ": " + c)

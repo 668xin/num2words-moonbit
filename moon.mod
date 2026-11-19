@@ -11,7 +11,7 @@
 
 name = "668xin/num2words-moonbit"
 
-version = "0.1.0"
+version = "0.1.1"
 
 readme = "README.mbt.md"
 
@@ -23,4 +23,4 @@ keywords = [ "num2words", "i18n", "numbers", "moonbit", "hackathon" ]
 
 preferred_target = "native"
 
-description = "Convert numbers into words in pure MoonBit (35 language codes: EN/FR/ES/DE/IT/PT/PT_PT/RU/NL/TR/VI/ZH/ZH_TW/JA/KO/SV/NO/DA/ID/PL/AR/TH/FI/UK/RO/HU/HE/FA/EO/CS/SK/SR/LT/AZ/BE): cardinal, ordinal, ordinal_num, year, and currency."
+description = "Convert numbers into words in pure MoonBit (36 language codes: EN/FR/ES/DE/IT/PT/PT_PT/RU/NL/TR/VI/ZH/ZH_TW/JA/KO/SV/NO/DA/ID/PL/AR/TH/FI/UK/RO/HU/HE/FA/EO/CS/SK/SR/LT/AZ/BE/IS): cardinal, ordinal, ordinal_num, year, and currency."

@@ -10,7 +10,7 @@ code.
 - Upstream languages used: `en`, `fr`, `es`, `de`, `it`, `pt_BR`, `pt`, `ru`,
   `nl`, `tr`, `vi`, `ja`, `ko`, `sv`, `no`, `da`, `id`, `pl`, `ar`, `th`,
   `fi`, `uk`, `ro`, `hu`, `he`, `fa`, `eo`, `cs`, `sk`, `sr`, `lt`, `az`,
-  `be`, plus `lang_ZH` (master) for `zh`/`zh_TW`
+  `be`, `is`, plus `lang_ZH` (master) for `zh`/`zh_TW`
 - Cardinal samples per language: **551** (`0..500` plus 50 multi-scale / signed
   values); Vietnamese, Polish, Czech and Slovak use **547** (negative samples
   excluded — upstream's negative handling is broken); Arabic, Finnish and
@@ -27,8 +27,9 @@ code.
   upstream rejects, Persian drops its empty `10^18` cardinal, Korean drops its
   `KeyError` cases, Polish drops 0 and its `IndexError` cases, Ukrainian drops
   its one rejected sample), `ordinal_num`: **11** per language (Vietnamese,
-  Swedish and Finnish upstream have no `ordinal_num`)
-- Currency samples: **7203** total — **340** for `en` (20 codes × 17 amounts),
+  Swedish, Finnish and Icelandic upstream have no `ordinal_num`). Icelandic has
+  **0** ordinals: upstream raises `NotImplementedError`
+- Currency samples: **11945** total — **340** for `en` (20 codes × 17 amounts),
   **85** each for `fr`/`de` (5 × 17), **68** for `nl` (4 × 17), **60** for `it`
   (4 × 17 minus its 8 rejected negative samples), **4446** for `es` (171 × 26),
   **208** for `ru` (8 × 26), **26** for `pt`, **130** for `pt_PT` (26 × 5),
@@ -38,10 +39,12 @@ code.
   **520** for `hu` (20 × 26), **78** for `he` (3 × 26), **130** for `eo`
   (5 × 26), **26** for `fa` (toman amounts), **52** for `cs`, **26** for `sk`,
   **78** for `sr`, **156** for `lt`, **26** for `az`, **208** for `be` (8 codes
-  × 26 amounts) and **204** each for `zh`/`zh_TW` (17 codes × 12 amounts)
-- Total comparisons: **35989** (19269 cardinal + 944 year + 7675 ordinal
-  + 352 ordinal_num + 7749 currency)
-- MoonBit test suite: **248 tests, 248 passed, 0 failed**
+  × 26 amounts), **78** for `pl` (3 × 26), **3900** for `uk` (150 × 26),
+  **78** for `th` (3 × 26), **140** for `ar` (5 codes × 28 non-negative
+  amounts) and **204** each for `zh`/`zh_TW` (17 codes × 12 amounts)
+- Total comparisons: **40736** (19820 cardinal + 944 year + 7675 ordinal
+  + 352 ordinal_num + 11945 currency)
+- MoonBit test suite: **255 tests, 255 passed, 0 failed**
 
 Run `moon test` from the project root to replay every comparison.
 
@@ -92,7 +95,10 @@ free of upstream's float truncation, `ja` 7 integral amounts, `ko` 27
 KRW/USD/JPY samples, `no` 11, `da`/`id` 10 each, `fi` 288 (24 codes × 12
 amounts), `ro` 227 (its upstream converter raises for the rest), `hu` 520
 (20 × 26), `he` 78 (3 × 26), `eo` 130 (5 × 26), `fa` 26 (toman amounts) and
-`zh`/`zh_TW` 12 amounts × 17 master codes. Amounts are passed to upstream as
+`zh`/`zh_TW` 12 amounts × 17 master codes. `pl` uses the same 26 amounts for
+PLN/EUR/USD, `uk` all 26 for its 150 codes, `th` the same 26 for THB/USD/EUR,
+and `ar` 28 non-negative amounts for SR/SAR/EGP/KWD/TND (upstream raises for
+negative fractions). Amounts are passed to upstream as
 floats, so its type-dependent int-as-cents quirk does not apply.
 
 ---
@@ -136,6 +142,7 @@ floats, so its type-dependent int-as-cents quirk does not apply.
 | `lt` | 551 | 551 | verbatim (*šimtas*/*šimtai*; three-way scale) |
 | `az` | 551 | 551 | verbatim (digit scan; *yüz*/*min* without *bir*) |
 | `be` | 551 | 551 | verbatim (gender agreement; three-way scale forms) |
+| `is` | 551 | 551 | verbatim (split/merge engine; gendered multipliers, `og` rule) |
 
 | Language | Year samples | Passed | Comparison |
 | --- | --- | --- | --- |
@@ -210,6 +217,7 @@ floats, so its type-dependent int-as-cents quirk does not apply.
 | `lt` | 0 | 11 | 11 | no `ordinal` upstream; `ordinal_num` is the plain number |
 | `az` | 249 | 11 | 260 | verbatim (vowel-harmony suffix; final vowel dropped) |
 | `be` | 249 | 11 | 260 | verbatim (fused scale groups; 70/80 quirk reproduced) |
+| `is` | 0 | 0 | 0 | upstream raises `NotImplementedError` for both modes |
 
 | Language | Currency samples | Passed | Comparison |
 | --- | --- | --- | --- |
@@ -242,8 +250,12 @@ floats, so its type-dependent int-as-cents quirk does not apply.
 | `lt` | 156 | 156 | verbatim (6 codes × 26 amounts; feminine RUB cents) |
 | `az` | 26 | 26 | verbatim (AZN × 26 amounts) |
 | `be` | 208 | 208 | verbatim (8 codes × 26 amounts; UAH feminine units) |
+| `pl` | 78 | 78 | verbatim (PLN/EUR/USD; three plural forms) |
+| `uk` | 3900 | 3900 | verbatim (150 codes; gendered nouns) |
+| `th` | 78 | 78 | verbatim (THB/USD/EUR; no spaces, *ถ้วน*) |
+| `ar` | 140 | 140 | verbatim (SR/SAR/EGP/KWD/TND; four noun forms, truncated fraction) |
 
-All **35989** comparisons pass under the documented comparison rules in §4.
+All **40736** comparisons pass under the documented comparison rules in §4.
 
 ### Ordinal comparison rules
 
@@ -407,6 +419,26 @@ Notes on the fixes:
   is reproduced because the fixtures are compared verbatim. Currency covers the
   full upstream 8-code set with feminine *грыўна* for UAH and feminine
   *капейка* cents for RUB/BYN/UAH.
+- **M13 — Icelandic:** the 36th language code (`is`), bringing the project to
+  **36 language codes** and **36540 comparisons** at that stage. Icelandic is the first
+  language ported through upstream's generic split/merge engine (rather than
+  3-digit groups): a greedy `splitnum` decomposition folded by `merge`, with
+  gendered multipliers (*eitt hundrað*, *tvö þúsund*, *tvær milljónir*), an
+  `og` separator only before a single card, and pluralised scale nouns. The card
+  table reaches 10^51, so the supported range is 10^54 (upstream `MAXVAL`).
+  Upstream implements only `cardinal` for Icelandic, so `ordinal`,
+  `ordinal_num`, `year` and `currency` return `""`.
+- **M14 — Polish, Ukrainian, Thai and Arabic currency:** the four remaining
+  upstream currency grammars, bringing currency coverage to **33 language
+  codes**, **520 entries** (519 ISO-code pairs plus Persian's code-less toman
+  mode) and **40736 comparisons**. Polish inflects the noun with three plural
+  forms (*jeden złoty*, *dwa złote*, *pięć złotych*) over PLN/EUR/USD;
+  Ukrainian reuses its gendered cardinal so *одна гривня* / *дві гривні* agree
+  with one of 150 codes. Thai writes number and noun without spaces and appends
+  *ถ้วน* to whole baht; Arabic zero-pads or truncates the fraction to the code's
+  precision (TND 3 digits) and selects one of four noun forms from the last two
+  digits. Negative Arabic fractions raise upstream, so the fixtures are
+  non-negative and the port documents its `سالب` prefix.
 
 ---
 
@@ -438,7 +470,11 @@ regular):
    exact `x.xx5` amounts (e.g. `1.005`) are excluded. Italian negative amounts
    are supported here (`meno …`) but excluded because upstream 0.5.14 raises
    `AttributeError`. Upstream's Russian PLN paucal typo (`слотых`) is
-   normalised to `злотых`. Everything else — including the Spanish
+   normalised to `злотых`. Arabic zero-pads or truncates the fraction to the
+   currency's precision (`TND` 3 digits) rather than rounding; the comparison
+   uses upstream's own truncation and only non-negative amounts, because
+   upstream raises `InvalidOperation` for negative fractions (this port prefixes
+   `سالب`). Everything else — including the Spanish
    masculine *quinientos* and the Russian feminine *одна миллион* — is
    compared verbatim.
 4. **Vietnamese, Polish, Czech and Slovak negatives.** Upstream 0.5.14 reads
@@ -523,11 +559,15 @@ regular):
     applies: upstream reads the fractional part as a whole number (`1.56` →
     *… коска пяцьдзясят шэсць*), while this project spells the digits
     (*… коска пяць шэсць*); the fixtures use integers only.
+14. **Icelandic.** Cardinal is compared verbatim, including the split/merge
+    engine's `og` placement and gender agreement. Decimals are digit by digit
+    in both implementations, so nothing is normalised. Upstream implements no
+    other mode for this language.
 
 No other comparison rule is applied: cardinal output for `en`, `fr`, `es`,
 `de`, `ru`, `nl`, `tr`, `ja`, `ko`, `sv`, `no`, `da`, `id`, `zh_TW`, `sr`,
-`lt`, `az` and `be` is compared byte-for-byte (and `vi`/`pl`/`cs`/`sk` after
-excluding their broken negatives),
+`lt`, `az`, `be` and `is` is compared byte-for-byte (and
+`vi`/`pl`/`cs`/`sk` after excluding their broken negatives),
 and so are years for positive values; the currency and negative-year rules
 above only affect the cases they name.
 
@@ -538,5 +578,5 @@ above only affect the cases they name.
 ```bash
 pip install num2words==0.5.14
 python tools/gen_fixtures.py   # rewrites diff_fixtures_wbtest.mbt
-moon test                      # replays all 35989 comparisons
+moon test                      # replays all 40736 comparisons
 ```

@@ -1599,7 +1599,23 @@ test "pl cardinal, ordinal and year" {
   )
   assert_eq(
     num2words_currency("1", "pl", "PLN"),
-    Err("currency not implemented for language: pl"),
+    Ok("jeden złoty, zero groszy"),
+  )
+  assert_eq(
+    num2words_currency("5.05", "pl", "PLN"),
+    Ok("pięć złotych, pięć groszy"),
+  )
+  assert_eq(
+    num2words_currency("0.5", "pl", "EUR"),
+    Ok("zero euro, pięćdziesiąt centów"),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "pl", "PLN"),
+    Ok("minus trzy złote, pięćdziesiąt groszy"),
+  )
+  assert_eq(
+    num2words_currency("1", "pl", "GBP"),
+    Err("currency code not supported for pl: GBP"),
   )
 }
 
@@ -1623,9 +1639,26 @@ test "ar cardinal, ordinal and year" {
     num2words_int(2024, "ar", "year"),
     "ألفان و أربعة و عشرون",
   )
+  assert_eq(num2words_currency("1", "ar", "SAR"), Ok("واحد ريال"))
   assert_eq(
-    num2words_currency("1", "ar", "SAR"),
-    Err("currency not implemented for language: ar"),
+    num2words_currency("2.02", "ar", "SR"),
+    Ok("اثنان ريالان و اثنتان هللتان"),
+  )
+  assert_eq(
+    num2words_currency("102.02", "ar", "SR"),
+    Ok("مائة و اثنان ريال و اثنتان هللتان"),
+  )
+  assert_eq(
+    num2words_currency("0.5", "ar", "SR"),
+    Ok(" و خمسون هللة"),
+  )
+  assert_eq(
+    num2words_currency("5.25", "ar", "TND"),
+    Ok("خمسة دينارات و مئتان و خمسون مليم"),
+  )
+  assert_eq(
+    num2words_currency("1", "ar", "GBP"),
+    Err("currency code not supported for ar: GBP"),
   )
 }
 
@@ -1666,7 +1699,27 @@ test "th cardinal, ordinal and year" {
   )
   assert_eq(
     num2words_currency("1", "th", "THB"),
-    Err("currency not implemented for language: th"),
+    Ok("หนึ่งบาทถ้วน"),
+  )
+  assert_eq(
+    num2words_currency("5.25", "th", "THB"),
+    Ok("ห้าบาทยี่สิบห้าสตางค์"),
+  )
+  assert_eq(
+    num2words_currency("0.5", "th", "THB"),
+    Ok("ห้าสิบสตางค์"),
+  )
+  assert_eq(
+    num2words_currency("0", "th", "USD"),
+    Ok("ศูนย์ดอลลาร์"),
+  )
+  assert_eq(
+    num2words_currency("-3.5", "th", "THB"),
+    Ok("ติดลบสามบาทห้าสิบสตางค์"),
+  )
+  assert_eq(
+    num2words_currency("1", "th", "GBP"),
+    Err("currency code not supported for th: GBP"),
   )
 }
 
@@ -1754,7 +1807,25 @@ test "uk cardinal, ordinal and year" {
   )
   assert_eq(
     num2words_currency("1", "uk", "UAH"),
-    Err("currency not implemented for language: uk"),
+    Ok("одна гривня, нуль копійок"),
+  )
+  assert_eq(
+    num2words_currency("2.02", "uk", "UAH"),
+    Ok("дві гривні, дві копійки"),
+  )
+  assert_eq(
+    num2words_currency("21.21", "uk", "UAH"),
+    Ok(
+      "двадцять одна гривня, двадцять одна копійка",
+    ),
+  )
+  assert_eq(
+    num2words_currency("5.25", "uk", "USD"),
+    Ok("п'ять доларів, двадцять п'ять центів"),
+  )
+  assert_eq(
+    num2words_currency("1", "uk", "JPY"),
+    Ok("одна єна, нуль сен"),
   )
 }
 

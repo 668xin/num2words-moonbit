@@ -198,7 +198,9 @@ fn ar_group_words(
 ) -> String {
   let tens = group % 100
   let hundreds = group / 100
-  let unit_words = if feminine && level == 0 {
+  // Upstream's `digit_feminine_status` feminises both the units group (level
+  // 0) and the currency fraction (level -1).
+  let unit_words = if feminine && level <= 0 {
     ar_feminine_ones
   } else {
     ar_ones

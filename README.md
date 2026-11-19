@@ -7,17 +7,17 @@
 
 `num2words-moonbit` is a from-scratch MoonBit implementation of the classic
 *number → words* library. It spells out integers (of arbitrary size via
-`BigInt`), decimals, ordinals, years and currency amounts in **35 language
+`BigInt`), decimals, ordinals, years and currency amounts in **36 language
 codes**: English, French, Spanish, German, Italian, Portuguese (Brazilian and
 European), Russian, Dutch, Turkish, Vietnamese, Simplified/Traditional Chinese,
 Japanese, Korean, Swedish, Norwegian, Danish, Indonesian, Polish, Arabic, Thai,
 Finnish, Ukrainian, Romanian, Hungarian, Hebrew, Persian, Esperanto, Czech,
-Slovak, Serbian, Lithuanian, Azerbaijani and Belarusian.
-Currency is native for 29 of them, using upstream's ISO code sets (EUR by
+Slovak, Serbian, Lithuanian, Azerbaijani, Belarusian and Icelandic.
+Currency is native for 33 of them, using upstream's ISO code sets (EUR by
 default, BRL for `pt`, TRY for `tr`, AZN for `az`, 元/`XXX` for `zh`, JPY for
 `ja`, KRW for `ko`, NOK for `no`, DKK for `da`, IDR for `id`, RON for `ro`,
-HUF for `hu`, ILS for `he`, 24 codes for `fi`; Persian writes tomans and takes
-no code).
+HUF for `hu`, ILS for `he`, THB for `th`, SR for `ar`, 24 codes for `fi`;
+Persian writes tomans and takes no code).
 
 This project was built for the **MoonBit September Hackathon 2026**. It ports
 the well-known Python [`num2words`](https://github.com/savoirfairelinux/num2words)
@@ -29,7 +29,7 @@ general-purpose multilingual number-to-words package on
 
 ## Features
 
-- **35 language codes**: English (`en`), French (`fr`), Spanish (`es`), German
+- **36 language codes**: English (`en`), French (`fr`), Spanish (`es`), German
   (`de`), Italian (`it`), Portuguese (`pt` Brazilian, `pt_PT` European), Russian
   (`ru`), Dutch (`nl`), Turkish (`tr`), Vietnamese (`vi`), Simplified Chinese
   (`zh`), Traditional Chinese (`zh_TW`), Japanese (`ja`), Korean (`ko`),
@@ -37,7 +37,8 @@ general-purpose multilingual number-to-words package on
   (`pl`), Arabic (`ar`), Thai (`th`), Finnish (`fi`), Ukrainian (`uk`),
   Romanian (`ro`), Hungarian (`hu`), Hebrew (`he`), Persian (`fa`),
   Esperanto (`eo`), Czech (`cs`), Slovak (`sk`), Serbian (`sr`),
-  Lithuanian (`lt`), Azerbaijani (`az`) and Belarusian (`be`).
+  Lithuanian (`lt`), Azerbaijani (`az`), Belarusian (`be`) and Icelandic
+  (`is`).
 - **5 output modes plus decimals**:
   - `cardinal` — `1234` → *one thousand, two hundred and thirty-four*
   - `ordinal` — `1` → *first*, `21` → *twenty-first*
@@ -50,8 +51,8 @@ general-purpose multilingual number-to-words package on
   scale table).
 - **Zero dependencies** beyond the MoonBit core.
 - A small **command-line tool** for ad-hoc conversions.
-- **Differential-tested against upstream `num2words`**: 35989 recorded
-  comparisons across the 35 language codes — see [DIFF_REPORT.md](DIFF_REPORT.md).
+- **Differential-tested against upstream `num2words`**: 40736 recorded
+  comparisons across the 36 language codes — see [DIFF_REPORT.md](DIFF_REPORT.md).
 
 ---
 
@@ -61,7 +62,7 @@ Add it to your `moon.mod` (requires the MoonBit toolchain ≥ 0.1.20260921).
 
 The latest published release is **0.1.0**, which **predates this rework** (it
 covers the original seven language codes). The version in this repository —
-35 language codes and 359 currency entries (358 ISO-code pairs plus Persian's
+36 language codes and 520 currency entries (519 ISO-code pairs plus Persian's
 code-less toman mode) — will be released as **0.1.1**; until then, depend on the
 repository checkout if you need the new languages.
 
@@ -217,6 +218,7 @@ are **reported, never crashed**:
 | `cs`, `sk`, `sr`, `lt` | 10³³ | `10^30` → *kvintillion* / *kvintilión* / *nonilion* / *naintilijonas* |
 | `az` | 10⁶⁶ | `10^63` → *vigintilyon* |
 | `be` | 10³³ | `10^30` → *адзін нанільён* |
+| `is` | 10⁵⁴ | `10^51` → *einn oktilljarður* |
 
 ```mbt
 @n2w.num2words_str_checked("1" + <36 zeros>, "en", "cardinal")
@@ -234,18 +236,19 @@ power of 1000 for most languages, and of 10⁴ for Chinese, Japanese and Korean.
 
 ### Known limitations
 
-- **35 language codes** (`en`, `fr`, `es`, `de`, `it`, `pt`, `pt_PT`, `ru`,
+- **36 language codes** (`en`, `fr`, `es`, `de`, `it`, `pt`, `pt_PT`, `ru`,
   `nl`, `tr`, `vi`, `zh`, `zh_TW`, `ja`, `ko`, `sv`, `no`, `da`, `id`, `pl`,
   `ar`, `th`, `fi`, `uk`, `ro`, `hu`, `he`, `fa`, `eo`, `cs`, `sk`, `sr`,
-  `lt`, `az`, `be`). Every mode upstream implements is ported and machine-checked;
-  modes upstream does not implement (`vi`/`sv` year/`ordinal_num`/currency,
-  `pl`/`ar`/`th`/`uk` currency, `fi` `ordinal_num`, `cs`/`sk`/`sr`/`lt`
-  `ordinal`) return `""` / `Err`. Upstream's other ~22 language codes are
+  `lt`, `az`, `be`, `is`). Every mode upstream implements is ported and
+  machine-checked; modes upstream does not implement (`vi`/`sv`
+  year/`ordinal_num`/currency, `fi`
+  `ordinal_num`, `cs`/`sk`/`sr`/`lt`/`is` `ordinal` and `ordinal_num`, `is`
+  year/currency) return `""` / `Err`. Upstream's other ~20 language codes are
   out of scope (see [COMPAT.md](COMPAT.md)).
 - **Magnitudes are bounded** by each language's scale-word table — see
   *Supported magnitude* above. "Arbitrarily large" is **not** claimed.
 - **Release status**: mooncakes.io carries `0.1.0`, which predates this rework
-  (seven language codes); the 35-language, 359-currency-entry version in this
+  (seven language codes); the 36-language, 520-currency-entry version in this
   repository is pending release as `0.1.1`.
 - **Chinese is post-0.5.14**: upstream 0.5.14 has no Chinese module, so `zh`
   (Simplified) and `zh_TW` (Traditional) follow the `lang_ZH.py` added on
@@ -294,18 +297,27 @@ power of 1000 for most languages, and of 10⁴ for Chinese, Japanese and Korean.
   upstream defines them; their `ordinal_num` is absent upstream and returns
   `""` here. Czech, Slovak, Serbian and Lithuanian have no `to_ordinal`
   upstream (`NotImplementedError`), so their `ordinal` returns `""`; their
-  `ordinal_num` is the plain number.
-- **`currency` is native for 29 language codes with upstream's complete code
+  `ordinal_num` is the plain number. Icelandic implements only `cardinal`
+  upstream: `ordinal`, `ordinal_num`, `year` and `currency` all return `""`.
+- **Icelandic follows upstream's split/merge engine** (not 3-digit groups):
+  the multiplier agrees in gender (*eitt hundrað*, *tvö þúsund*, *tvær
+  milljónir*, *einn milljarður*), `og` appears only when the right side is a
+  single card (*tuttugu og einn*, *eitt hundrað og einn*) and not before a
+  composed remainder (*eitt hundrað tuttugu og einn*), and scale nouns
+  pluralise after a multiplier other than one (*níu hundruð*, *þrjú þúsund*,
+  *oktilljónir*).
+- **`currency` is native for 33 language codes with upstream's complete code
   sets**: `en` 20, `fr`/`de` 5 each, `it`/`nl` 4 each, `es` 171, `ru` 8,
   `pt` 1 (BRL), `pt_PT` 5, `tr` 1 (TRY), `ja` 1 (JPY, no fractions), `ko` 3
   (KRW/USD/JPY), `no` 1 (NOK), `da` 1 (DKK), `id` 1 (IDR), `fi` 24,
   `zh`/`zh_TW` 17 (incl. `XXX` for plain 元), `ro`/`hu` 20 each (the EU set),
   `he` 3 (ILS/EUR/USD), `eo` 5, `cs` 2 (CZK/EUR), `sk` 1 (EUR), `sr` 3
   (RUB/EUR/RSD), `lt` 6 (LTL/EUR/USD/GBP/PLN/RUB), `az` 1 (AZN), `be` 8
-  (RUB/EUR/USD/UAH/KZT/BYN/UZS/PLN), and `fa` 1
+  (RUB/EUR/USD/UAH/KZT/BYN/UZS/PLN), `pl` 3 (PLN/EUR/USD), `uk` 150,
+  `th` 3 (THB/USD/EUR), `ar` 5 (`SR`/`SAR`/`EGP`/`KWD`/`TND`), and `fa` 1
   (tomans, no ISO
-  code). Vietnamese,
-  Swedish, Polish, Arabic, Thai and Ukrainian have no currency mode upstream.
+  code). Vietnamese and
+  Swedish have no currency mode upstream.
   Codes valid upstream but not for a language return `""` (`Err` from
   `num2words_str_checked` / `num2words_currency`).
 - **Currency amounts are decimal strings** (`num2words_currency`), and the
@@ -330,7 +342,12 @@ power of 1000 for most languages, and of 10⁴ for Chinese, Japanese and Korean.
   value (*dva koruny*, *pět korun*, *dva eurá*, *päť eur*); Serbian agrees in
   gender (*jedna rublja*, *dve rublje*) and keeps *bilion* for 10⁹; Lithuanian
   writes *du šimtai* for multiplied hundreds and uses feminine RUB cents
-  (*viena kapeika*). Upstream's Romanian converter raises
+  (*viena kapeika*). Polish inflects the noun three ways (*jeden złoty*, *dwa
+  złote*, *pięć złotych*), Ukrainian also genders it (*одна гривня*, *дві
+  гривні*, *п'ять гривень*), Thai writes the number and noun as one word and
+  appends *ถ้วน* to whole baht (*ห้าบาทถ้วน*), and Arabic truncates the fraction
+  to the code's precision and picks one of four noun forms (*ريال*, *ريالان*,
+  *ريالات*, *ريالاً*). Upstream's Romanian converter raises
   `IndexError` for many two-form codes and amounts; this port keeps the plural
   form instead of failing.
 - **Fractional digits are spelled one by one** (`1234.56` → *… point five
@@ -367,7 +384,7 @@ moon run cmd/main -- --help
 ```
 
 ```
-num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi|zh|zh_TW|ja|ko|sv|no|da|id|pl|ar|th|fi|uk|ro|hu|he|fa|eo|cs|sk|sr|lt|az|be] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]
+num2words <value> [--lang en|fr|es|de|it|pt|pt_PT|ru|nl|tr|vi|zh|zh_TW|ja|ko|sv|no|da|id|pl|ar|th|fi|uk|ro|hu|he|fa|eo|cs|sk|sr|lt|az|be|is] [--to cardinal|ordinal|ordinal_num|year|currency] [--currency CODE]
 ```
 
 Conversion errors are written to **stderr** as `error: <message>`. The process
@@ -381,7 +398,7 @@ rather than `$?`.
 moon run examples
 ```
 
-The `examples/` package exercises every mode, all thirty-five language codes,
+The `examples/` package exercises every mode, all thirty-six language codes,
 seven currency conversions and the error path.
 
 ---
@@ -391,24 +408,24 @@ seven currency conversions and the error path.
 The reference implementation is the Python
 [`num2words`](https://github.com/savoirfairelinux/num2words) library, version
 **0.5.14** (LGPL-2.1). Cardinal, year, ordinal, `ordinal_num` and currency
-parity for all thirty-five language codes are machine-checked by
-**35989 recorded comparisons**; see [DIFF_REPORT.md](DIFF_REPORT.md) for the
+parity for all thirty-six language codes are machine-checked by
+**40736 recorded comparisons**; see [DIFF_REPORT.md](DIFF_REPORT.md) for the
 method and results, and [COMPAT.md](COMPAT.md) for a call-by-call mapping,
 currency-code coverage and the known gaps.
 
 Upstream implements all five output modes for most of these language codes; a
 few have narrower upstream surfaces (Vietnamese and Swedish: no year,
-`ordinal_num` or currency; Polish, Arabic, Thai and Ukrainian: no currency;
-Finnish: no `ordinal_num`; Czech, Slovak, Serbian and Lithuanian: no ordinal).
-This project's coverage is:
+`ordinal_num` or currency;
+Finnish: no `ordinal_num`; Czech, Slovak, Serbian and Lithuanian: no ordinal;
+Icelandic: cardinal only). This project's coverage is:
 
 | Mode | Languages |
 | --- | --- |
-| `cardinal` | all 35 |
-| `year` | `en` `fr` `es` `de` `it` `pt` `pt_PT` `ru` `nl` `tr` `zh` `zh_TW` `ja` `ko` `no` `da` `id` `pl` `ar` `th` `fi` `uk` `ro` `hu` `he` `fa` `eo` `cs` `sk` `sr` `lt` `az` `be` (33; `vi`/`sv` n.a.) |
-| `ordinal` | 31 of 35; `cs`/`sk`/`sr`/`lt` n.a. (upstream raises `NotImplementedError`) |
-| `ordinal_num` | `en` `fr` `es` `de` `it` `pt` `pt_PT` `ru` `nl` `tr` `zh` `zh_TW` `ja` `ko` `no` `da` `id` `pl` `ar` `th` `uk` `ro` `hu` `he` `fa` `eo` `cs` `sk` `sr` `lt` `az` `be` (32; `vi`/`sv`/`fi` n.a.) |
-| `currency` | `en` `fr` `es` `de` `it` `pt` `pt_PT` `ru` `nl` `tr` `zh` `zh_TW` `ja` `ko` `no` `da` `id` `fi` `ro` `hu` `he` `fa` `eo` `cs` `sk` `sr` `lt` `az` `be` (29; `vi`/`sv`/`pl`/`ar`/`th`/`uk` n.a.) |
+| `cardinal` | all 36 |
+| `year` | `en` `fr` `es` `de` `it` `pt` `pt_PT` `ru` `nl` `tr` `zh` `zh_TW` `ja` `ko` `no` `da` `id` `pl` `ar` `th` `fi` `uk` `ro` `hu` `he` `fa` `eo` `cs` `sk` `sr` `lt` `az` `be` (33; `vi`/`sv`/`is` n.a.) |
+| `ordinal` | 31 of 36; `cs`/`sk`/`sr`/`lt`/`is` n.a. (upstream raises `NotImplementedError`) |
+| `ordinal_num` | `en` `fr` `es` `de` `it` `pt` `pt_PT` `ru` `nl` `tr` `zh` `zh_TW` `ja` `ko` `no` `da` `id` `pl` `ar` `th` `uk` `ro` `hu` `he` `fa` `eo` `cs` `sk` `sr` `lt` `az` `be` (32; `vi`/`sv`/`fi`/`is` n.a.) |
+| `currency` | `en` `fr` `es` `de` `it` `pt` `pt_PT` `ru` `nl` `tr` `zh` `zh_TW` `ja` `ko` `no` `da` `id` `fi` `ro` `hu` `he` `fa` `eo` `cs` `sk` `sr` `lt` `az` `be` `pl` `uk` `th` `ar` (33; `vi`/`sv`/`is` n.a.) |
 
 n.a. = not implemented by upstream for that language (the call returns `""`
 here).
@@ -436,11 +453,11 @@ here).
 | `no` | `no` | `no` | Cardinal, ordinal (*tjueførste*, quirk *trettførste*), `N.` ordinal numbers, years and NOK currency aligned |
 | `da` | `da` | `da` | Cardinal (*enogtyve*, quirk *en millioner*), ordinals, years and the kr/øre currency split (including `float2tuple` and empty zero) aligned |
 | `id` | `id` | `id` | Cardinal, `ke…` ordinals, year = cardinal, and the *… koma nol rupiah* currency aligned |
-| `pl` | `pl` | `pl` | Cardinal and real ordinals (*dwudziesty pierwszy*) aligned; year is the cardinal, `ordinal_num` is the digits; upstream has no currency; negatives are fixed here |
-| `ar` | `ar` | `ar` | Dual/plural scale forms (*ألفان*, *ثلاثة آلاف*), gender-aware ordinals; year = cardinal; upstream has no currency; negative input is fixed here |
-| `th` | `th` | `th` | 10⁶ grouping (*ล้าน*) with the เอ็ด rule (*สิบเอ็ด*, *หนึ่งร้อยเอ็ด*); ordinal and year = cardinal; `ordinal_num` = digits; no currency |
+| `pl` | `pl` | `pl` | Cardinal and real ordinals (*dwudziesty pierwszy*) aligned; year is the cardinal, `ordinal_num` is the digits; currency aligned (PLN/EUR/USD with three plural forms); negatives are fixed here |
+| `ar` | `ar` | `ar` | Dual/plural scale forms (*ألفان*, *ثلاثة آلاف*), gender-aware ordinals; year = cardinal; currency aligned (`SR`/`SAR`/`EGP`/`KWD`/`TND`, four noun forms, truncated fraction); negative input is fixed here |
+| `th` | `th` | `th` | 10⁶ grouping (*ล้าน*) with the เอ็ด rule (*สิบเอ็ด*, *หนึ่งร้อยเอ็ด*); ordinal and year = cardinal; `ordinal_num` = digits; currency aligned (THB/USD/EUR, no spaces, *ถ้วน* for whole baht) |
 | `fi` | `fi` | `fi` | Concatenated compounds with partitive scale forms (*kaksisataa*, *kaksituhatta*); real ordinals; year is the space-free cardinal (negative years append *ennen ajanlaskun alkua*); 24 currency codes |
-| `uk` | `uk` | `uk` | Three-way plural and feminine thousands (*одна тисяча*, *дві тисячі*, *п'ять тисяч*), real ordinals; year = cardinal; upstream has no currency; 0 and negatives are fixed here |
+| `uk` | `uk` | `uk` | Three-way plural and feminine thousands (*одна тисяча*, *дві тисячі*, *п'ять тисяч*), real ordinals; year = cardinal; currency aligned (150 codes, gendered nouns); 0 and negatives are fixed here |
 | `ro` | `ro` | `ro` | Three-way scale inflection (*două sute*, *douăzeci de mii*, *un milion*), the *doi* → *două* multiplier switch and upstream's raw *biliard/e* quirk; *al …lea* ordinals; year is the cardinal with *î.Hr.* for negative years; RON default with 20 codes |
 | `hu` | `hu` | `hu` | Single-word compounds (*százhuszonháromezer-négyszázötvenhat*), *kettő*/*két* alternation and the 2001+ hyphen; suffix-table ordinals (*huszonkettedik*); *i. e.* for negative years; HUF default with 20 codes and a comma separator |
 | `he` | `he` | `he` | Feminine default with masculine thousands/millions, the *ו* conjunction on every group after the first, construct forms for 2 and before scales; definite-article ordinals (*האחד עשר*); ILS/EUR/USD with noun gender and construct state |
@@ -452,19 +469,20 @@ here).
 | `lt` | `lt` | `lt` | *šimtas*/*šimtai* after a multiplied hundred; *…1* → *tūkstantis*, *10..19* → *tūkstančių*; feminine RUB cents (*viena kapeika*); no ordinal upstream; 6 codes |
 | `az` | `az` | `az` | *yüz*/*min* without *bir* (*yüz*, *min*, *iki min*), 10⁶+ keeps *bir milyon*; vowel-harmony ordinals (*ikinci*, *üçüncü*, *yüzüncü*); AZN only |
 | `be` | `be` | `be` | Gender agreement (*адна тысяча*, *дзве тысячы*), three scale forms (*тысяча*/*тысячы*/*тысяч*); ordinals rewrite the last word and fuse a 000-group (*двухтысячны*), with upstream's 70/80 = *сямідзясяты* quirk; 8 currency codes, feminine *грыўна* and *капейка* |
+| `is` | `is` | `is` | Upstream's split/merge engine: gendered multipliers (*eitt hundrað*, *tvær milljónir*), `og` only before a single card (*tuttugu og einn* vs *eitt hundrað tuttugu og einn*), plural scale nouns (*níu hundruð*, *oktilljónir*); cardinal only upstream |
 
 ### Other differences
 
 - **Breadth.** Upstream exposes ~56 language codes (including regional
-  variants); this project covers 35 language codes, each as one
+  variants); this project covers 36 language codes, each as one
   `lang_xx.mbt` file, including all three CJK languages, Arabic, Thai,
   Finnish, Ukrainian, Romanian, Hungarian, Hebrew, Persian, Esperanto,
-  Czech, Slovak, Serbian, Lithuanian, Azerbaijani, Belarusian and the
-  major Scandinavian, Slavic and Southeast Asian languages.
+  Czech, Slovak, Serbian, Lithuanian, Azerbaijani, Belarusian, Icelandic and
+  the major Scandinavian, Slavic and Southeast Asian languages.
 - **Ordinals.** Native for every language where upstream implements them, and
   machine-checked against upstream.
-- **Currency.** Native for 29 language codes with upstream's complete code
-  sets (358 ISO-code pairs, 359 entries including Persian's code-less toman
+- **Currency.** Native for 33 language codes with upstream's complete code
+  sets (519 ISO-code pairs, 520 entries including Persian's code-less toman
   mode); see [COMPAT.md](COMPAT.md) §4.
 - **Scale ceilings.** Both sides use a finite scale-word table, but the
   ceilings differ; see [Supported magnitude](#supported-magnitude) for ours.
@@ -518,14 +536,16 @@ The library is split into a small core engine and one module per language:
 | `lang_lt.mbt` | Lithuanian (*šimtas*/*šimtai*, *tūkstantis*/*tūkstančiai*/*tūkstančių*, 6 codes) |
 | `lang_az.mbt` | Azerbaijani (*yüz*/*min* without *bir*, vowel-harmony ordinals, AZN) |
 | `lang_be.mbt` | Belarusian (gender agreement, three scale forms, fused ordinals, 8 codes) |
+| `lang_is.mbt` | Icelandic (upstream split/merge engine, gendered multipliers, `og` rule) |
 | `lang_ordinal.mbt` | ordinals and `ordinal_num` for the non-English language codes |
-| `lang_currency.mbt` | currency tables and formatting (29 language codes; per-language code sets, gender and plural rules) |
+| `lang_currency.mbt` | currency tables and formatting (33 language codes; per-language code sets, gender and plural rules) |
+| `lang_currency_extra.mbt` | Polish/Ukrainian/Thai/Arabic currency grammars and Ukraine's 150-code table |
 | `examples/` | runnable demo (`moon run examples`) |
 | `benchmarks/` | `moon bench` microbenchmarks |
 | `num2words-moonbit.mbt` | public API + per-mode dispatch |
 | `cmd/main/main.mbt` | CLI built on `@env.args()` |
 | `tools/gen_fixtures.py` | regenerates the differential fixtures from upstream `num2words` |
-| `diff_fixtures_wbtest.mbt` | generated fixtures + differential tests (35989 comparisons) |
+| `diff_fixtures_wbtest.mbt` | generated fixtures + differential tests (40736 comparisons) |
 
 Each language is described declaratively by a `Lang` struct (ones, teens, tens,
 hundreds, scale words, conjunctions, negative word, decimal word), and a few
@@ -558,7 +578,7 @@ cross-language comparison. Regenerate them with
 ## Development
 
 ```bash
-moon test          # 248 tests, including 35989 differential comparisons
+moon test          # 255 tests, including 40736 differential comparisons
 moon build         # build the library + CLI
 moon run cmd/main -- 1234 --lang en
 
